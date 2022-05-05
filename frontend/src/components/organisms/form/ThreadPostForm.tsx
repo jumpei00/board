@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, Input, Box } from "@chakra-ui/react";
-import { PrimaryButton } from "../atoms/button/PrimaryButton";
+import { PrimaryButton } from "../../atoms/button/PrimaryButton";
 
 export const ThreadPostForm: React.FC = () => {
     return (

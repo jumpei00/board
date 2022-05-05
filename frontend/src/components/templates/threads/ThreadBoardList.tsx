@@ -1,7 +1,7 @@
 import React from "react";
 import { Stack } from "@chakra-ui/react";
-import { ThreadBoard } from "../organisms/ThreadBoard";
-import { Threads } from "../../models/Thread";
+import { ThreadBoard } from "../../organisms/board/ThreadBoard";
+import { Threads } from "../../../models/Thread";
 
 export const ThreadsBoardList: React.FC<Threads> = (props) => {
     const { threads } = props;

@@ -1,6 +1,6 @@
 import React from "react";
 import { Text, Box, Flex, Spacer } from "@chakra-ui/react";
-import { Thread } from "../../models/Thread";
+import { Thread } from "../../../models/Thread";
 
 export const ThreadBoard: React.FC<Thread> = (props) => {
     const { title, contributer, postDate, updateDate, views, sumComment } =

@@ -2,10 +2,12 @@ import React from "react";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./theme/Theme";
 import { ThreadDetail } from "./pages/threadDetail/Page";
+// import { Home } from "./pages/home/Page";
 
 const App: React.FC = () => {
     return (
         <ChakraProvider theme={theme}>
+            {/* <Home></Home> */}
             <ThreadDetail
                 hashID="1"
                 title="test"

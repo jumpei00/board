@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, Box, Flex, Spacer } from "@chakra-ui/react";
 import { Thread } from "../../../models/Thread";
+import { MenuIconButton } from "../../atoms/button/MenuIconButton";
 
 export const ThreadBoard: React.FC<Thread> = (props) => {
     const { title, contributer, postDate, updateDate, views, sumComment } =
@@ -8,13 +9,17 @@ export const ThreadBoard: React.FC<Thread> = (props) => {
 
     return (
         <Box
-            p="15px"
+            p="20px"
             border="1px"
             bg="red.100"
             borderRadius="lg"
             boxShadow="dark-lg"
         >
-            <Text fontSize="50px">{title}</Text>
+            <Flex>
+                <Text fontSize="50px">{title}</Text>
+                <Spacer></Spacer>
+                <MenuIconButton></MenuIconButton>
+            </Flex>
             <Text textAlign="right">投稿者: {contributer}</Text>
             <Text textAlign="right">投稿日: {postDate}</Text>
             <Flex>

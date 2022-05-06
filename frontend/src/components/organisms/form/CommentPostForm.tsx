@@ -8,7 +8,7 @@ export const CommentPostform: React.FC = () => {
         <Box w="70%" m="auto">
             <Text mb="10px">コメント</Text>
             <Textarea
-                h="150px"
+                h="120px"
                 mb="10px"
                 variant="flushed"
                 placeholder="コメントしよう"

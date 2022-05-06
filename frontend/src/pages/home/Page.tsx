@@ -1,8 +1,8 @@
 import React from "react";
-import { VisitorStat } from "../../components/organisms/VisitorStat";
-import { ThreadPostForm } from "../../components/organisms/ThreadPostForm";
+import { VisitorStat } from "../../components/organisms/stat/VisitorStat";
+import { ThreadPostForm } from "../../components/organisms/form/ThreadPostForm";
 import { Thread } from "../../models/Thread";
-import { ThreadsBoardList } from "../../components/templates/ThreadBoardList";
+import { ThreadsBoardList } from "../../components/templates/threads/ThreadBoardList";
 
 export const Home: React.FC = () => {
     const testThreads: Thread[] = [

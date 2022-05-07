@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { Box, Heading, Flex, Spacer } from "@chakra-ui/react";
-import { HeaderNavigation } from "../../organisms/navigation/headerNavigation";
+import { HeaderNavigation } from "../../organisms/navigation/HeaderNavigation";
 
 export const Header: React.FC = () => {
     return (

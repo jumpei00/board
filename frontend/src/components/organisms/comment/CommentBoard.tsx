@@ -5,6 +5,7 @@ import { GoogButton } from "../../atoms/button/GoogButton";
 import { Picture } from "../../atoms/picture/Picture";
 
 export const CommentBoard: React.FC = () => {
+
     return (
         <Box
             p="20px"
@@ -17,7 +18,7 @@ export const CommentBoard: React.FC = () => {
                 <Flex>
                     <Text m="auto">投稿者: ゲスト</Text>
                     <Spacer></Spacer>
-                    <MenuIconButton></MenuIconButton>
+                    <MenuIconButton onOpen={() => undefined}></MenuIconButton>
                 </Flex>
                 <Divider></Divider>
                 <Text>テストです。</Text>

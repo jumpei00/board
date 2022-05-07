@@ -7,7 +7,7 @@ import { ThreadsBoardList } from "../../components/templates/threads/ThreadBoard
 export const Home: React.FC = () => {
     const testThreads: Thread[] = [
         {
-            hashID: "1",
+            threadKey: "1",
             title: "test",
             contributer: "motohashi",
             postDate: "2022/1/1 12:00",
@@ -16,7 +16,7 @@ export const Home: React.FC = () => {
             sumComment: 20,
         },
         {
-            hashID: "2",
+            threadKey: "2",
             title: "test",
             contributer: "motohashi",
             postDate: "2022/1/1 12:00",

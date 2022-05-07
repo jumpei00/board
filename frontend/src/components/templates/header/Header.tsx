@@ -10,7 +10,7 @@ export const Header: React.FC = () => {
                 <Flex>
                     <Heading>6ちゃんねる</Heading>
                     <Spacer></Spacer>
-                    <HeaderNavigation></HeaderNavigation>
+                    <HeaderNavigation isSigninText isSignoutText isSignupText></HeaderNavigation>
                 </Flex>
             </Box>
             <Outlet></Outlet>

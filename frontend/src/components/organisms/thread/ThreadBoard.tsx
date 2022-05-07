@@ -1,17 +1,16 @@
 import React from "react";
-import {
-    Text,
-    Box,
-    Flex,
-    Spacer,
-    Heading,
-} from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
+import { Text, Box, Flex, Spacer, Heading, HStack } from "@chakra-ui/react";
 import { Thread } from "../../../models/Thread";
 import { MenuIconButton } from "../../atoms/button/MenuIconButton";
+import { ThreadViewButton } from "../../atoms/button/ThreadViewButton";
 
-export const ThreadBoard: React.FC<Thread> = (props) => {
-    const { title, contributer, postDate, updateDate, views, sumComment } =
-        props;
+interface ThreadBoadState extends Thread {
+    isStatic?: boolean;
+}
+
+export const ThreadBoard: React.FC<ThreadBoadState> = (props) => {
+    const navigate = useNavigate();
 
     return (
         <>
@@ -23,18 +22,31 @@ export const ThreadBoard: React.FC<Thread> = (props) => {
                 boxShadow="dark-lg"
             >
                 <Flex>
-                    <Heading>{title}</Heading>
+                    <Heading>{props.title}</Heading>
                     <Spacer></Spacer>
-                    <MenuIconButton onOpen={() => undefined}></MenuIconButton>
+                    <HStack>
+                        {props.isStatic || (
+                            <ThreadViewButton
+                                onClick={() =>
+                                    navigate(`thread/${props.threadKey}`)
+                                }
+                            >
+                                Look!
+                            </ThreadViewButton>
+                        )}
+                        <MenuIconButton
+                            onOpen={() => undefined}
+                        ></MenuIconButton>
+                    </HStack>
                 </Flex>
-                <Text textAlign="right">投稿者: {contributer}</Text>
-                <Text textAlign="right">投稿日: {postDate}</Text>
+                <Text textAlign="right">投稿者: {props.contributer}</Text>
+                <Text textAlign="right">投稿日: {props.postDate}</Text>
                 <Flex>
-                    <Text>閲覧数: {views}人</Text>
+                    <Text>閲覧数: {props.views}人</Text>
                     <Spacer></Spacer>
-                    <Text w="600px">コメント数: {sumComment}人</Text>
+                    <Text w="600px">コメント数: {props.sumComment}人</Text>
                     <Spacer></Spacer>
-                    <Text>更新日: {updateDate}</Text>
+                    <Text>更新日: {props.updateDate}</Text>
                 </Flex>
             </Box>
         </>

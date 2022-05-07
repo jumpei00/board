@@ -10,8 +10,8 @@ export const ThreadsBoardList: React.FC<Threads> = (props) => {
         <Stack w="70%" m="50px auto" spacing={6}>
             {threads.map((thread) => (
                 <ThreadBoard
-                    key={thread.hashID}
-                    hashID={thread.hashID}
+                    key={thread.threadKey}
+                    threadKey={thread.threadKey}
                     title={thread.title}
                     contributer={thread.contributer}
                     postDate={thread.postDate}

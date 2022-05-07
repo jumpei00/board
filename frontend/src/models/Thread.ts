@@ -1,5 +1,5 @@
 export interface Thread {
-    hashID: string;
+    threadKey: string;
     title: string;
     contributer: string;
     postDate: string;

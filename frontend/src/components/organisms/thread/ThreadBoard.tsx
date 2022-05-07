@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, Box, Flex, Spacer } from "@chakra-ui/react";
+import { Text, Box, Flex, Spacer, Heading } from "@chakra-ui/react";
 import { Thread } from "../../../models/Thread";
 import { MenuIconButton } from "../../atoms/button/MenuIconButton";
 
@@ -16,7 +16,7 @@ export const ThreadBoard: React.FC<Thread> = (props) => {
             boxShadow="dark-lg"
         >
             <Flex>
-                <Text fontSize="50px">{title}</Text>
+                <Heading>{title}</Heading>
                 <Spacer></Spacer>
                 <MenuIconButton></MenuIconButton>
             </Flex>

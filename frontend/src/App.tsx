@@ -2,13 +2,14 @@ import React from "react";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./theme/Theme";
 import { ThreadDetail } from "./pages/threadDetail/Page";
+import { SingUp } from "./pages/singup/Page";
 // import { Home } from "./pages/home/Page";
 
 const App: React.FC = () => {
     return (
         <ChakraProvider theme={theme}>
             {/* <Home></Home> */}
-            <ThreadDetail
+            {/* <ThreadDetail
                 hashID="1"
                 title="test"
                 contributer="motohashi"
@@ -16,7 +17,8 @@ const App: React.FC = () => {
                 updateDate="2022/1/1 13:00"
                 views={10}
                 sumComment={20}
-            ></ThreadDetail>
+            ></ThreadDetail> */}
+            <SingUp></SingUp>
         </ChakraProvider>
     );
 };

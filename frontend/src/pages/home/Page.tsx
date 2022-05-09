@@ -28,11 +28,7 @@ export const Home: React.FC = () => {
 
     return (
         <>
-            <VisitorStat
-                yesterdayVisitor={0}
-                todayVisitor={0}
-                sumVisitor={0}
-            ></VisitorStat>
+            <VisitorStat yesterdayVisitor={0} todayVisitor={0} sumVisitor={0}></VisitorStat>
             <ThreadPostForm></ThreadPostForm>
             <ThreadsBoardList threads={testThreads}></ThreadsBoardList>
         </>

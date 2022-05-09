@@ -14,10 +14,24 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = (props) => {
 
     return (
         <HStack spacing={4}>
-            <Text><Link to="/">Home</Link></Text>
-            {isSigninText && <Text><Link to="/signin">ログイン</Link></Text>}
-            {isSignoutText && <Text><Link to="/">ログアウト</Link></Text>}
-            {isSignupText && <Text><Link to="/signup">ユーザー登録</Link></Text>}
+            <Text>
+                <Link to="/">Home</Link>
+            </Text>
+            {isSigninText && (
+                <Text>
+                    <Link to="/signin">ログイン</Link>
+                </Text>
+            )}
+            {isSignoutText && (
+                <Text>
+                    <Link to="/">ログアウト</Link>
+                </Text>
+            )}
+            {isSignupText && (
+                <Text>
+                    <Link to="/signup">ユーザー登録</Link>
+                </Text>
+            )}
             <Box textAlign="center">
                 <Text>ようこそ</Text>
                 <Text>{username ? `${username}さん` : "ゲストさん"}</Text>

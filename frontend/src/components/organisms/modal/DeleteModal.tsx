@@ -1,12 +1,5 @@
 import React from "react";
-import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalCloseButton,
-    ModalBody,
-} from "@chakra-ui/react";
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from "@chakra-ui/react";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
 import { AnyAlert } from "../../atoms/alert/AnyAlert";
 
@@ -31,5 +24,5 @@ export const DeleteModal: React.FC<DeleteModalProps> = (props) => {
                 </ModalBody>
             </ModalContent>
         </Modal>
-    )
+    );
 };

@@ -1,0 +1,18 @@
+on:
+  push:
+    branches-ignore:
+      - "staging"
+
+jobs:
+  frontend-eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check out
+        uses: actions/checkout@v2
+      - name: eslint
+        uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ github.token }}
+          level: warning
+          reporter: github-check
+          eslint_flags: "./src/**/*.{ts,tsx} ./src/*.{ts,tsx}"

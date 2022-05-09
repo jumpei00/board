@@ -9,5 +9,5 @@ export interface Thread {
 }
 
 export interface Threads {
-    threads: <Thread>[];
+    threads: Array<Thread>;
 }

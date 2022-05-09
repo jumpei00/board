@@ -25,4 +25,6 @@ jobs:
           github_token: ${{ github.token }}
           level: warning
           reporter: github-check
+          fail_on_error: true
+          workdir: frontend/
           eslint_flags: "./src/**/*.{ts,tsx} ./src/*.{ts,tsx}"

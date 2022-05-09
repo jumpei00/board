@@ -6,9 +6,19 @@ on:
 jobs:
   frontend-eslint:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - name: check out
         uses: actions/checkout@v2
+      - name: setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16.14.2"
+      - name: install modules
+        run: |
+          yarn install
       - name: eslint
         uses: reviewdog/action-eslint@v1
         with:

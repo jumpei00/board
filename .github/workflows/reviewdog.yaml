@@ -1,3 +1,5 @@
+name: Reviewdog
+
 on:
   pull_request:
     types:
@@ -13,18 +15,11 @@ jobs:
     steps:
       - name: check out
         uses: actions/checkout@v2
-      - name: setup node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16.14.2"
-      - name: install modules
-        run: |
-          yarn install
       - name: eslint
         uses: reviewdog/action-eslint@v1
         with:
           github_token: ${{ github.token }}
           level: warning
-          reporter: github-check
+          reporter: github-pr-check
           workdir: frontend/
           eslint_flags: "./src/**/*.{ts,tsx} ./src/*.{ts,tsx}"

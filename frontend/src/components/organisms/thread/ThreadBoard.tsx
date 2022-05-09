@@ -14,29 +14,17 @@ export const ThreadBoard: React.FC<ThreadBoadState> = (props) => {
 
     return (
         <>
-            <Box
-                p="20px"
-                border="1px"
-                bg="red.100"
-                borderRadius="lg"
-                boxShadow="dark-lg"
-            >
+            <Box p="20px" border="1px" bg="red.100" borderRadius="lg" boxShadow="dark-lg">
                 <Flex>
                     <Heading>{props.title}</Heading>
                     <Spacer></Spacer>
                     <HStack>
                         {props.isStatic || (
-                            <ThreadViewButton
-                                onClick={() =>
-                                    navigate(`thread/${props.threadKey}`)
-                                }
-                            >
+                            <ThreadViewButton onClick={() => navigate(`thread/${props.threadKey}`)}>
                                 Look!
                             </ThreadViewButton>
                         )}
-                        <MenuIconButton
-                            onOpen={() => undefined}
-                        ></MenuIconButton>
+                        <MenuIconButton onOpen={() => undefined}></MenuIconButton>
                     </HStack>
                 </Flex>
                 <Text textAlign="right">投稿者: {props.contributer}</Text>

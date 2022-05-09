@@ -14,10 +14,7 @@ export const Router: React.FC = () => {
                 <Route index element={<Home></Home>}></Route>
                 <Route path="signup" element={<SingUp></SingUp>}></Route>
                 <Route path="signin" element={<SignIn></SignIn>}></Route>
-                <Route
-                    path="thread/:threadKey"
-                    element={<ThreadContent></ThreadContent>}
-                ></Route>
+                <Route path="thread/:threadKey" element={<ThreadContent></ThreadContent>}></Route>
                 <Route path="*" element={<NotFind></NotFind>}></Route>
             </Route>
         </Routes>

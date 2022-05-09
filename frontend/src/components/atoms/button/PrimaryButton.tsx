@@ -3,7 +3,7 @@ import { Button } from "@chakra-ui/react";
 
 type PrimaryButtonProps = {
     children: ReactNode;
-    colorScheme: string
+    colorScheme: string;
 };
 
 export const PrimaryButton: React.FC<PrimaryButtonProps> = (props) => {

@@ -2,6 +2,9 @@ on:
   push:
     branches-ignore:
       - "staging"
+  pull_request:
+    types:
+      - opened
 
 jobs:
   frontend-eslint:

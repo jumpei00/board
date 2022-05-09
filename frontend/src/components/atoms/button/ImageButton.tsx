@@ -10,12 +10,7 @@ export const ImageButton: React.FC<ImageButtonProps> = (props) => {
     const { children } = props;
 
     return (
-        <Button
-            leftIcon={<AttachmentIcon></AttachmentIcon>}
-            colorScheme="cyan"
-            size="md"
-            _hover={{ opacity: 0.8 }}
-        >
+        <Button leftIcon={<AttachmentIcon></AttachmentIcon>} colorScheme="cyan" size="md" _hover={{ opacity: 0.8 }}>
             {children}
         </Button>
     );

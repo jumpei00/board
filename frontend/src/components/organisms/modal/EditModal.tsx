@@ -7,7 +7,7 @@ import {
     ModalCloseButton,
     ModalBody,
     ModalFooter,
-    Input
+    Input,
 } from "@chakra-ui/react";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
 
@@ -15,10 +15,10 @@ type EditModalProps = {
     content: string;
     isOpen: boolean;
     onClose: () => void;
-}
+};
 
 export const EditModal: React.FC<EditModalProps> = (props) => {
-    const { content, isOpen, onClose } = props
+    const { content, isOpen, onClose } = props;
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
@@ -35,5 +35,5 @@ export const EditModal: React.FC<EditModalProps> = (props) => {
                 </ModalFooter>
             </ModalContent>
         </Modal>
-    )
-}
+    );
+};

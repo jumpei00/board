@@ -1,12 +1,5 @@
 import React from "react";
-import {
-    Box,
-    Stack,
-    FormControl,
-    FormLabel,
-    Input,
-    Heading,
-} from "@chakra-ui/react";
+import { Box, Stack, FormControl, FormLabel, Input, Heading } from "@chakra-ui/react";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
 
 type AuthFormProps = {
@@ -24,24 +17,14 @@ export const AuthForm: React.FC<AuthFormProps> = (props) => {
                     <Heading>{formName}</Heading>
                     <Box>
                         <FormLabel>ユーザー名</FormLabel>
-                        <Input
-                            type="text"
-                            variant="flushed"
-                            placeholder="username"
-                        ></Input>
+                        <Input type="text" variant="flushed" placeholder="username"></Input>
                     </Box>
                     <Box>
                         <FormLabel>パスワード</FormLabel>
-                        <Input
-                            type="password"
-                            variant="flushed"
-                            placeholder="password"
-                        ></Input>
+                        <Input type="password" variant="flushed" placeholder="password"></Input>
                     </Box>
                     <Box textAlign="right">
-                        <PrimaryButton colorScheme="teal">
-                            {buttonName}
-                        </PrimaryButton>
+                        <PrimaryButton colorScheme="teal">{buttonName}</PrimaryButton>
                     </Box>
                 </Stack>
             </FormControl>

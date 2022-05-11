@@ -25,7 +25,7 @@ jobs:
       - name: eslint
         uses: reviewdog/action-eslint@v1
         with:
-          github_token: ${{ secrets.REVIEWDOG_GITHUB_API_TOKEN }}
+          # github_token: ${{ secrets.REVIEWDOG_GITHUB_API_TOKEN }}
           reporter: github-pr-review
           workdir: frontend/
           eslint_flags: "./src/**/*.{ts,tsx} ./src/*.{ts,tsx}"

@@ -2,9 +2,9 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 
-const hoge = "hoge";
+const huga = "hoge";
 const state = {
-    hoge: hoge
+    huga: huga
 }
 console.log(state)
 

@@ -1,36 +1,23 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { VisitorStat } from "../../components/organisms/stat/VisitorStat";
 import { ThreadPostForm } from "../../components/organisms/form/ThreadPostForm";
-import { Thread } from "../../models/Thread";
 import { ThreadsBoardList } from "../../components/templates/threads/ThreadBoardList";
+import { RootState } from "../../store/store";
 
 export const Home: React.FC = () => {
-    const testThreads: Thread[] = [
-        {
-            threadKey: "1",
-            title: "test",
-            contributer: "motohashi",
-            postDate: "2022/1/1 12:00",
-            updateDate: "2022/1/1 13:00",
-            views: 10,
-            sumComment: 20,
-        },
-        {
-            threadKey: "2",
-            title: "test",
-            contributer: "motohashi",
-            postDate: "2022/1/1 12:00",
-            updateDate: "2022/1/1 13:00",
-            views: 10,
-            sumComment: 20,
-        },
-    ];
+    const visitors = useSelector((state: RootState) => state.visitors);
+    const threads = useSelector((state: RootState) => state.threads.threads);
 
     return (
         <>
-            <VisitorStat yesterdayVisitor={0} todayVisitor={0} sumVisitor={0}></VisitorStat>
+            <VisitorStat
+                yesterdayVisitor={visitors.yesterdayVisitor}
+                todayVisitor={visitors.todayVisitor}
+                sumVisitor={visitors.sumVisitor}
+            ></VisitorStat>
             <ThreadPostForm></ThreadPostForm>
-            <ThreadsBoardList threads={testThreads}></ThreadsBoardList>
+            <ThreadsBoardList threads={threads}></ThreadsBoardList>
         </>
     );
 };

@@ -11,7 +11,9 @@ export const CommentPostform: React.FC = () => {
             <Flex>
                 <ImageButton>画像</ImageButton>
                 <Spacer></Spacer>
-                <PrimaryButton colorScheme="teal">投稿</PrimaryButton>
+                <PrimaryButton colorScheme="teal" onClick={() => undefined}>
+                    投稿
+                </PrimaryButton>
             </Flex>
         </Box>
     );

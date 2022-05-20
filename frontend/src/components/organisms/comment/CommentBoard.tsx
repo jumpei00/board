@@ -1,17 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Stack, Flex, Divider, Text, Spacer } from "@chakra-ui/react";
 import { MenuIconButton } from "../../atoms/button/MenuIconButton";
 import { GoogButton } from "../../atoms/button/GoogButton";
 import { Picture } from "../../atoms/picture/Picture";
 
 export const CommentBoard: React.FC = () => {
+    const [isEdit, setIsEdit] = useState(true);
+
     return (
         <Box p="20px" border="1px" bg="blue.100" borderRadius="lg" boxShadow="dark-lg">
             <Stack ml="15px" spacing={3}>
                 <Flex>
                     <Text m="auto">投稿者: ゲスト</Text>
                     <Spacer></Spacer>
-                    <MenuIconButton onOpen={() => undefined}></MenuIconButton>
+                    <MenuIconButton onOpen={() => isEdit} setIsEdit={setIsEdit}></MenuIconButton>
                 </Flex>
                 <Divider></Divider>
                 <Text>テストです。</Text>

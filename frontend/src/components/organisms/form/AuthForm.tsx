@@ -24,7 +24,9 @@ export const AuthForm: React.FC<AuthFormProps> = (props) => {
                         <Input type="password" variant="flushed" placeholder="password"></Input>
                     </Box>
                     <Box textAlign="right">
-                        <PrimaryButton colorScheme="teal">{buttonName}</PrimaryButton>
+                        <PrimaryButton colorScheme="teal" onClick={() => undefined}>
+                            {buttonName}
+                        </PrimaryButton>
                     </Box>
                 </Stack>
             </FormControl>

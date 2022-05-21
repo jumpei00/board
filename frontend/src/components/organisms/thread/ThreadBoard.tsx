@@ -6,14 +6,14 @@ import { Thread } from "../../../models/Thread";
 import { MenuIconButton } from "../../atoms/button/MenuIconButton";
 import { ThreadViewButton } from "../../atoms/button/ThreadViewButton";
 import { GeneralModal } from "../modal/GeneralModal";
-import { deleteThreadPayload, editThreadPayload } from "../../../pages/home/reducks/threads/type";
-import { deleteThread, editThreadTitle } from "../../../pages/home/reducks/threads";
+import { deleteThreadPayload, editThreadPayload } from "../../../pages/home/redux/threads/type";
+import { deleteThread, editThreadTitle } from "../../../pages/home/redux/threads";
 
-interface ThreadBoadState extends Thread {
+interface ThreadBoadProps extends Thread {
     isStatic?: boolean;
 }
 
-export const ThreadBoard: React.FC<ThreadBoadState> = (props) => {
+export const ThreadBoard: React.FC<ThreadBoadProps> = (props) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();

@@ -8,7 +8,7 @@ type GeneralModalProps = {
     isEdit: boolean;
     isOpen: boolean;
     onClose: () => void;
-    updateOnClick: (title: string) => void;
+    updateOnClick: (value: string) => void;
     deleteOnClick: () => void;
 };
 
@@ -30,7 +30,7 @@ export const GeneralModal: React.FC<GeneralModalProps> = (props) => {
             <ModalContent>
                 {props.isEdit ? (
                     <>
-                        <ModalHeader>タイトル：{value}</ModalHeader>
+                        <ModalHeader>編集：{value}</ModalHeader>
                         <ModalBody>
                             <Input value={value} onChange={handleChange}></Input>
                         </ModalBody>

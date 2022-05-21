@@ -4,11 +4,9 @@ import { ThreadBoard } from "../../organisms/thread/ThreadBoard";
 import { Threads } from "../../../models/Thread";
 
 export const ThreadsBoardList: React.FC<Threads> = (props) => {
-    const { threads } = props;
-
     return (
         <Stack w="70%" m="50px auto" spacing={6}>
-            {threads.map((thread) => (
+            {props.threads.map((thread) => (
                 <ThreadBoard
                     key={thread.threadKey}
                     threadKey={thread.threadKey}

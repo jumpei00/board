@@ -1,37 +1,57 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useParams } from "react-router-dom";
 import { Box } from "@chakra-ui/react";
 import { ThreadBoard } from "../../components/organisms/thread/ThreadBoard";
 import { CommentPostform } from "../../components/organisms/form/CommentPostForm";
 import { CommentBoardList } from "../../components/templates/comments/CommentBoardList";
-import { Thread } from "../../models/Thread";
+import { RootState } from "../../store/store";
+import { getAllCommentByThreadKey } from "./redux/comments";
+import { getThreadByThreadKeyPayload } from "./redux/thread/type";
+import { getThreadByThreadKey } from "./redux/thread";
+import { getAllCommentPayload } from "./redux/comments/type";
 
 export const ThreadContent: React.FC = () => {
-    const damyThread: Thread = {
-        threadKey: "1",
-        title: "test",
-        contributer: "motohashi",
-        postDate: "2022/1/1 12:00",
-        updateDate: "2022/1/1 13:00",
-        views: 10,
-        sumComment: 20,
+    const urlParams = useParams();
+
+    const thread = useSelector((state: RootState) => state.thread);
+    const threads = useSelector((state: RootState) => state.threads.threads);
+    const comments = useSelector((state: RootState) => state.comments.comments);
+    const dispatch = useDispatch();
+
+    const getAllCommentPayload: getAllCommentPayload = {
+        threadKey: urlParams.threadKey as string
     };
+
+    const getThreadByThreadKeyPayload: getThreadByThreadKeyPayload = {
+        threads,
+        threadKey: urlParams.threadKey as string,
+    };
+
+    useEffect(() => {
+        dispatch(getThreadByThreadKey(getThreadByThreadKeyPayload));
+    }, [threads]);
+
+    useEffect(() => {
+        dispatch(getAllCommentByThreadKey(getAllCommentPayload));
+    }, []);
 
     return (
         <>
             <Box w="70%" m="50px auto">
                 <ThreadBoard
-                    threadKey={damyThread.threadKey}
+                    threadKey={thread.threadKey}
                     isStatic
-                    title={damyThread.title}
-                    contributer={damyThread.contributer}
-                    postDate={damyThread.postDate}
-                    updateDate={damyThread.updateDate}
-                    views={damyThread.views}
-                    sumComment={damyThread.sumComment}
+                    title={thread.title}
+                    contributer={thread.contributer}
+                    postDate={thread.postDate}
+                    updateDate={thread.updateDate}
+                    views={thread.views}
+                    sumComment={thread.sumComment}
                 ></ThreadBoard>
             </Box>
-            <CommentPostform></CommentPostform>
-            <CommentBoardList></CommentBoardList>
+            <CommentPostform threadKey={urlParams.threadKey as string}></CommentPostform>
+            <CommentBoardList comments={comments}></CommentBoardList>
         </>
     );
 };

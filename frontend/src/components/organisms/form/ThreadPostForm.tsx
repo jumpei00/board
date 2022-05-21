@@ -2,8 +2,8 @@ import React, { useState, ChangeEvent } from "react";
 import { useDispatch } from "react-redux";
 import { Text, Input, Box } from "@chakra-ui/react";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
-import { createThreadPayload } from "../../../pages/home/reducks/threads/type";
-import { createThread } from "../../../pages/home/reducks/threads";
+import { createThreadPayload } from "../../../pages/home/redux/threads/type";
+import { createThread } from "../../../pages/home/redux/threads";
 
 export const ThreadPostForm: React.FC = () => {
     const dispatch = useDispatch();

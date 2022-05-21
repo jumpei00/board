@@ -2,16 +2,16 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Thread, Threads } from "../../../../models/Thread";
 import { createThreadPayload, deleteThreadPayload, editThreadPayload } from "./type";
 
-const initialStateThreads: Threads = {
+const initialState: Threads = {
     threads: [],
 };
 
 export const threadsSlice = createSlice({
     name: "threads",
-    initialState: initialStateThreads,
+    initialState,
     reducers: {
         getAllThread: (state) => {
-            state = initialStateThreads;
+            state = initialState;
         },
         createThread: (state, action: PayloadAction<createThreadPayload>) => {
             const now = new Date();
@@ -20,7 +20,7 @@ export const threadsSlice = createSlice({
                 title: action.payload.title,
                 contributer: action.payload.contributer,
                 postDate: now.toLocaleString(),
-                updateDate: now.toLocaleDateString(),
+                updateDate: now.toLocaleString(),
                 views: 0,
                 sumComment: 0,
             };

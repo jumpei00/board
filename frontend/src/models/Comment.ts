@@ -1,8 +1,8 @@
 export interface Comment {
+    threadKey: string;
     commentKey: string;
     contributer: string;
     comment: string;
-    pictureURL: string;
     updateDate: string;
 }
 

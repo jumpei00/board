@@ -12,7 +12,7 @@ type HeaderNavigationProps = {
 };
 
 export const HeaderNavigation: React.FC<HeaderNavigationProps> = (props) => {
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
 
     return (
         <HStack spacing={4}>

@@ -11,16 +11,16 @@ export const userSlice = createSlice({
     initialState,
     reducers: {
         signup: (state, action: PayloadAction<userPayload>) => {
-            state.username = action.payload.username
+            state.username = action.payload.username;
         },
         signin: (state, action: PayloadAction<userPayload>) => {
-            state.username = action.payload.username
+            state.username = action.payload.username;
         },
         signout: (state) => {
-            return initialState
-        }
+            return initialState;
+        },
     },
 });
 
-export const { signup, signin, signout } = userSlice.actions
-export const userReducer = userSlice.reducer
+export const { signup, signin, signout } = userSlice.actions;
+export const userReducer = userSlice.reducer;

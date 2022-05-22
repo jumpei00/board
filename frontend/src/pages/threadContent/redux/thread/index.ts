@@ -19,12 +19,12 @@ export const threadSlice = createSlice({
         getThreadByThreadKey: (state, action: PayloadAction<getThreadByThreadKeyPayload>) => {
             for (const ts of action.payload.threads) {
                 if (ts.threadKey === action.payload.threadKey) {
-                    return ts
+                    return ts;
                 }
             }
         },
     },
 });
 
-export const { getThreadByThreadKey } = threadSlice.actions
-export const threadReducer = threadSlice.reducer
+export const { getThreadByThreadKey } = threadSlice.actions;
+export const threadReducer = threadSlice.reducer;

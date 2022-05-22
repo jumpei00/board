@@ -12,7 +12,7 @@ export const visitorsSlice = createSlice({
     initialState: initialStatevVisitors,
     reducers: {
         getVisitors: (state) => {
-            state = initialStatevVisitors
+            state = initialStatevVisitors;
         },
         visitedUserCountup: (state) => {
             state.todayVisitor += 1;
@@ -22,4 +22,4 @@ export const visitorsSlice = createSlice({
 });
 
 export const { getVisitors, visitedUserCountup } = visitorsSlice.actions;
-export const visitorsReducer = visitorsSlice.reducer
+export const visitorsReducer = visitorsSlice.reducer;

@@ -45,9 +45,7 @@ export const ThreadBoard: React.FC<ThreadBoadProps> = (props) => {
                     <Heading>{props.title}</Heading>
                     <Spacer></Spacer>
                     {props.isStatic || (
-                        <ThreadViewButton onClick={() => navigate(`thread/${props.threadKey}`)}>
-                            Look!
-                        </ThreadViewButton>
+                        <ThreadViewButton onClick={() => navigate(`thread/${props.threadKey}`)}>Look!</ThreadViewButton>
                     )}
                     <MenuIconButton onOpen={onOpen} setIsEdit={setIsEdit}></MenuIconButton>
                 </Flex>

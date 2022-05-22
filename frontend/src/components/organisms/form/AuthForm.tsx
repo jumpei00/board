@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useState } from "react";
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import { Box, Stack, FormControl, FormLabel, Input, Heading } from "@chakra-ui/react";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
 import { userPayload } from "../../../state/user/redux/type";
@@ -11,7 +11,7 @@ type AuthFormProps = {
 };
 
 export const AuthForm: React.FC<AuthFormProps> = (props) => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
@@ -26,11 +26,11 @@ export const AuthForm: React.FC<AuthFormProps> = (props) => {
     const buttonOnClick = () => {
         const user: userPayload = {
             username,
-            password
-        }
-        props.OnClick(user)
-        navigate("/")
-    }
+            password,
+        };
+        props.OnClick(user);
+        navigate("/");
+    };
 
     return (
         <Box w="50%" m="200px auto" bg="gray.300" boxShadow="dark-lg" p="50px">

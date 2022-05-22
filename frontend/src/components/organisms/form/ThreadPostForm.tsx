@@ -7,7 +7,7 @@ import { createThread } from "../../../pages/home/redux/threads";
 
 type ThreadPostFormProps = {
     loginUsername: string;
-}
+};
 
 export const ThreadPostForm: React.FC<ThreadPostFormProps> = (props) => {
     const dispatch = useDispatch();

@@ -11,7 +11,7 @@ export const commentsSlice = createSlice({
     initialState,
     reducers: {
         getAllCommentByThreadKey: (state, action: PayloadAction<getAllCommentPayload>) => {
-            state.comments = state.comments.filter((comment) => comment.threadKey === action.payload.threadKey)
+            state.comments = state.comments.filter((comment) => comment.threadKey === action.payload.threadKey);
         },
         createComment: (state, action: PayloadAction<createCommentPayload>) => {
             const now = new Date();

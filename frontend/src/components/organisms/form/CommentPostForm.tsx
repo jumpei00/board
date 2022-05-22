@@ -9,7 +9,7 @@ import { createComment } from "../../../pages/threadContent/redux/comments";
 type CommentPostFormProps = {
     loginUsername: string;
     threadKey: string;
-}
+};
 
 export const CommentPostform: React.FC<CommentPostFormProps> = (props) => {
     const dispatch = useDispatch();

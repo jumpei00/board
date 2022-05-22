@@ -8,6 +8,7 @@ import { getAllThread } from "./redux/threads";
 import { getVisitors } from "./redux/visitors";
 
 export const Home: React.FC = () => {
+    const user = useSelector((state: RootState) => state.user);
     const visitors = useSelector((state: RootState) => state.visitors);
     const threads = useSelector((state: RootState) => state.threads.threads);
     const dispatch = useDispatch();
@@ -27,7 +28,7 @@ export const Home: React.FC = () => {
                 todayVisitor={visitors.todayVisitor}
                 sumVisitor={visitors.sumVisitor}
             ></VisitorStat>
-            <ThreadPostForm></ThreadPostForm>
+            {user.username === "" || <ThreadPostForm loginUsername={user.username}></ThreadPostForm>}
             <ThreadsBoardList threads={threads}></ThreadsBoardList>
         </>
     );

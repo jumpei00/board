@@ -5,14 +5,18 @@ import { PrimaryButton } from "../../atoms/button/PrimaryButton";
 import { createThreadPayload } from "../../../pages/home/redux/threads/type";
 import { createThread } from "../../../pages/home/redux/threads";
 
-export const ThreadPostForm: React.FC = () => {
+type ThreadPostFormProps = {
+    loginUsername: string;
+}
+
+export const ThreadPostForm: React.FC<ThreadPostFormProps> = (props) => {
     const dispatch = useDispatch();
     const [value, setValue] = useState("");
     const [buttonDisabled, setButtonDisabled] = useState(true);
 
     const createThreadPayload: createThreadPayload = {
         title: value,
-        contributer: "ゲスト",
+        contributer: props.loginUsername,
     };
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {

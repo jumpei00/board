@@ -14,13 +14,14 @@ import { getAllCommentPayload } from "./redux/comments/type";
 export const ThreadContent: React.FC = () => {
     const urlParams = useParams();
 
+    const user = useSelector((state: RootState) => state.user);
     const thread = useSelector((state: RootState) => state.thread);
     const threads = useSelector((state: RootState) => state.threads.threads);
     const comments = useSelector((state: RootState) => state.comments.comments);
     const dispatch = useDispatch();
 
     const getAllCommentPayload: getAllCommentPayload = {
-        threadKey: urlParams.threadKey as string
+        threadKey: urlParams.threadKey as string,
     };
 
     const getThreadByThreadKeyPayload: getThreadByThreadKeyPayload = {
@@ -50,7 +51,12 @@ export const ThreadContent: React.FC = () => {
                     sumComment={thread.sumComment}
                 ></ThreadBoard>
             </Box>
-            <CommentPostform threadKey={urlParams.threadKey as string}></CommentPostform>
+            {user.username === "" || (
+                <CommentPostform
+                    loginUsername={user.username}
+                    threadKey={urlParams.threadKey as string}
+                ></CommentPostform>
+            )}
             <CommentBoardList comments={comments}></CommentBoardList>
         </>
     );

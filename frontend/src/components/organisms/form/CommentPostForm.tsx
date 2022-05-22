@@ -7,6 +7,7 @@ import { createCommentPayload } from "../../../pages/threadContent/redux/comment
 import { createComment } from "../../../pages/threadContent/redux/comments";
 
 type CommentPostFormProps = {
+    loginUsername: string;
     threadKey: string;
 }
 
@@ -18,7 +19,7 @@ export const CommentPostform: React.FC<CommentPostFormProps> = (props) => {
     const createCommentPayload: createCommentPayload = {
         threadKey: props.threadKey,
         comment,
-        contributer: "名無し",
+        contributer: props.loginUsername,
     };
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {

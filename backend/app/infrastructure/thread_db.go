@@ -8,12 +8,16 @@ func NewThreadDB() *ThreadDB {
 	return &ThreadDB{}
 }
 
-func (tb *ThreadDB) GetAll() []*domain.Thread {
+func (t *ThreadDB) GetAll() []*domain.Thread {
 	return []*domain.Thread{}
 }
 
-func (tb *ThreadDB) Create(t *domain.Thread) {}
+func (t *ThreadDB) GetByKey(threadKey string) *domain.Thread {
+	return &domain.Thread{}
+}
 
-func (tb *ThreadDB) Edit(t *domain.Thread) {}
+func (t *ThreadDB) Insert(thread *domain.Thread) {}
 
-func (tb *ThreadDB) Delete(threadKey string) {}
+func (t *ThreadDB) Update(thread *domain.Thread) {}
+
+func (t *ThreadDB) Delete(threadKey string) {}

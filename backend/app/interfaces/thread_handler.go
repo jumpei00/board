@@ -8,21 +8,21 @@ import (
 )
 
 type ThreadHandler struct {
-	threadApplication *application.ThreadApplication
+	threadApplication application.ThreadApplication
 }
 
-func NewThreadHandler(ta *application.ThreadApplication) *ThreadHandler {
+func NewThreadHandler(ta application.ThreadApplication) *ThreadHandler {
 	return &ThreadHandler{
 		threadApplication: ta,
 	}
 }
 
-func (th *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
-	r.GET("/", th.GetAll)
+func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
+	r.GET("/", t.GetAll)
 }
 
-func (th *ThreadHandler) GetAll(c *gin.Context) {
-	threads := th.threadApplication.GetAllThread()
+func (t *ThreadHandler) GetAll(c *gin.Context) {
+	threads := t.threadApplication.GetAllThread()
 
 	c.JSON(http.StatusOK, threads)
 }

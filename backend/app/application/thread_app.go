@@ -5,17 +5,35 @@ import (
 	"github.com/jumpei00/board/backend/app/domain/repository"
 )
 
-type ThreadApplication struct {
+type ThreadApplication interface {
+	GetAllThread() []*domain.Thread
+	GetByThreadKey(threadKey string) *domain.Thread
+	CreateThread()
+	EditThread()
+	DeleteThread(threadKey string)
+}
+
+type threadApplication struct {
 	threadRepo repository.ThreadRepository
 }
 
-func NewThreadApplication(tr repository.ThreadRepository) *ThreadApplication {
-	return &ThreadApplication{
+func NewThreadApplication(tr repository.ThreadRepository) *threadApplication {
+	return &threadApplication{
 		threadRepo: tr,
 	}
 }
 
-func (ta *ThreadApplication) GetAllThread() []*domain.Thread {
-	threads := ta.threadRepo.GetAll()
+func (t *threadApplication) GetAllThread() []*domain.Thread {
+	threads := t.threadRepo.GetAll()
 	return threads
 }
+
+func (t *threadApplication) GetByThreadKey(threadKey string) *domain.Thread {
+	return t.GetByThreadKey(threadKey)
+}
+
+func (t *threadApplication) CreateThread() {}
+
+func (t *threadApplication) EditThread() {}
+
+func (t *threadApplication) DeleteThread(threadKey string) {}

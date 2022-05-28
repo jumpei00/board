@@ -5,6 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
+	"github.com/jumpei00/board/backend/app/domain"
+	"github.com/jumpei00/board/backend/app/params"
 )
 
 type ThreadHandler struct {
@@ -18,11 +20,158 @@ func NewThreadHandler(ta application.ThreadApplication) *ThreadHandler {
 }
 
 func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
-	r.GET("/", t.GetAll)
+	r.GET("/", t.getAll)
+	r.GET("/:thread_key", t.get)
+	r.POST("/", t.create)
+	r.PUT("/:thread_key", t.edit)
+	r.DELETE("/:thread_key", t.delete)
 }
 
-func (t *ThreadHandler) GetAll(c *gin.Context) {
-	threads := t.threadApplication.GetAllThread()
+func (t *ThreadHandler) getAll(c *gin.Context) {
+	threads, err := t.threadApplication.GetAllThread()
 
-	c.JSON(http.StatusOK, threads)
+	if err != nil {
+		handleError(c)
+		return
+	}
+
+	var res responseThreads
+	for _, thread := range threads {
+		res.Threads = append(res.Threads, NewResponseThread(thread))
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func (t *ThreadHandler) get(c *gin.Context) {
+	threadKey := c.Param("thread_key")
+	if threadKey == "" {
+		handleError(c)
+		return
+	}
+
+	thread, err := t.threadApplication.GetByThreadKey(threadKey)
+
+	if err != nil {
+		handleError(c)
+		return
+	}
+
+	responseThread := NewResponseThread(thread)
+	c.JSON(http.StatusOK, responseThread)
+}
+
+func (t *ThreadHandler) create(c *gin.Context) {
+	var req requestThreadCreate
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handleError(c)
+		return
+	}
+
+	param := params.CreateThreadAppLayerParam{
+		Title: req.Title,
+		Contributer: req.Contributer,
+	}
+
+	thread, err := t.threadApplication.CreateThread(&param)
+	if err != nil {
+		handleError(c)
+		return
+	}
+
+	res := NewResponseThread(thread)
+	c.JSON(http.StatusOK, res)
+}
+
+func (t *ThreadHandler) edit(c *gin.Context) {
+	threadKey := c.Param("thread_key")
+	if threadKey == "" {
+		handleError(c)
+		return
+	}
+
+	var req requestThreadEdit
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handleError(c)
+		return
+	}
+
+	param := params.EditThreadAppLayerParam{
+		ThreadKey: threadKey,
+		Title: req.Title,
+		Contributer: req.Contributer,
+	}
+
+	thread, err := t.threadApplication.EditThread(&param)
+	if err != nil {
+		handleError(c)
+		return
+	}
+
+	res := NewResponseThread(thread)
+	c.JSON(http.StatusOK, res)
+}
+
+func (t *ThreadHandler) delete(c *gin.Context) {
+	threadKey := c.Param("thread_key")
+	if threadKey == "" {
+		handleError(c)
+		return
+	}
+
+	var req requestThreadDelete
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handleError(c)
+		return
+	}
+
+	param := params.DeleteThreadAppLayerParam{
+		ThreadKey: threadKey,
+		Contributer: req.Contributer,
+	}
+
+	if err := t.threadApplication.DeleteThread(&param); err != nil {
+		handleError(c)
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+type requestThreadCreate struct {
+	Title       string `json:"title"`
+	Contributer string `json:"contributer"`
+}
+
+type requestThreadEdit struct {
+	Title       string `json:"title"`
+	Contributer string `json:"contributer"`
+}
+
+type requestThreadDelete struct {
+	Contributer string `json:"contributer"`
+}
+
+type responseThreads struct {
+	Threads []*responseThread `json:"threads"`
+}
+
+type responseThread struct {
+	ThreadKey   string `json:"thread_key"`
+	Title       string `json:"title"`
+	Contributer string `json:"contributer"`
+	PostDate    string `json:"post_date"`
+	Views       int    `json:"views"`
+	SumComment  int    `json:"sum_comment"`
+}
+
+func NewResponseThread(thread *domain.Thread) *responseThread {
+	return &responseThread{
+		ThreadKey:   thread.ThreadKey(),
+		Title:       thread.Title(),
+		Contributer: thread.Contributer(),
+		PostDate:    thread.FormatPostDate(),
+		Views:       thread.Views(),
+		SumComment:  thread.SumComment(),
+	}
 }

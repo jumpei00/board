@@ -3,7 +3,7 @@ package domain
 import "time"
 
 type Thread struct {
-	threadKey         string
+	threadKey   string
 	title       string
 	contributer string
 	postDate    time.Time
@@ -29,6 +29,10 @@ func (t *Thread) Contributer() string {
 
 func (t *Thread) PostDate() time.Time {
 	return t.postDate
+}
+
+func (t *Thread) FormatPostDate() string {
+	return t.postDate.Format("2006/01/02 15:04")
 }
 
 func (t *Thread) Views() int {

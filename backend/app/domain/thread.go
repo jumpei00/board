@@ -1,6 +1,10 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"github.com/jumpei00/board/backend/app/params"
+)
 
 type Thread struct {
 	threadKey   string
@@ -11,12 +15,36 @@ type Thread struct {
 	sumComment  int
 }
 
-func NewThread() *Thread {
-	return &Thread{}
+func NewThread(param *params.ThreadCreateDomainLayerParam) *Thread {
+	thread := &Thread{
+		title:       param.Title,
+		contributer: param.Contributer,
+		postDate:    time.Now(),
+		views:       0,
+		sumComment:  0,
+	}
+	thread.setRandomThreadKey()
+
+	return thread
+}
+
+func (t *Thread) UpdateThread(param *params.ThreadEditDomainLayerParam) *Thread {
+	t.threadKey = param.ThreadKey
+	t.title = param.Title
+	t.contributer = param.Contributer
+	t.postDate = param.PostDate
+	t.views = param.Views
+	t.sumComment = param.SumComment
+
+	return t
 }
 
 func (t *Thread) ThreadKey() string {
 	return t.threadKey
+}
+
+func (t *Thread) setRandomThreadKey() {
+	t.threadKey = "hello"
 }
 
 func (t *Thread) Title() string {
@@ -25,6 +53,10 @@ func (t *Thread) Title() string {
 
 func (t *Thread) Contributer() string {
 	return t.contributer
+}
+
+func (t *Thread) IsNotSameContrituber(person string) bool {
+	return t.contributer != person
 }
 
 func (t *Thread) PostDate() time.Time {

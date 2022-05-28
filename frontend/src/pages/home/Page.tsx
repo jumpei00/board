@@ -1,36 +1,35 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { VisitorStat } from "../../components/organisms/stat/VisitorStat";
 import { ThreadPostForm } from "../../components/organisms/form/ThreadPostForm";
-import { Thread } from "../../models/Thread";
 import { ThreadsBoardList } from "../../components/templates/threads/ThreadBoardList";
+import { RootState } from "../../store/store";
+import { getAllThread } from "./redux/threads";
+import { getVisitors } from "./redux/visitors";
 
 export const Home: React.FC = () => {
-    const testThreads: Thread[] = [
-        {
-            threadKey: "1",
-            title: "test",
-            contributer: "motohashi",
-            postDate: "2022/1/1 12:00",
-            updateDate: "2022/1/1 13:00",
-            views: 10,
-            sumComment: 20,
-        },
-        {
-            threadKey: "2",
-            title: "test",
-            contributer: "motohashi",
-            postDate: "2022/1/1 12:00",
-            updateDate: "2022/1/1 13:00",
-            views: 10,
-            sumComment: 20,
-        },
-    ];
+    const user = useSelector((state: RootState) => state.user);
+    const visitors = useSelector((state: RootState) => state.visitors);
+    const threads = useSelector((state: RootState) => state.threads.threads);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(getAllThread());
+    }, []);
+
+    useEffect(() => {
+        dispatch(getVisitors());
+    }, []);
 
     return (
         <>
-            <VisitorStat yesterdayVisitor={0} todayVisitor={0} sumVisitor={0}></VisitorStat>
-            <ThreadPostForm></ThreadPostForm>
-            <ThreadsBoardList threads={testThreads}></ThreadsBoardList>
+            <VisitorStat
+                yesterdayVisitor={visitors.yesterdayVisitor}
+                todayVisitor={visitors.todayVisitor}
+                sumVisitor={visitors.sumVisitor}
+            ></VisitorStat>
+            {user.username === "" || <ThreadPostForm loginUsername={user.username}></ThreadPostForm>}
+            <ThreadsBoardList threads={threads}></ThreadsBoardList>
         </>
     );
 };

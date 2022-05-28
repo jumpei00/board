@@ -4,13 +4,20 @@ import { Button } from "@chakra-ui/react";
 type PrimaryButtonProps = {
     children: ReactNode;
     colorScheme: string;
+    onClick: () => void;
+    isDisabled?: boolean;
 };
 
 export const PrimaryButton: React.FC<PrimaryButtonProps> = (props) => {
-    const { children, colorScheme } = props;
     return (
-        <Button colorScheme={colorScheme} size="md" _hover={{ opacity: 0.8 }}>
-            {children}
+        <Button
+            colorScheme={props.colorScheme}
+            size="md"
+            _hover={{ opacity: 0.8 }}
+            onClick={props.onClick}
+            isDisabled={props.isDisabled}
+        >
+            {props.children}
         </Button>
     );
 };

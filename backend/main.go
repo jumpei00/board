@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
 	"github.com/jumpei00/board/backend/app/infrastructure"
@@ -24,5 +26,5 @@ func main() {
 	// router setup
 	threadHandler.SetupRouter(group)
 
-	router.Run(":8080")
+	log.Fatal(router.Run(":8080"))
 }

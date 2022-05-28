@@ -45,7 +45,7 @@ func (t *threadApplication) GetByThreadKey(threadKey string) (*domain.Thread, er
 func (t *threadApplication) CreateThread(param *params.CreateThreadAppLayerParam) (*domain.Thread, error) {
 	domainParam := params.ThreadCreateDomainLayerParam{
 		Title:       param.Title,
-		Contributer: param.Title,
+		Contributor: param.Title,
 	}
 
 	newThread := domain.NewThread(&domainParam)
@@ -64,14 +64,14 @@ func (t *threadApplication) EditThread(param *params.EditThreadAppLayerParam) (*
 		return nil, err
 	}
 
-	if thread.IsNotSameContrituber(param.Contributer) {
+	if thread.IsNotSameContritubor(param.Contributor) {
 		return nil, err
 	}
 
 	domainParam := params.ThreadEditDomainLayerParam{
 		ThreadKey:   param.ThreadKey,
 		Title:       param.Title,
-		Contributer: param.Contributer,
+		Contributor: param.Contributor,
 		PostDate:    thread.PostDate(),
 		Views:       thread.Views(),
 		SumComment:  thread.SumComment(),
@@ -88,7 +88,7 @@ func (t *threadApplication) DeleteThread(param *params.DeleteThreadAppLayerParam
 		return err
 	}
 
-	if thread.IsNotSameContrituber(param.Contributer) {
+	if thread.IsNotSameContritubor(param.Contributor) {
 		return err
 	}
 

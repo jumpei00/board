@@ -4,13 +4,13 @@ import "time"
 
 type ThreadCreateDomainLayerParam struct {
 	Title       string
-	Contributer string
+	Contributor string
 }
 
 type ThreadEditDomainLayerParam struct {
 	ThreadKey   string
 	Title       string
-	Contributer string
+	Contributor string
 	PostDate    time.Time
 	Views       int
 	SumComment  int

@@ -5,7 +5,7 @@ import "time"
 type Comment struct {
 	threadKey string
 	commentKey string
-	contributer string
+	contributor string
 	comment string
 	updateDate time.Time
 }
@@ -22,8 +22,8 @@ func (c *Comment) CommentKey() string {
 	return c.commentKey
 }
 
-func (c *Comment) Contributer() string {
-	return c.contributer
+func (c *Comment) Contributor() string {
+	return c.contributor
 }
 
 func (c *Comment) Comment() string {

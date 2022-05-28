@@ -9,7 +9,7 @@ import (
 type Thread struct {
 	threadKey   string
 	title       string
-	contributer string
+	contributor string
 	postDate    time.Time
 	views       int
 	sumComment  int
@@ -18,7 +18,7 @@ type Thread struct {
 func NewThread(param *params.ThreadCreateDomainLayerParam) *Thread {
 	thread := &Thread{
 		title:       param.Title,
-		contributer: param.Contributer,
+		contributor: param.Contributor,
 		postDate:    time.Now(),
 		views:       0,
 		sumComment:  0,
@@ -31,7 +31,7 @@ func NewThread(param *params.ThreadCreateDomainLayerParam) *Thread {
 func (t *Thread) UpdateThread(param *params.ThreadEditDomainLayerParam) *Thread {
 	t.threadKey = param.ThreadKey
 	t.title = param.Title
-	t.contributer = param.Contributer
+	t.contributor = param.Contributor
 	t.postDate = param.PostDate
 	t.views = param.Views
 	t.sumComment = param.SumComment
@@ -51,12 +51,12 @@ func (t *Thread) Title() string {
 	return t.title
 }
 
-func (t *Thread) Contributer() string {
-	return t.contributer
+func (t *Thread) Contributor() string {
+	return t.contributor
 }
 
-func (t *Thread) IsNotSameContrituber(person string) bool {
-	return t.contributer != person
+func (t *Thread) IsNotSameContritubor(person string) bool {
+	return t.contributor != person
 }
 
 func (t *Thread) PostDate() time.Time {

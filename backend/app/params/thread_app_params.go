@@ -2,16 +2,16 @@ package params
 
 type CreateThreadAppLayerParam struct {
 	Title       string
-	Contributer string
+	Contributor string
 }
 
 type EditThreadAppLayerParam struct {
 	ThreadKey   string
 	Title       string
-	Contributer string
+	Contributor string
 }
 
 type DeleteThreadAppLayerParam struct {
 	ThreadKey   string
-	Contributer string
+	Contributor string
 }

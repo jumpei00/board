@@ -70,7 +70,7 @@ func (t *ThreadHandler) create(c *gin.Context) {
 
 	param := params.CreateThreadAppLayerParam{
 		Title: req.Title,
-		Contributer: req.Contributer,
+		Contributor: req.Contributor,
 	}
 
 	thread, err := t.threadApplication.CreateThread(&param)
@@ -99,7 +99,7 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 	param := params.EditThreadAppLayerParam{
 		ThreadKey: threadKey,
 		Title: req.Title,
-		Contributer: req.Contributer,
+		Contributor: req.Contributor,
 	}
 
 	thread, err := t.threadApplication.EditThread(&param)
@@ -127,7 +127,7 @@ func (t *ThreadHandler) delete(c *gin.Context) {
 
 	param := params.DeleteThreadAppLayerParam{
 		ThreadKey: threadKey,
-		Contributer: req.Contributer,
+		Contributor: req.Contributor,
 	}
 
 	if err := t.threadApplication.DeleteThread(&param); err != nil {
@@ -140,16 +140,16 @@ func (t *ThreadHandler) delete(c *gin.Context) {
 
 type requestThreadCreate struct {
 	Title       string `json:"title"`
-	Contributer string `json:"contributer"`
+	Contributor string `json:"contributor"`
 }
 
 type requestThreadEdit struct {
 	Title       string `json:"title"`
-	Contributer string `json:"contributer"`
+	Contributor string `json:"contributor"`
 }
 
 type requestThreadDelete struct {
-	Contributer string `json:"contributer"`
+	Contributor string `json:"contributor"`
 }
 
 type responseThreads struct {
@@ -159,7 +159,7 @@ type responseThreads struct {
 type responseThread struct {
 	ThreadKey   string `json:"thread_key"`
 	Title       string `json:"title"`
-	Contributer string `json:"contributer"`
+	Contributor string `json:"contributor"`
 	PostDate    string `json:"post_date"`
 	Views       int    `json:"views"`
 	SumComment  int    `json:"sum_comment"`
@@ -169,7 +169,7 @@ func NewResponseThread(thread *domain.Thread) *responseThread {
 	return &responseThread{
 		ThreadKey:   thread.ThreadKey(),
 		Title:       thread.Title(),
-		Contributer: thread.Contributer(),
+		Contributor: thread.Contributor(),
 		PostDate:    thread.FormatPostDate(),
 		Views:       thread.Views(),
 		SumComment:  thread.SumComment(),

@@ -160,7 +160,7 @@ type responseThread struct {
 	ThreadKey   string `json:"thread_key"`
 	Title       string `json:"title"`
 	Contributor string `json:"contributor"`
-	PostDate    string `json:"post_date"`
+	UpdateDate    string `json:"update_date"`
 	Views       int    `json:"views"`
 	SumComment  int    `json:"sum_comment"`
 }
@@ -170,7 +170,7 @@ func NewResponseThread(thread *domain.Thread) *responseThread {
 		ThreadKey:   thread.ThreadKey(),
 		Title:       thread.Title(),
 		Contributor: thread.Contributor(),
-		PostDate:    thread.FormatPostDate(),
+		UpdateDate:    thread.FormatUpdateDate(),
 		Views:       thread.Views(),
 		SumComment:  thread.SumComment(),
 	}

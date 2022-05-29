@@ -43,7 +43,7 @@ func (t *threadApplication) GetByThreadKey(threadKey string) (*domain.Thread, er
 }
 
 func (t *threadApplication) CreateThread(param *params.CreateThreadAppLayerParam) (*domain.Thread, error) {
-	domainParam := params.ThreadCreateDomainLayerParam{
+	domainParam := params.CreateThreadDomainLayerParam{
 		Title:       param.Title,
 		Contributor: param.Title,
 	}
@@ -68,11 +68,11 @@ func (t *threadApplication) EditThread(param *params.EditThreadAppLayerParam) (*
 		return nil, err
 	}
 
-	domainParam := params.ThreadEditDomainLayerParam{
+	domainParam := params.EditThreadDomainLayerParam{
 		ThreadKey:   param.ThreadKey,
 		Title:       param.Title,
 		Contributor: param.Contributor,
-		PostDate:    thread.PostDate(),
+		UpdateDate:    thread.UpdateDate(),
 		Views:       thread.Views(),
 		SumComment:  thread.SumComment(),
 	}

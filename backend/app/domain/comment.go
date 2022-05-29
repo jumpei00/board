@@ -3,11 +3,11 @@ package domain
 import "time"
 
 type Comment struct {
-	threadKey string
-	commentKey string
+	threadKey   string
+	commentKey  string
 	contributor string
-	comment string
-	updateDate time.Time
+	comment     string
+	updateDate  time.Time
 }
 
 func NewComment() *Comment {
@@ -30,6 +30,10 @@ func (c *Comment) Comment() string {
 	return c.comment
 }
 
-func (c *Comment) Updatedate() time.Time {
+func (c *Comment) UpdateDate() time.Time {
 	return c.updateDate
+}
+
+func (c *Comment) FormatUpdateDate() string {
+	return c.updateDate.Format("2006/01/02 15:04")
 }

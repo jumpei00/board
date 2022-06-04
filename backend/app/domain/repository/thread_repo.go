@@ -7,5 +7,5 @@ type ThreadRepository interface {
 	GetByKey(threadKey string) (*domain.Thread, error)
 	Insert(thread *domain.Thread) (*domain.Thread, error)
 	Update(thread *domain.Thread) (*domain.Thread, error)
-	Delete(threadKey string) error
+	Delete(thread *domain.Thread) error
 }

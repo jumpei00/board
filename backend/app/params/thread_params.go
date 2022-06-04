@@ -1,6 +1,5 @@
 package params
 
-import "time"
 
 type CreateThreadAppLayerParam struct {
 	Title       string
@@ -24,10 +23,5 @@ type CreateThreadDomainLayerParam struct {
 }
 
 type EditThreadDomainLayerParam struct {
-	ThreadKey   string
 	Title       string
-	Contributor string
-	UpdateDate    time.Time
-	Views       int
-	SumComment  int
 }

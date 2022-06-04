@@ -23,18 +23,14 @@ func NewThread(param *params.CreateThreadDomainLayerParam) *Thread {
 		views:       0,
 		sumComment:  0,
 	}
-	thread.setRandomThreadKey()
+	thread.setThreadKey()
 
 	return thread
 }
 
 func (t *Thread) UpdateThread(param *params.EditThreadDomainLayerParam) *Thread {
-	t.threadKey = param.ThreadKey
 	t.title = param.Title
-	t.contributor = param.Contributor
-	t.updateDate = param.UpdateDate
-	t.views = param.Views
-	t.sumComment = param.SumComment
+	t.updateDate = time.Now()
 
 	return t
 }
@@ -43,7 +39,7 @@ func (t *Thread) ThreadKey() string {
 	return t.threadKey
 }
 
-func (t *Thread) setRandomThreadKey() {
+func (t *Thread) setThreadKey() {
 	t.threadKey = "hello"
 }
 
@@ -55,8 +51,8 @@ func (t *Thread) Contributor() string {
 	return t.contributor
 }
 
-func (t *Thread) IsNotSameContritubor(person string) bool {
-	return t.contributor != person
+func (t *Thread) IsNotSameContritubor(contributor string) bool {
+	return t.contributor != contributor
 }
 
 func (t *Thread) UpdateDate() time.Time {
@@ -85,4 +81,8 @@ func (t *Thread) SumComment() int {
 
 func (t *Thread) CountupSumComment() {
 	t.sumComment += 1
+}
+
+func (t *Thread) CountdownSumComment() {
+	t.sumComment -= 1
 }

@@ -69,15 +69,13 @@ func (t *threadApplication) EditThread(param *params.EditThreadAppLayerParam) (*
 	}
 
 	domainParam := params.EditThreadDomainLayerParam{
-		ThreadKey:   param.ThreadKey,
 		Title:       param.Title,
-		Contributor: param.Contributor,
-		UpdateDate:    thread.UpdateDate(),
-		Views:       thread.Views(),
-		SumComment:  thread.SumComment(),
 	}
 
-	editedThread := thread.UpdateThread(&domainParam)
+	editedThread, err := t.threadRepo.Update(thread.UpdateThread(&domainParam))
+	if err != nil {
+		return nil, err
+	}
 
 	return editedThread, nil
 }
@@ -92,7 +90,7 @@ func (t *threadApplication) DeleteThread(param *params.DeleteThreadAppLayerParam
 		return err
 	}
 
-	if err := t.threadRepo.Delete(param.ThreadKey); err != nil {
+	if err := t.threadRepo.Delete(thread); err != nil {
 		return err
 	}
 

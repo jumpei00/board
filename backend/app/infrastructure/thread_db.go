@@ -24,6 +24,6 @@ func (t *ThreadDB) Update(thread *domain.Thread) (*domain.Thread, error) {
 	return &domain.Thread{}, nil
 }
 
-func (t *ThreadDB) Delete(threadKey string) error {
+func (t *ThreadDB) Delete(thread *domain.Thread) error {
 	return nil
 }

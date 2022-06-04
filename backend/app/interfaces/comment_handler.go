@@ -21,11 +21,11 @@ func NewCommentHandler(ta application.ThreadApplication, ca application.CommentA
 	}
 }
 
-func (co *CommentHandler) SetupRouter(r gin.RouterGroup) {
-	r.GET("/:thread_key/comment", co.getAll)
-	r.POST("/:thread_key/comment", co.create)
-	r.PUT("/:thread_key/comment", co.edit)
-	r.DELETE("/:thread_key/comment", co.delete)
+func (co *CommentHandler) SetupRouter(r *gin.RouterGroup) {
+	r.GET("/:thread_key", co.getAll)
+	r.POST("/:thread_key", co.create)
+	r.PUT("/:thread_key", co.edit)
+	r.DELETE("/:thread_key", co.delete)
 }
 
 func (co *CommentHandler) getAll(c *gin.Context) {
@@ -75,7 +75,7 @@ func (co *CommentHandler) create(c *gin.Context) {
 		Contributor: req.Contributor,
 	}
 
-	comment, err := co.commentApplication.CreateComment(&param)
+	comments, err := co.commentApplication.CreateComment(&param)
 	if err != nil {
 		handleError(c)
 		return
@@ -87,9 +87,10 @@ func (co *CommentHandler) create(c *gin.Context) {
 		return
 	}
 
-	res := responseThreadAndComment{
-		Thread:  NewResponseThread(thread),
-		Comment: NewResponseComment(comment),
+	var res responseThreadAndComments
+	res.Thread = NewResponseThread(thread)
+	for _, comment := range comments {
+		res.Comments = append(res.Comments, NewResponseComment(comment))
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -109,13 +110,13 @@ func (co *CommentHandler) edit(c *gin.Context) {
 	}
 
 	param := params.EditCommentAppLayerParam{
-		ThreadKey: threadKey,
-		CommentKey: req.CommentKey,
-		Comment: req.Comment,
+		ThreadKey:   threadKey,
+		CommentKey:  req.CommentKey,
+		Comment:     req.Comment,
 		Contributor: req.Contributor,
 	}
 
-	comment, err := co.commentApplication.EditComment(&param)
+	comments, err := co.commentApplication.EditComment(&param)
 	if err != nil {
 		handleError(c)
 		return
@@ -127,9 +128,10 @@ func (co *CommentHandler) edit(c *gin.Context) {
 		return
 	}
 
-	res := responseThreadAndComment{
-		Thread:  NewResponseThread(thread),
-		Comment: NewResponseComment(comment),
+	var res responseThreadAndComments
+	res.Thread = NewResponseThread(thread)
+	for _, comment := range comments {
+		res.Comments = append(res.Comments, NewResponseComment(comment))
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -141,7 +143,7 @@ func (co *CommentHandler) delete(c *gin.Context) {
 		handleError(c)
 		return
 	}
-	
+
 	var req requestCommentDelete
 	if err := c.ShouldBindJSON(&req); err != nil {
 		handleError(c)
@@ -149,17 +151,30 @@ func (co *CommentHandler) delete(c *gin.Context) {
 	}
 
 	param := params.DeleteCommentAppLayerParam{
-		ThreadKey: threadKey,
-		CommentKey: req.CommentKey,
+		ThreadKey:   threadKey,
+		CommentKey:  req.CommentKey,
 		Contributor: req.Contributor,
 	}
 
-	if err := co.commentApplication.DeleteComment(&param); err != nil {
+	comments, err := co.commentApplication.DeleteComment(&param)
+	if err != nil {
 		handleError(c)
 		return
 	}
 
-	c.Status(http.StatusOK)
+	thread, err := co.threadApplication.GetByThreadKey(threadKey)
+	if err != nil {
+		handleError(c)
+		return
+	}
+
+	var res responseThreadAndComments
+	res.Thread = NewResponseThread(thread)
+	for _, comment := range comments {
+		res.Comments = append(res.Comments, NewResponseComment(comment))
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 type requestCommentCreate struct {
@@ -181,11 +196,6 @@ type requestCommentDelete struct {
 type responseThreadAndComments struct {
 	Thread   *responseThread    `json:"thread"`
 	Comments []*responseComment `json:"comments"`
-}
-
-type responseThreadAndComment struct {
-	Thread  *responseThread  `json:"thread"`
-	Comment *responseComment `json:"comment"`
 }
 
 type responseComment struct {

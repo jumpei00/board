@@ -8,12 +8,22 @@ func NewCommentDB() *CommentDB {
 	return &CommentDB{}
 }
 
-func (c *CommentDB) GetAllByKey(threadKey string) []*domain.Comment {
-	return []*domain.Comment{}
+func (c *CommentDB) GetAllByKey(threadKey string) ([]*domain.Comment, error) {
+	return []*domain.Comment{}, nil
 }
 
-func (c *CommentDB) Insert(comment *domain.Comment) {}
+func (c *CommentDB) GetByKey(commentKey string) (*domain.Comment, error) {
+	return &domain.Comment{}, nil
+}
 
-func (c *CommentDB) Update(comment *domain.Comment) {}
+func (c *CommentDB) Insert(comment *domain.Comment) (*domain.Comment, error) {
+	return &domain.Comment{}, nil
+}
 
-func (c *CommentDB) Delete(threadKey, commentKey string) {}
+func (c *CommentDB) Update(comment *domain.Comment) (*domain.Comment, error) {
+	return &domain.Comment{}, nil
+}
+
+func (c *CommentDB) Delete(comment *domain.Comment) error {
+	return nil
+}

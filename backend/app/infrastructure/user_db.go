@@ -8,8 +8,10 @@ func NewUserDB() *UserDB {
 	return &UserDB{}
 }
 
-func (u *UserDB) GetByKey(key string) *domain.User {
-	return &domain.User{}
+func (u *UserDB) GetByKey(key string) (*domain.User, error) {
+	return &domain.User{}, nil
 }
 
-func (u *UserDB) Insert(user *domain.User) {}
+func (u *UserDB) Insert(user *domain.User) (*domain.User, error) {
+	return &domain.User{}, nil
+}

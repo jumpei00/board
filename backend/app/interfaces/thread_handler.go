@@ -69,7 +69,7 @@ func (t *ThreadHandler) create(c *gin.Context) {
 	}
 
 	param := params.CreateThreadAppLayerParam{
-		Title: req.Title,
+		Title:       req.Title,
 		Contributor: req.Contributor,
 	}
 
@@ -97,8 +97,8 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 	}
 
 	param := params.EditThreadAppLayerParam{
-		ThreadKey: threadKey,
-		Title: req.Title,
+		ThreadKey:   threadKey,
+		Title:       req.Title,
 		Contributor: req.Contributor,
 	}
 
@@ -126,7 +126,7 @@ func (t *ThreadHandler) delete(c *gin.Context) {
 	}
 
 	param := params.DeleteThreadAppLayerParam{
-		ThreadKey: threadKey,
+		ThreadKey:   threadKey,
 		Contributor: req.Contributor,
 	}
 
@@ -160,7 +160,7 @@ type responseThread struct {
 	ThreadKey   string `json:"thread_key"`
 	Title       string `json:"title"`
 	Contributor string `json:"contributor"`
-	UpdateDate    string `json:"update_date"`
+	UpdateDate  string `json:"update_date"`
 	Views       int    `json:"views"`
 	SumComment  int    `json:"sum_comment"`
 }
@@ -170,7 +170,7 @@ func NewResponseThread(thread *domain.Thread) *responseThread {
 		ThreadKey:   thread.ThreadKey(),
 		Title:       thread.Title(),
 		Contributor: thread.Contributor(),
-		UpdateDate:    thread.FormatUpdateDate(),
+		UpdateDate:  thread.FormatUpdateDate(),
 		Views:       thread.Views(),
 		SumComment:  thread.SumComment(),
 	}

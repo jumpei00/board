@@ -39,16 +39,8 @@ func (c *Comment) CommentKey() string {
 	return c.commentKey
 }
 
-func (c *Comment) setCommentKey() {
-	c.commentKey = "key"
-}
-
 func (c *Comment) Contributor() string {
 	return c.contributor
-}
-
-func (c *Comment) IsNotSameContritubor(contributor string) bool {
-	return c.contributor != contributor
 }
 
 func (c *Comment) Comment() string {
@@ -57,6 +49,14 @@ func (c *Comment) Comment() string {
 
 func (c *Comment) UpdateDate() time.Time {
 	return c.updateDate
+}
+
+func (c *Comment) setCommentKey() {
+	c.commentKey = "key"
+}
+
+func (c *Comment) IsNotSameContritubor(contributor string) bool {
+	return c.contributor != contributor
 }
 
 func (c *Comment) FormatUpdateDate() string {

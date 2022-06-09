@@ -39,10 +39,6 @@ func (t *Thread) ThreadKey() string {
 	return t.threadKey
 }
 
-func (t *Thread) setThreadKey() {
-	t.threadKey = "hello"
-}
-
 func (t *Thread) Title() string {
 	return t.title
 }
@@ -51,12 +47,24 @@ func (t *Thread) Contributor() string {
 	return t.contributor
 }
 
-func (t *Thread) IsNotSameContritubor(contributor string) bool {
-	return t.contributor != contributor
-}
-
 func (t *Thread) UpdateDate() time.Time {
 	return t.updateDate
+}
+
+func (t *Thread) Views() int {
+	return t.views
+}
+
+func (t *Thread) SumComment() int {
+	return t.sumComment
+}
+
+func (t *Thread) setThreadKey() {
+	t.threadKey = "hello"
+}
+
+func (t *Thread) IsNotSameContritubor(contributor string) bool {
+	return t.contributor != contributor
 }
 
 func (t *Thread) FormatUpdateDate() string {
@@ -67,16 +75,8 @@ func (t *Thread) UpdateLatestUpdateDate() {
 	t.updateDate = time.Now()
 }
 
-func (t *Thread) Views() int {
-	return t.views
-}
-
 func (t *Thread) CountupViews() {
 	t.views += 1
-}
-
-func (t *Thread) SumComment() int {
-	return t.sumComment
 }
 
 func (t *Thread) CountupSumComment() {

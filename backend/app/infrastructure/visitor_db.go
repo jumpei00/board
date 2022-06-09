@@ -8,8 +8,10 @@ func NewVisitorDB() *VisitorDB {
 	return &VisitorDB{}
 }
 
-func (v *VisitorDB) Get() *domain.Visitors {
-	return &domain.Visitors{}
+func (v *VisitorDB) Get() (*domain.Visitors, error) {
+	return &domain.Visitors{}, nil
 }
 
-func (v *VisitorDB) CountUp() {}
+func (v *VisitorDB) Update(visitors *domain.Visitors) (*domain.Visitors, error) {
+	return nil, nil
+}

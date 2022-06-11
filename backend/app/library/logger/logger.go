@@ -21,21 +21,41 @@ func init() {
 }
 
 func Debug(msg string, keysAndValues ...interface{}) {
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			log.Println("zap logger sync error")
+		}
+	}()
 	zap.S().Debugw(msg, keysAndValues...)
 }
 
 func Info(msg string, keysAndValues ...interface{}) {
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			log.Println("zap logger sync error")
+		}
+	}()
 	zap.S().Infow(msg, keysAndValues...)
 }
 
 func Warning(msg string, keysAndValues ...interface{}) {
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			log.Println("zap logger sync error")
+		}
+	}()
 	zap.S().Warnw(msg, keysAndValues...)
 }
 
 func Error(msg string, keysAndValues ...interface{}) {
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			log.Println("zap logger sync error")
+		}
+	}()
 	zap.S().Errorw(msg, keysAndValues...)
 }

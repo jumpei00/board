@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: ./docker/dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/go/api:cached
+    command: air
+    environment:
+      - VIRTUAL_HOST=localhost.api
+      - VIRTUAL_PORT=8080
+      - API_ENV=development
+    depends_on:
+      - mysql
+      - redis
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "13306:3306"
+    volumes:
+      - mysql-volume:/var/lib/mysql
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_USER=development
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=board
+  redis:
+    image: redis:7.0
+    ports:
+      - "16379:6379"
+    volumes:
+      - redis-volume:/data
+
+volumes:
+  mysql-volume:
+  redis-volume:

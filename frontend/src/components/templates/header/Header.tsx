@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Outlet } from "react-router-dom";
 import { Box, Heading, Flex, Spacer } from "@chakra-ui/react";
-import { HeaderNavigation } from "../../organisms/navigation/HeaderNavigation";
+import { HeaderNavigation } from "../../organisms/navigation/headerNavigation";
 import { RootState } from "../../../store/store";
 
 export const Header: React.FC = () => {

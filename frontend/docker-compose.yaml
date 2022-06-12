@@ -7,9 +7,20 @@ services:
       context: .
       dockerfile: ./docker/dockerfile
     ports:
-      - "13000:3000"
+      - "3000:3000"
+    volumes:
+      - ./:/app
+    networks:
+      - board_default
+      - backend_default
     command: yarn start
     environment:
       - VIRTUAL_HOST=localhost.web
-      - VIRTUAL_PORT=13000
+      - VIRTUAL_PORT=3000
       - API_ENV=development
+
+networks:
+  board_default:
+    external: true
+  backend_default:
+    external: true

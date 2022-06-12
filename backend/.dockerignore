@@ -1,3 +1,5 @@
 docker
+docker-compose.yaml
+tmp
 .gitignore
-.golangci.yaml
+.air.toml

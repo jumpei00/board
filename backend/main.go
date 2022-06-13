@@ -7,9 +7,34 @@ import (
 	"github.com/jumpei00/board/backend/app/application"
 	"github.com/jumpei00/board/backend/app/infrastructure"
 	"github.com/jumpei00/board/backend/app/interfaces"
+	"github.com/jumpei00/board/backend/app/library/logger"
 )
 
 func main() {
+	// DB
+	dbSession, err := infrastructure.GenerateDBPool()
+	if err != nil {
+		logger.Fatal("db session open error", "error", err)
+	}
+
+	userDB := infrastructure.NewUserDB()
+	visitorDB := infrastructure.NewVisitorDB()
+	threadDB := infrastructure.NewThreadRepository(dbSession)
+	commentDB := infrastructure.NewCommentDB()
+	
+	// application
+	userApp := application.NewUserApplication(userDB)
+	visitApp := application.NewVisitorApplication(visitorDB)
+	threadApp := application.NewThreadApplication(threadDB)
+	commentApp := application.NewCommentApplication(threadDB, commentDB)
+	
+	// handler
+	userHandler := interfaces.NewUserHandler(userApp)
+	visitorHandler := interfaces.NewVisitorsHandler(visitApp)
+	threadHandler := interfaces.NewThreadHandler(threadApp)
+	commentHandler := interfaces.NewCommentHandler(threadApp, commentApp)
+	
+	// router setup
 	router := gin.Default()
 
 	apigroup := router.Group("/api")
@@ -17,25 +42,6 @@ func main() {
 	threadGroup := router.Group("/api/thread")
 	commentGroup := router.Group("/api/comment")
 
-	// DB
-	userDB := infrastructure.NewUserDB()
-	visitorDB := infrastructure.NewVisitorDB()
-	threadDB := infrastructure.NewThreadDB()
-	commentDB := infrastructure.NewCommentDB()
-
-	// application
-	userApp := application.NewUserApplication(userDB)
-	visitApp := application.NewVisitorApplication(visitorDB)
-	threadApp := application.NewThreadApplication(threadDB)
-	commentApp := application.NewCommentApplication(threadDB, commentDB)
-
-	// handler
-	userHandler := interfaces.NewUserHandler(userApp)
-	visitorHandler := interfaces.NewVisitorsHandler(visitApp)
-	threadHandler := interfaces.NewThreadHandler(threadApp)
-	commentHandler := interfaces.NewCommentHandler(threadApp, commentApp)
-
-	// router setup
 	userHandler.SetupRouter(apigroup)
 	visitorHandler.SetupRouter(visitorGroup)
 	threadHandler.SetupRouter(threadGroup)

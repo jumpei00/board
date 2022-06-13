@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func GenerateDBSession() (*gorm.DB, error) {
+func GenerateDBPool() (*gorm.DB, error) {
 	// dsn -> username:password@protocol(host:port)/dbname?param=value
 	dsn := fmt.Sprintf(
 		"%s:%s@%s(%s:%s)/%s?charset=utf8mb4&parseTime=True",

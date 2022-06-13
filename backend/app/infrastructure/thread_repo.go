@@ -1,29 +1,36 @@
 package infrastructure
 
-import "github.com/jumpei00/board/backend/app/domain"
+import (
+	"github.com/jumpei00/board/backend/app/domain"
+	"gorm.io/gorm"
+)
 
-type ThreadDB struct{}
-
-func NewThreadDB() *ThreadDB {
-	return &ThreadDB{}
+type threadRepository struct{
+	db *gorm.DB
 }
 
-func (t *ThreadDB) GetAll() ([]*domain.Thread, error) {
+func NewThreadRepository(dbSession *gorm.DB) *threadRepository {
+	return &threadRepository{
+		db: dbSession,
+	}
+}
+
+func (t *threadRepository) GetAll() ([]*domain.Thread, error) {
 	return []*domain.Thread{}, nil
 }
 
-func (t *ThreadDB) GetByKey(threadKey string) (*domain.Thread, error) {
+func (t *threadRepository) GetByKey(threadKey string) (*domain.Thread, error) {
 	return &domain.Thread{}, nil
 }
 
-func (t *ThreadDB) Insert(thread *domain.Thread) (*domain.Thread, error) {
+func (t *threadRepository) Insert(thread *domain.Thread) (*domain.Thread, error) {
 	return &domain.Thread{}, nil
 }
 
-func (t *ThreadDB) Update(thread *domain.Thread) (*domain.Thread, error) {
+func (t *threadRepository) Update(thread *domain.Thread) (*domain.Thread, error) {
 	return &domain.Thread{}, nil
 }
 
-func (t *ThreadDB) Delete(thread *domain.Thread) error {
+func (t *threadRepository) Delete(thread *domain.Thread) error {
 	return nil
 }

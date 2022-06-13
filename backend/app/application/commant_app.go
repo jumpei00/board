@@ -54,8 +54,8 @@ func (c *commentApplication) CreateComment(param *params.CreateCommentAppLayerPa
 	}
 
 	// スレッドの更新日時とコメント数を更新する
-	thread.UpdateLatestUpdateDate()
-	thread.CountupSumComment()
+	thread.UpdateLatestUpdatedDate()
+	thread.CountupCommentSum()
 	if _, err := c.threadRepo.Update(thread); err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (c *commentApplication) EditComment(param *params.EditCommentAppLayerParam)
 	}
 
 	// スレッドの更新時刻を更新する
-	thread.UpdateLatestUpdateDate()
+	thread.UpdateLatestUpdatedDate()
 	if _, err := c.threadRepo.Update(thread); err != nil {
 		return nil, err
 	}
@@ -132,8 +132,8 @@ func (c *commentApplication) DeleteComment(param *params.DeleteCommentAppLayerPa
 	}
 
 	// スレッドの更新時刻とコメント数を更新
-	thread.UpdateLatestUpdateDate()
-	thread.CountdownSumComment()
+	thread.UpdateLatestUpdatedDate()
+	thread.CountdownCommentSum()
 	if _, err := c.threadRepo.Update(thread); err != nil {
 		return nil, err
 	}

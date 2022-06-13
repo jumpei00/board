@@ -168,10 +168,10 @@ type responseThread struct {
 func NewResponseThread(thread *domain.Thread) *responseThread {
 	return &responseThread{
 		ThreadKey:   thread.ThreadKey(),
-		Title:       thread.Title(),
-		Contributor: thread.Contributor(),
-		UpdateDate:  thread.FormatUpdateDate(),
-		Views:       thread.Views(),
-		SumComment:  thread.SumComment(),
+		Title:       thread.TitleName(),
+		Contributor: thread.CreatorName(),
+		UpdateDate:  thread.FormatUpdatedDate(),
+		Views:       thread.ViewsNumber(),
+		SumComment:  thread.CommentSumNumber(),
 	}
 }

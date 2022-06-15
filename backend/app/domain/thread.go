@@ -12,8 +12,8 @@ type Thread struct {
 	Key         string    `gorm:"primaryKey;column:thread_key"`
 	Title       string    `gorm:"column:title"`
 	Contributor string    `gorm:"column:contributor"`
-	Views       int       `gorm:"column:views"`
-	CommentSum  int       `gorm:"column:comment_sum"`
+	Views       *int      `gorm:"column:views;default:0"`
+	CommentSum  *int      `gorm:"column:comment_sum;default:0"`
 	CreatedAt   time.Time `gorm:"column:created_at"`
 	UpdatedAt   time.Time `gorm:"column:updated_at"`
 }
@@ -22,8 +22,6 @@ func NewThread(param *params.CreateThreadDomainLayerParam) *Thread {
 	thread := &Thread{
 		Title:       param.Title,
 		Contributor: param.Contributor,
-		Views:       0,
-		CommentSum:  0,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
@@ -39,32 +37,32 @@ func (t *Thread) UpdateThread(param *params.EditThreadDomainLayerParam) *Thread 
 	return t
 }
 
-func (t *Thread) ThreadKey() string {
+func (t *Thread) GetKey() string {
 	return t.Key
 }
 
-func (t *Thread) TitleName() string {
+func (t *Thread) GetTitle() string {
 	return t.Title
 }
 
-func (t *Thread) CreatorName() string {
+func (t *Thread) GetContributor() string {
 	return t.Contributor
 }
 
-func (t *Thread) CreatedDate() time.Time {
+func (t *Thread) GetCreatedAt() time.Time {
 	return t.CreatedAt
 }
 
-func (t *Thread) UpdatedDate() time.Time {
+func (t *Thread) GetUpdatedAt() time.Time {
 	return t.UpdatedAt
 }
 
-func (t *Thread) ViewsNumber() int {
-	return t.Views
+func (t *Thread) GetViews() int {
+	return *t.Views
 }
 
-func (t *Thread) CommentSumNumber() int {
-	return t.CommentSum
+func (t *Thread) GetCommentSum() int {
+	return *t.CommentSum
 }
 
 func (t *Thread) setKey() {
@@ -88,13 +86,13 @@ func (t *Thread) UpdateLatestUpdatedDate() {
 }
 
 func (t *Thread) CountupViews() {
-	t.Views += 1
+	*t.Views += 1
 }
 
 func (t *Thread) CountupCommentSum() {
-	t.CommentSum += 1
+	*t.CommentSum += 1
 }
 
 func (t *Thread) CountdownCommentSum() {
-	t.CommentSum -= 1
+	*t.CommentSum -= 1
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type ThreadApplication interface {
-	GetAllThread() ([]*domain.Thread, error)
+	GetAllThread() (*[]domain.Thread, error)
 	GetByThreadKey(threadKey string) (*domain.Thread, error)
 	CreateThread(param *params.CreateThreadAppLayerParam) (*domain.Thread, error)
 	EditThread(param *params.EditThreadAppLayerParam) (*domain.Thread, error)
@@ -24,7 +24,7 @@ func NewThreadApplication(tr repository.ThreadRepository) *threadApplication {
 	}
 }
 
-func (t *threadApplication) GetAllThread() ([]*domain.Thread, error) {
+func (t *threadApplication) GetAllThread() (*[]domain.Thread, error) {
 	threads, err := t.threadRepo.GetAll()
 	if err != nil {
 		return nil, err

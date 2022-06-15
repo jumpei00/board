@@ -36,8 +36,8 @@ func (t *ThreadHandler) getAll(c *gin.Context) {
 	}
 
 	var res responseThreads
-	for _, thread := range threads {
-		res.Threads = append(res.Threads, NewResponseThread(thread))
+	for _, thread := range *threads {
+		res.Threads = append(res.Threads, NewResponseThread(&thread))
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -162,16 +162,16 @@ type responseThread struct {
 	Contributor string `json:"contributor"`
 	UpdateDate  string `json:"update_date"`
 	Views       int    `json:"views"`
-	SumComment  int    `json:"sum_comment"`
+	CommentSum  int    `json:"comment_sum"`
 }
 
 func NewResponseThread(thread *domain.Thread) *responseThread {
 	return &responseThread{
-		ThreadKey:   thread.ThreadKey(),
-		Title:       thread.TitleName(),
-		Contributor: thread.CreatorName(),
+		ThreadKey:   thread.GetKey(),
+		Title:       thread.GetTitle(),
+		Contributor: thread.GetContributor(),
 		UpdateDate:  thread.FormatUpdatedDate(),
-		Views:       thread.ViewsNumber(),
-		SumComment:  thread.CommentSumNumber(),
+		Views:       thread.GetViews(),
+		CommentSum:  thread.GetCommentSum(),
 	}
 }

@@ -49,8 +49,8 @@ func (co *CommentHandler) getAll(c *gin.Context) {
 
 	var res responseThreadAndComments
 	res.Thread = NewResponseThread(thread)
-	for _, comment := range comments {
-		res.Comments = append(res.Comments, NewResponseComment(comment))
+	for _, comment := range *comments {
+		res.Comments = append(res.Comments, NewResponseComment(&comment))
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -89,8 +89,8 @@ func (co *CommentHandler) create(c *gin.Context) {
 
 	var res responseThreadAndComments
 	res.Thread = NewResponseThread(thread)
-	for _, comment := range comments {
-		res.Comments = append(res.Comments, NewResponseComment(comment))
+	for _, comment := range *comments {
+		res.Comments = append(res.Comments, NewResponseComment(&comment))
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -130,8 +130,8 @@ func (co *CommentHandler) edit(c *gin.Context) {
 
 	var res responseThreadAndComments
 	res.Thread = NewResponseThread(thread)
-	for _, comment := range comments {
-		res.Comments = append(res.Comments, NewResponseComment(comment))
+	for _, comment := range *comments {
+		res.Comments = append(res.Comments, NewResponseComment(&comment))
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -170,8 +170,8 @@ func (co *CommentHandler) delete(c *gin.Context) {
 
 	var res responseThreadAndComments
 	res.Thread = NewResponseThread(thread)
-	for _, comment := range comments {
-		res.Comments = append(res.Comments, NewResponseComment(comment))
+	for _, comment := range *comments {
+		res.Comments = append(res.Comments, NewResponseComment(&comment))
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -207,9 +207,9 @@ type responseComment struct {
 
 func NewResponseComment(comment *domain.Comment) *responseComment {
 	return &responseComment{
-		CommentKey:  comment.CommentKey(),
-		Contributor: comment.Contributor(),
-		Comment:     comment.Comment(),
+		CommentKey:  comment.GetKey(),
+		Contributor: comment.GetContributor(),
+		Comment:     comment.GetComment(),
 		UpdateDate:  comment.FormatUpdateDate(),
 	}
 }

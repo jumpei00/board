@@ -12,20 +12,20 @@ import (
 
 func main() {
 	// DB
-	dbSession, err := infrastructure.GenerateDBPool()
+	dbPool, err := infrastructure.GenerateDBPool()
 	if err != nil {
 		logger.Fatal("db session open error", "error", err)
 	}
 
 	userDB := infrastructure.NewUserDB()
 	visitorDB := infrastructure.NewVisitorDB()
-	threadDB := infrastructure.NewThreadRepository(dbSession)
-	commentDB := infrastructure.NewCommentDB()
+	threadDB := infrastructure.NewThreadRepository(dbPool)
+	commentDB := infrastructure.NewCommentDB(dbPool)
 	
 	// application
 	userApp := application.NewUserApplication(userDB)
 	visitApp := application.NewVisitorApplication(visitorDB)
-	threadApp := application.NewThreadApplication(threadDB)
+	threadApp := application.NewThreadApplication(threadDB, commentDB)
 	commentApp := application.NewCommentApplication(threadDB, commentDB)
 	
 	// handler

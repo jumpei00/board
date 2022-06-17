@@ -3,62 +3,73 @@ package domain
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jumpei00/board/backend/app/params"
 )
 
 type Comment struct {
-	threadKey   string
-	commentKey  string
-	contributor string
-	comment     string
-	updateDate  time.Time
+	Key         string    `gorm:"column:comment_key"`
+	ThreadKey   string    `gorm:"column:thread_key"`
+	Contributor string    `gorm:"column:contributor"`
+	Comment     string    `gorm:"comment"`
+	CreatedAt   time.Time `gorm:"created_at"`
+	UpdatedAt   time.Time `gorm:"updated_at"`
 }
 
 func NewComment(param *params.CreateCommentDomainLayerParam) *Comment {
 	comment := &Comment{
-		threadKey: param.ThreadKey,
-		contributor: param.Contributor,
-		comment: param.Comment,
-		updateDate: time.Now(),
+		ThreadKey:   param.ThreadKey,
+		Contributor: param.Contributor,
+		Comment:     param.Comment,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 	comment.setCommentKey()
 	return comment
 }
 
 func (c *Comment) UpdateComment(param *params.EditCommentDomainLayerParam) *Comment {
-	c.comment = param.Comment
-	c.updateDate = time.Now()
+	c.Comment = param.Comment
+	c.UpdatedAt = time.Now()
 	return c
 }
 
-func (c *Comment) ThreadKey() string {
-	return c.threadKey
+func (c *Comment) GetKey() string {
+	return c.Key
 }
 
-func (c *Comment) CommentKey() string {
-	return c.commentKey
+func (c *Comment) GetThreadKey() string {
+	return c.ThreadKey
 }
 
-func (c *Comment) Contributor() string {
-	return c.contributor
+func (c *Comment) GetContributor() string {
+	return c.Contributor
 }
 
-func (c *Comment) Comment() string {
-	return c.comment
+func (c *Comment) GetComment() string {
+	return c.Comment
 }
 
-func (c *Comment) UpdateDate() time.Time {
-	return c.updateDate
+func (c *Comment) GetCreatedAt() time.Time {
+	return c.CreatedAt
+}
+
+func (c *Comment) GetUpdatedAt() time.Time {
+	return c.UpdatedAt
 }
 
 func (c *Comment) setCommentKey() {
-	c.commentKey = "key"
+	c.Key = uuid.New().String()
 }
 
 func (c *Comment) IsNotSameContritubor(contributor string) bool {
-	return c.contributor != contributor
+	return c.Contributor != contributor
+}
+
+func (t *Comment) FormatCreatedDate() string {
+	return t.CreatedAt.Format("2006/01/02 15:04")
 }
 
 func (c *Comment) FormatUpdateDate() string {
-	return c.updateDate.Format("2006/01/02 15:04")
+	return c.UpdatedAt.Format("2006/01/02 15:04")
 }

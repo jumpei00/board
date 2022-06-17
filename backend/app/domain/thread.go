@@ -69,7 +69,7 @@ func (t *Thread) setKey() {
 	t.Key = uuid.New().String()
 }
 
-func (t *Thread) IsNotSameContritubor(contributor string) bool {
+func (t *Thread) IsNotSameContributor(contributor string) bool {
 	return t.Contributor != contributor
 }
 

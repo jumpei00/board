@@ -22,13 +22,16 @@ func (t *threadRepository) GetAll() (*[]domain.Thread, error) {
 	var threads []domain.Thread
 
 	// TODO: スレッド数が増えてきたらLIMITをかけてページネーションなどにする
-	if err := t.db.Order("updated_at desc").Find(&threads).Error; err != nil {
-		if errors.Cause(err) == gorm.ErrRecordNotFound {
-			logger.Info("no threads")
-			return nil, appError.NewErrNotFound("thread get all failed -> err: %s", err)
-		}
-		errors.WithStack(err)
-		return nil, err
+	result := t.db.Order("updated_at desc").Find(&threads)
+
+	if result.Error != nil {
+		logger.Error("thread get all failed -> err: %s", result.Error)
+		return nil, errors.WithStack(result.Error)
+	}
+
+	if result.RowsAffected == 0 {
+		logger.Info("thread get all, but not thread")
+		return nil, appError.NewErrNotFound("thread get all, but not thread")
 	}
 
 	return &threads, nil
@@ -87,6 +90,28 @@ func (t *threadRepository) Delete(thread *domain.Thread) error {
 			logger.Error("thread delete failed -> err: %s, target thread: %s", err, thread)
 			return err
 		}
+		return nil
+	})
+
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+func (t *threadRepository) DeleteThreadAndComments(thread *domain.Thread, comments *[]domain.Comment) error {
+	err := t.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Delete(thread).Error; err != nil {
+			logger.Error("thread delete failed -> err: %s, target thread: %s", err, thread)
+			return err
+		}
+
+		if err := tx.Delete(comments).Error; err != nil {
+			logger.Error("targeted all comments delete failed -> err: %s, target thread_key: %s", err, thread.GetKey())
+			return err
+		}
+
 		return nil
 	})
 

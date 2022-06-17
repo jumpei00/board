@@ -8,4 +8,5 @@ type ThreadRepository interface {
 	Insert(thread *domain.Thread) (*domain.Thread, error)
 	Update(thread *domain.Thread) (*domain.Thread, error)
 	Delete(thread *domain.Thread) error
+	DeleteThreadAndComments(thread *domain.Thread, comments *[]domain.Comment) error
 }

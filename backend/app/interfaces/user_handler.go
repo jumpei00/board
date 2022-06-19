@@ -28,9 +28,24 @@ func (u *UserHandler) SetupRouter(r *gin.RouterGroup) {
 }
 
 func (u *UserHandler) me(c *gin.Context) {
+	// TODO: セッションが実装されたらこちらも実装する
 	c.Status(http.StatusOK)
 }
 
+// User godoc
+// @Summary ユーザーの新規作成
+// @Description 新規ユーザーを作成する
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param body body requestSignUp true "新規ユーザー作成情報"
+// @Success 200 {object} responseSignUp
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/signup [post]
+// User godoc
 func (u *UserHandler) signup(c *gin.Context) {
 	var req requestSignUp
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -54,6 +69,20 @@ func (u *UserHandler) signup(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// User godoc
+// @Summary ログイン
+// @Description ユーザーがログインできるか検証する
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param body body requestSignIn true "ログイン情報"
+// @Success 200 {object} responseSignIn
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/signin [post]
+// User godoc
 func (u *UserHandler) signin(c *gin.Context) {
 	var req requestSignIn
 	if err := c.ShouldBindJSON(&req); err != nil {

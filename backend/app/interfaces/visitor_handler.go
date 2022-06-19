@@ -24,6 +24,19 @@ func (v *VisitorsHandler) SetupRouter(r *gin.RouterGroup) {
 	r.PUT("/reset", v.reset)
 }
 
+// Visitor godoc
+// @Summary 訪問者統計の取得
+// @Description サイトへの訪問者情報を取得する
+// @Tags visitor
+// @Accept json
+// @Produce json
+// @Success 200 {object} responseVisitor
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/visitor [get]
+// Visitor godoc
 func (v *VisitorsHandler) get(c *gin.Context) {
 	visitors, err := v.visitorApp.GetVisitorsStat()
 	if err != nil {
@@ -31,10 +44,23 @@ func (v *VisitorsHandler) get(c *gin.Context) {
 		return
 	}
 
-	res := NewResponseVisitors(visitors)
+	res := NewResponseVisitor(visitors)
 	c.JSON(http.StatusOK, res)
 }
 
+// Visitor godoc
+// @Summary 訪問者のカウントアップ
+// @Description サイトへの訪問回数をカウントアップさせる
+// @Tags visitor
+// @Accept json
+// @Produce json
+// @Success 200 {object} responseVisitor
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/visitor [put]
+// Visitor godoc
 func (v *VisitorsHandler) visited(c *gin.Context) {
 	visitors, err := v.visitorApp.CountupVisitors()
 	if err != nil {
@@ -42,10 +68,23 @@ func (v *VisitorsHandler) visited(c *gin.Context) {
 		return
 	}
 
-	res := NewResponseVisitors(visitors)
+	res := NewResponseVisitor(visitors)
 	c.JSON(http.StatusOK, res)
 }
 
+// Visitor godoc
+// @Summary 訪問者のリセット
+// @Description 昨日の訪問者を今日の訪問者で上書きしリセットさせる
+// @Tags visitor
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/visitor/reset [put]
+// Visitor godoc
 func (v *VisitorsHandler) reset(c *gin.Context) {
 	_, err := v.visitorApp.ResetVisitors()
 	if err != nil {
@@ -56,14 +95,14 @@ func (v *VisitorsHandler) reset(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-type responseVisitors struct {
+type responseVisitor struct {
 	Yesterday int `json:"yesterday"`
 	Today     int `json:"today"`
 	Sum       int `json:"sum"`
 }
 
-func NewResponseVisitors(visitor *domain.Visitor) *responseVisitors {
-	return &responseVisitors{
+func NewResponseVisitor(visitor *domain.Visitor) *responseVisitor {
+	return &responseVisitor{
 		Yesterday: visitor.GetYesterdayVisitor(),
 		Today: visitor.GetTodayVisitor(),
 		Sum: visitor.GetVisitorSum(),

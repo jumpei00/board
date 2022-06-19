@@ -10,6 +10,9 @@ services:
       - "8080:8080"
     volumes:
       - ./:/go/api:cached
+    networks:
+      - board_default
+      - database
     command: air
     environment:
       - VIRTUAL_HOST=localhost.api
@@ -30,6 +33,8 @@ services:
       - "13306:3306"
     volumes:
       - mysql-volume:/var/lib/mysql
+    networks:
+      - database
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_USER=development
@@ -42,14 +47,24 @@ services:
       - "16379:6379"
     volumes:
       - redis-volume:/data
+    networks:
+      - database
   migration:
     container_name: migration
     build:
       context: ./docker/migration/
       dockerfile: dockerfile
+    networks:
+      - database
     command: sql-migrate up -config=dbconfig.yaml -env="development"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_started
+
+networks:
+  board_default:
+    external: true
+  database:
 
 volumes:
   mysql-volume:

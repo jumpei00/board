@@ -12,7 +12,6 @@ services:
       - ./:/app
     networks:
       - board_default
-      - backend_default
     command: yarn start
     environment:
       - VIRTUAL_HOST=localhost.web
@@ -21,6 +20,4 @@ services:
 
 networks:
   board_default:
-    external: true
-  backend_default:
     external: true

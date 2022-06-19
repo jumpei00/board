@@ -30,6 +30,20 @@ func (co *CommentHandler) SetupRouter(r *gin.RouterGroup) {
 	r.DELETE("/:thread_key", co.delete)
 }
 
+// Comment godoc
+// @Summary コメントを全て取得
+// @Description スレッドに紐づくコメントを全て取得
+// @Tags comment
+// @Accept json
+// @Produce json
+// @Param thread_key path string true "スレッドキー"
+// @Success 200 {object} responseThreadAndComments
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/comment/{thread_key} [get]
+// Comment godoc
 func (co *CommentHandler) getAll(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
@@ -59,6 +73,21 @@ func (co *CommentHandler) getAll(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// Comment godoc
+// @Summary スレッドへの新規コメントを作成
+// @Description スレッドに対するコメントを作成する
+// @Tags comment
+// @Accept json
+// @Produce json
+// @Param thread_key path string true "スレッドキー"
+// @Param body body requestCommentCreate true "コメント作成情報"
+// @Success 200 {object} responseThreadAndComments
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/comment/{thread_key} [post]
+// Comment godoc
 func (co *CommentHandler) create(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
@@ -101,6 +130,21 @@ func (co *CommentHandler) create(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// Comment godoc
+// @Summary 指定されたコメントを更新
+// @Description 指定されたコメントを編集し更新する
+// @Tags comment
+// @Accept json
+// @Produce json
+// @Param thread_key path string true "スレッドキー"
+// @Param body body requestCommentEdit true "コメント編集情報"
+// @Success 200 {object} responseThreadAndComments
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/comment/{thread_key} [put]
+// Comment godoc
 func (co *CommentHandler) edit(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
@@ -150,6 +194,21 @@ func (co *CommentHandler) edit(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// Comment godoc
+// @Summary 指定されたコメントを削除
+// @Description 指定されたコメントを削除する
+// @Tags comment
+// @Accept json
+// @Produce json
+// @Param thread_key path string true "スレッドキー"
+// @Param body body requestCommentDelete true "コメント削除情報"
+// @Success 200 {object} responseThreadAndComments
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/comment/{thread_key} [delete]
+// Comment godoc
 func (co *CommentHandler) delete(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {

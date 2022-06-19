@@ -10,14 +10,14 @@ import (
 var messageYaml *errCause
 
 func init() {
-	file, err := os.ReadFile("./message.yaml")
+	file, err := os.ReadFile("./app/library/error/message.yaml")
 	if err != nil {
-		logger.Fatal("no open message.yaml")
+		logger.Fatal("no open message.yaml", "error", err)
 	}
 
 	errContents := &errCause{}
 	if err := yaml.Unmarshal(file, errContents); err != nil {
-		logger.Fatal("unmarshal yaml file failed")
+		logger.Fatal("unmarshal yaml file failed", "error", err)
 	}
 
 	messageYaml = errContents

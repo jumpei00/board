@@ -7,6 +7,8 @@ import (
 	"github.com/jumpei00/board/backend/app/application"
 	"github.com/jumpei00/board/backend/app/domain"
 	"github.com/jumpei00/board/backend/app/params"
+	"github.com/jumpei00/board/backend/app/library/logger"
+	appError "github.com/jumpei00/board/backend/app/library/error"
 )
 
 type CommentHandler struct {
@@ -31,19 +33,20 @@ func (co *CommentHandler) SetupRouter(r *gin.RouterGroup) {
 func (co *CommentHandler) getAll(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
-		handleError(c)
+		logger.Warning("comment get all, but not thread key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
 		return
 	}
 
 	comments, err := co.commentApplication.GetAllByThreadKey(threadKey)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
 	thread, err := co.threadApplication.GetByThreadKey(threadKey)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -59,13 +62,15 @@ func (co *CommentHandler) getAll(c *gin.Context) {
 func (co *CommentHandler) create(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
-		handleError(c)
+		logger.Warning("comment create, but not thread key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
 		return
 	}
 
 	var req requestCommentCreate
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c)
+		logger.Error("comment create, requesting json bind error", "error", err, "binded_request", req)
+		handleError(c, err)
 		return
 	}
 
@@ -77,13 +82,13 @@ func (co *CommentHandler) create(c *gin.Context) {
 
 	comments, err := co.commentApplication.CreateComment(&param)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
 	thread, err := co.threadApplication.GetByThreadKey(threadKey)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -99,13 +104,21 @@ func (co *CommentHandler) create(c *gin.Context) {
 func (co *CommentHandler) edit(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
-		handleError(c)
+		logger.Warning("comment edit, but not thread key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
 		return
 	}
 
 	var req requestCommentEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c)
+		logger.Error("comment edit, requesting json bind error", "error", err, "binded_request", req)
+		handleError(c, err)
+		return
+	}
+
+	if req.CommentKey == "" {
+		logger.Warning("comment edit, but not comment key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotCommentKey, "not comment key"))
 		return
 	}
 
@@ -118,13 +131,13 @@ func (co *CommentHandler) edit(c *gin.Context) {
 
 	comments, err := co.commentApplication.EditComment(&param)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
 	thread, err := co.threadApplication.GetByThreadKey(threadKey)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -140,13 +153,21 @@ func (co *CommentHandler) edit(c *gin.Context) {
 func (co *CommentHandler) delete(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
-		handleError(c)
+		logger.Warning("comment delete, but not thread key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
 		return
 	}
 
 	var req requestCommentDelete
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c)
+		logger.Error("comment delete, requesting json bind error", "error", err, "binded_request", req)
+		handleError(c, err)
+		return
+	}
+
+	if req.CommentKey == "" {
+		logger.Warning("comment delete, but not comment key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotCommentKey, "not comment key"))
 		return
 	}
 
@@ -158,13 +179,13 @@ func (co *CommentHandler) delete(c *gin.Context) {
 
 	comments, err := co.commentApplication.DeleteComment(&param)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
 	thread, err := co.threadApplication.GetByThreadKey(threadKey)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 

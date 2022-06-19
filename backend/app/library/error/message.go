@@ -29,6 +29,8 @@ type errCause struct {
 	NotSameContributor   ErrContents `yaml:"ErrNotSameContributor"`
 	AlreadyUsernameExist ErrContents `yaml:"ErrAlreadyUsernameExist"`
 	SignInBadRequest     ErrContents `yaml:"ErrSignInBadRequest"`
+	NotThreadKey         ErrContents `yaml:"ErrNotThreadKey"`
+	NotCommentKey        ErrContents `yaml:"ErrNotCommentKey"`
 }
 
 type ErrContents struct {

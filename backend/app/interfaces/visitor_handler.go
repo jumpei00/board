@@ -27,7 +27,7 @@ func (v *VisitorsHandler) SetupRouter(r *gin.RouterGroup) {
 func (v *VisitorsHandler) get(c *gin.Context) {
 	visitors, err := v.visitorApp.GetVisitorsStat()
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -38,7 +38,7 @@ func (v *VisitorsHandler) get(c *gin.Context) {
 func (v *VisitorsHandler) visited(c *gin.Context) {
 	visitors, err := v.visitorApp.CountupVisitors()
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -49,7 +49,7 @@ func (v *VisitorsHandler) visited(c *gin.Context) {
 func (v *VisitorsHandler) reset(c *gin.Context) {
 	_, err := v.visitorApp.ResetVisitors()
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 

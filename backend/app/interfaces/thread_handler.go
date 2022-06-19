@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
 	"github.com/jumpei00/board/backend/app/domain"
+	"github.com/jumpei00/board/backend/app/library/logger"
+	appError "github.com/jumpei00/board/backend/app/library/error"
 	"github.com/jumpei00/board/backend/app/params"
 )
 
@@ -31,7 +33,7 @@ func (t *ThreadHandler) getAll(c *gin.Context) {
 	threads, err := t.threadApplication.GetAllThread()
 
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -46,14 +48,15 @@ func (t *ThreadHandler) getAll(c *gin.Context) {
 func (t *ThreadHandler) get(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
-		handleError(c)
+		logger.Warning("thread get, but not thread key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
 		return
 	}
 
 	thread, err := t.threadApplication.GetByThreadKey(threadKey)
 
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -64,7 +67,8 @@ func (t *ThreadHandler) get(c *gin.Context) {
 func (t *ThreadHandler) create(c *gin.Context) {
 	var req requestThreadCreate
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c)
+		logger.Error("thread create, requesting json bind error", "error", err, "binded_request", req)
+		handleError(c, err)
 		return
 	}
 
@@ -75,7 +79,7 @@ func (t *ThreadHandler) create(c *gin.Context) {
 
 	thread, err := t.threadApplication.CreateThread(&param)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -86,13 +90,15 @@ func (t *ThreadHandler) create(c *gin.Context) {
 func (t *ThreadHandler) edit(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
-		handleError(c)
+		logger.Warning("thread edit, but not thread key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
 		return
 	}
 
 	var req requestThreadEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c)
+		logger.Error("thread edit, requesting json bind error", "error", err, "binded_request", req)
+		handleError(c, err)
 		return
 	}
 
@@ -104,7 +110,7 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 
 	thread, err := t.threadApplication.EditThread(&param)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -115,13 +121,15 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 func (t *ThreadHandler) delete(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
-		handleError(c)
+		logger.Warning("thread delete, but not thread key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
 		return
 	}
 
 	var req requestThreadDelete
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c)
+		logger.Error("thread delete, requesting json bind error", "error", err, "binded_request", req)
+		handleError(c, err)
 		return
 	}
 
@@ -131,7 +139,7 @@ func (t *ThreadHandler) delete(c *gin.Context) {
 	}
 
 	if err := t.threadApplication.DeleteThread(&param); err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 

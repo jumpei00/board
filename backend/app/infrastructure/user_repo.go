@@ -26,7 +26,7 @@ func (u *UserDB) GetByUsername(username string) (*domain.User, error) {
 			logger.Info("search user at targeted username, but not found", "username", username)
 			return nil, appError.NewErrNotFound("no search user at targeted username -> username: %s", username)
 		}
-		logger.Error("search user at targetd username error", "error", err, "username", username)
+		logger.Error("search user at targeted username error", "error", err, "username", username)
 		return nil, errors.WithStack(err)
 	}
 

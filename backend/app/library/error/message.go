@@ -16,7 +16,9 @@ func init() {
 	}
 
 	errContents := &errCause{}
-	yaml.Unmarshal(file, errContents)
+	if err := yaml.Unmarshal(file, errContents); err != nil {
+		logger.Fatal("unmarshal yaml file failed")
+	}
 
 	messageYaml = errContents
 }

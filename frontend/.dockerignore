@@ -1,4 +1,5 @@
 docker
 docker-compose.yaml
+.dockerignore
 .gitignore
 README.md

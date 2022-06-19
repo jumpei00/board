@@ -94,7 +94,7 @@ type responseSignUp struct {
 
 func NewResponseSignUp(user *domain.User) *responseSignUp {
 	return &responseSignUp{
-		Username: user.Username(),
+		Username: user.GetUsername(),
 	}
 }
 
@@ -104,6 +104,6 @@ type responseSignIn struct {
 
 func NewResponseSignIn(user *domain.User) *responseSignIn {
 	return &responseSignIn{
-		Username: user.Username(),
+		Username: user.GetUsername(),
 	}
 }

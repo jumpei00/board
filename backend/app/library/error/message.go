@@ -26,10 +26,11 @@ func Message() *errCause {
 }
 
 type errCause struct {
-	NotSameContributor ErrContents `yaml:"ErrNotSameContributor"`
+	NotSameContributor   ErrContents `yaml:"ErrNotSameContributor"`
+	AlreadyUsernameExist ErrContents `yaml:"ErrAlreadyUsernameExist"`
+	SignInBadRequest     ErrContents `yaml:"ErrSignInBadRequest"`
 }
 
 type ErrContents struct {
 	message string `yaml:"message"`
 }
-

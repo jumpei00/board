@@ -17,7 +17,7 @@ func main() {
 		logger.Fatal("db session open error", "error", err)
 	}
 
-	userDB := infrastructure.NewUserDB()
+	userDB := infrastructure.NewUserDB(dbPool)
 	visitorDB := infrastructure.NewVisitorDB()
 	threadDB := infrastructure.NewThreadRepository(dbPool)
 	commentDB := infrastructure.NewCommentDB(dbPool)

@@ -3,11 +3,14 @@ package application
 import (
 	"github.com/jumpei00/board/backend/app/domain"
 	"github.com/jumpei00/board/backend/app/domain/repository"
+	appError "github.com/jumpei00/board/backend/app/library/error"
+	"github.com/jumpei00/board/backend/app/library/logger"
 	"github.com/jumpei00/board/backend/app/params"
+	"github.com/pkg/errors"
 )
 
 type UserApplication interface {
-	GetUserByKey(key string) (*domain.User, error)
+	GetUserByUsername(key string) (*domain.User, error)
 	CreateUser(param *params.UserSignUpApplicationLayerParam) (*domain.User, error)
 	ValidateUser(param *params.UserSignInApplicationLayerParam) (*domain.User, error)
 }
@@ -22,8 +25,8 @@ func NewUserApplication(ur repository.UserRepository) *userApplication {
 	}
 }
 
-func (u *userApplication) GetUserByKey(key string) (*domain.User, error) {
-	user, err := u.userRepo.GetByKey(key)
+func (u *userApplication) GetUserByUsername(username string) (*domain.User, error) {
+	user, err := u.userRepo.GetByUsername(username)
 	if err != nil {
 		return nil, err
 	}
@@ -32,6 +35,20 @@ func (u *userApplication) GetUserByKey(key string) (*domain.User, error) {
 }
 
 func (u *userApplication) CreateUser(param *params.UserSignUpApplicationLayerParam) (*domain.User, error) {
+	// 登録しようとしているユーザー名は既に登録済みではないか調べる必要がある
+	_, err := u.userRepo.GetByUsername(param.Username)
+
+	// nilの場合は該当ユーザーが存在しているのでエラーを返す必要がある
+	if err == nil {
+		logger.Info("requesting username is already registered", "username", param.Username)
+		return nil, appError.NewErrBadRequest(appError.Message().AlreadyUsernameExist, "username is already exist -> username: %s", param.Username)
+	}
+
+	// ユーザーが存在しない以外のエラーだった場合はエラーをそのまま返す
+	if err != nil && errors.Cause(err) != appError.ErrNotFound {
+		return nil, err
+	}
+
 	domainParam := params.UserSignUpDomainLayerParam{
 		Username: param.Username,
 		Password: param.Password,
@@ -51,8 +68,16 @@ func (u *userApplication) CreateUser(param *params.UserSignUpApplicationLayerPar
 }
 
 func (u *userApplication) ValidateUser(param *params.UserSignInApplicationLayerParam) (*domain.User, error) {
-	user, err := u.userRepo.GetByKey(param.Username)
+	// ユーザー名かパスワードが違う場合はエラーメッセージを返す必要がある
+	user, err := u.userRepo.GetByUsername(param.Username)
 	if err != nil {
+		if errors.Cause(err) == appError.ErrNotFound {
+			logger.Info("requesting usrename is not found", "username", param.Username)
+			return nil, appError.NewErrBadRequest(
+				appError.Message().SignInBadRequest,
+				"requesting username is not found -> username: %s", param.Username,
+			)
+		}
 		return nil, err
 	}
 
@@ -62,7 +87,11 @@ func (u *userApplication) ValidateUser(param *params.UserSignInApplicationLayerP
 	}
 
 	if err := user.Validate(&domainParam); err != nil {
-		return nil, err
+		logger.Info("requesting password is not matched", "error", err)
+		return nil, appError.NewErrBadRequest(
+			appError.Message().SignInBadRequest,
+			"requesting password is not matched -> err: %s", err,
+		)
 	}
 
 	return user, nil

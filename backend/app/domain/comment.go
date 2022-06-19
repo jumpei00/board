@@ -8,12 +8,12 @@ import (
 )
 
 type Comment struct {
-	Key         string    `gorm:"column:comment_key"`
+	Key         string    `gorm:"primaryKey;column:comment_key"`
 	ThreadKey   string    `gorm:"column:thread_key"`
 	Contributor string    `gorm:"column:contributor"`
-	Comment     string    `gorm:"comment"`
-	CreatedAt   time.Time `gorm:"created_at"`
-	UpdatedAt   time.Time `gorm:"updated_at"`
+	Comment     string    `gorm:"column:comment"`
+	CreatedAt   time.Time `gorm:"column:created_at"`
+	UpdatedAt   time.Time `gorm:"column:updated_at"`
 }
 
 func NewComment(param *params.CreateCommentDomainLayerParam) *Comment {

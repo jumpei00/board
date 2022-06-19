@@ -45,6 +45,7 @@ func (c *CommentDB) GetByKey(commentKey string) (*domain.Comment, error) {
 			logger.Info("comment get at targed comment_key, but no comment", "comment_key", commentKey)
 			return nil, appError.NewErrNotFound("comment get at targed comment_key, but no comment -> comment_key: %s", commentKey)
 		}
+		logger.Error("comment get at targed comment_key failed", "error", err, "comment_key", commentKey)
 		return nil, errors.WithStack(err)
 	}
 

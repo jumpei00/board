@@ -1,0 +1,4 @@
+development:
+  dialect: mysql
+  datasource: development:password@tcp(mysql:3306)/board?charset=utf8mb4&parseTime=True
+  dir: ./mysql

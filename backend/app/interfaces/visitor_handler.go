@@ -64,8 +64,8 @@ type responseVisitors struct {
 
 func NewResponseVisitors(visitors *domain.Visitors) *responseVisitors {
 	return &responseVisitors{
-		Yesterday: visitors.YesterdayVisitors(),
-		Today: visitors.TodayVisitors(),
-		Sum: visitors.SumVisitor(),
+		Yesterday: visitors.GetYesterdayVisitors(),
+		Today: visitors.GetTodayVisitors(),
+		Sum: visitors.GetVisitorSum(),
 	}
 }

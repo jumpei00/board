@@ -18,7 +18,7 @@ func main() {
 	}
 
 	userDB := infrastructure.NewUserDB(dbPool)
-	visitorDB := infrastructure.NewVisitorDB()
+	visitorDB := infrastructure.NewVisitorDB(dbPool)
 	threadDB := infrastructure.NewThreadRepository(dbPool)
 	commentDB := infrastructure.NewCommentDB(dbPool)
 	

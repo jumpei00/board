@@ -53,7 +53,7 @@ func (v *visitorApplication) ResetVisitors() (*domain.Visitors, error) {
 		return nil, err
 	}
 
-	visitors.SetYesterdayVisitors(visitors.TodayVisitors())
+	visitors.SetYesterdayVisitors(visitors.GetTodayVisitors())
 	visitors.ResetTodayVisitors(0)
 
 	updatedVisitors, err := v.visitorRepo.Update(visitors)

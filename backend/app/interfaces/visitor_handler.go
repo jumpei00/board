@@ -62,10 +62,10 @@ type responseVisitors struct {
 	Sum       int `json:"sum"`
 }
 
-func NewResponseVisitors(visitors *domain.Visitors) *responseVisitors {
+func NewResponseVisitors(visitor *domain.Visitor) *responseVisitors {
 	return &responseVisitors{
-		Yesterday: visitors.GetYesterdayVisitors(),
-		Today: visitors.GetTodayVisitors(),
-		Sum: visitors.GetVisitorSum(),
+		Yesterday: visitor.GetYesterdayVisitor(),
+		Today: visitor.GetTodayVisitor(),
+		Sum: visitor.GetVisitorSum(),
 	}
 }

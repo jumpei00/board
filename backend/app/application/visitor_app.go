@@ -6,9 +6,9 @@ import (
 )
 
 type VisitorApplication interface {
-	GetVisitorsStat() (*domain.Visitors, error)
-	CountupVisitors() (*domain.Visitors, error)
-	ResetVisitors() (*domain.Visitors, error)
+	GetVisitorsStat() (*domain.Visitor, error)
+	CountupVisitors() (*domain.Visitor, error)
+	ResetVisitors() (*domain.Visitor, error)
 }
 
 type visitorApplication struct {
@@ -21,25 +21,25 @@ func NewVisitorApplication(vr repository.VisitorRepository) *visitorApplication 
 	}
 }
 
-func (v *visitorApplication) GetVisitorsStat() (*domain.Visitors, error) {
-	visitors, err := v.visitorRepo.Get()
+func (v *visitorApplication) GetVisitorsStat() (*domain.Visitor, error) {
+	visitor, err := v.visitorRepo.Get()
 	if err != nil {
 		return nil, err
 	}
 
-	return visitors, nil
+	return visitor, nil
 }
 
-func (v *visitorApplication) CountupVisitors() (*domain.Visitors, error) {
-	visitors, err := v.visitorRepo.Get()
+func (v *visitorApplication) CountupVisitors() (*domain.Visitor, error) {
+	visitor, err := v.visitorRepo.Get()
 	if err != nil {
 		return nil, err
 	}
 
-	visitors.CoutupTodayVisitors()
-	visitors.CountupSumVisitor()
+	visitor.CoutupTodayVisitor()
+	visitor.CountupSumVisitor()
 
-	updatedVisitors, err := v.visitorRepo.Update(visitors)
+	updatedVisitors, err := v.visitorRepo.Update(visitor)
 	if err != nil {
 		return nil, err
 	}
@@ -47,16 +47,16 @@ func (v *visitorApplication) CountupVisitors() (*domain.Visitors, error) {
 	return updatedVisitors, nil
 }
 
-func (v *visitorApplication) ResetVisitors() (*domain.Visitors, error) {
-	visitors, err := v.visitorRepo.Get()
+func (v *visitorApplication) ResetVisitors() (*domain.Visitor, error) {
+	visitor, err := v.visitorRepo.Get()
 	if err != nil {
 		return nil, err
 	}
 
-	visitors.SetYesterdayVisitors(visitors.GetTodayVisitors())
-	visitors.ResetTodayVisitors(0)
+	visitor.SetYesterdayVisitor(visitor.GetTodayVisitor())
+	visitor.ResetTodayVisitor(0)
 
-	updatedVisitors, err := v.visitorRepo.Update(visitors)
+	updatedVisitors, err := v.visitorRepo.Update(visitor)
 	if err != nil {
 		return nil, err
 	}

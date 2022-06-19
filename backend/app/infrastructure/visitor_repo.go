@@ -18,10 +18,10 @@ func NewVisitorDB(dbPool *gorm.DB) *VisitorDB {
 	}
 }
 
-func (v *VisitorDB) Get() (*domain.Visitors, error) {
-	var visitors domain.Visitors
+func (v *VisitorDB) Get() (*domain.Visitor, error) {
+	var visitor domain.Visitor
 
-	if err := v.db.First(&visitors).Error; err != nil {
+	if err := v.db.First(&visitor).Error; err != nil {
 		if errors.Cause(err) == gorm.ErrRecordNotFound {
 			logger.Error("not found visitor stat", "error", err)
 			return nil, appError.NewErrNotFound("not found visitor stat -> error: %s", err)
@@ -29,13 +29,13 @@ func (v *VisitorDB) Get() (*domain.Visitors, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	return &visitors, nil
+	return &visitor, nil
 }
 
-func (v *VisitorDB) Update(visitors *domain.Visitors) (*domain.Visitors, error) {
+func (v *VisitorDB) Update(visitor *domain.Visitor) (*domain.Visitor, error) {
 	err := v.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Save(visitors).Error; err != nil {
-			logger.Error("visitor stat update failed", "error", err, "visitor_stat", visitors)
+		if err := tx.Save(visitor).Error; err != nil {
+			logger.Error("visitor stat update failed", "error", err, "visitor_stat", visitor)
 			return err
 		}
 		return nil
@@ -45,5 +45,5 @@ func (v *VisitorDB) Update(visitors *domain.Visitors) (*domain.Visitors, error) 
 		return nil, errors.WithStack(err)
 	}
 
-	return visitors, nil
+	return visitor, nil
 }

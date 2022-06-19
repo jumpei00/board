@@ -2,7 +2,7 @@ package domain
 
 import "time"
 
-type Visitors struct {
+type Visitor struct {
 	ID               int       `gorm:"primaryKey;column:id"`
 	YesterdayVisitor *int      `gorm:"column:yesterday_visitor"`
 	TodayVisitor     *int      `gorm:"column:today_visitor"`
@@ -11,8 +11,8 @@ type Visitors struct {
 	UpdatedAt        time.Time `gorm:"column:updated_at"`
 }
 
-func NewVisitors(yesterday, today, sum int) *Visitors {
-	return &Visitors{
+func NewVisitor(yesterday, today, sum int) *Visitor {
+	return &Visitor{
 		YesterdayVisitor: &yesterday,
 		TodayVisitor: &today,
 		VisitorSum: &sum,
@@ -21,30 +21,30 @@ func NewVisitors(yesterday, today, sum int) *Visitors {
 	}
 }
 
-func (v *Visitors) GetYesterdayVisitors() int {
+func (v *Visitor) GetYesterdayVisitor() int {
 	return *v.YesterdayVisitor
 }
 
-func (v *Visitors) GetTodayVisitors() int {
+func (v *Visitor) GetTodayVisitor() int {
 	return *v.TodayVisitor
 }
 
-func (v *Visitors) GetVisitorSum() int {
+func (v *Visitor) GetVisitorSum() int {
 	return *v.VisitorSum
 }
 
-func (v *Visitors) CoutupTodayVisitors() {
+func (v *Visitor) CoutupTodayVisitor() {
 	*v.TodayVisitor += 1
 }
 
-func (v *Visitors) CountupSumVisitor() {
+func (v *Visitor) CountupSumVisitor() {
 	*v.VisitorSum += 1
 }
 
-func (v *Visitors) ResetTodayVisitors(n int) {
+func (v *Visitor) ResetTodayVisitor(n int) {
 	v.TodayVisitor = &n
 }
 
-func (v *Visitors) SetYesterdayVisitors(n int) {
+func (v *Visitor) SetYesterdayVisitor(n int) {
 	v.YesterdayVisitor = &n
 }

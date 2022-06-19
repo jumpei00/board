@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: ./docker/api/dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/go/api:cached
+    networks:
+      - board_default
+      - database
+    command: air
+    environment:
+      - VIRTUAL_HOST=localhost.api
+      - VIRTUAL_PORT=8080
+      - API_ENV=development
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=development
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE_NAME=board
+    depends_on:
+      - mysql
+      - redis
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    ports:
+      - "13306:3306"
+    volumes:
+      - mysql-volume:/var/lib/mysql
+    networks:
+      - database
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_USER=development
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=board
+  redis:
+    container_name: redis
+    image: redis:7.0
+    ports:
+      - "16379:6379"
+    volumes:
+      - redis-volume:/data
+    networks:
+      - database
+  migration:
+    container_name: migration
+    build:
+      context: ./docker/migration/
+      dockerfile: dockerfile
+    networks:
+      - database
+    command: sql-migrate up -config=dbconfig.yaml -env="development"
+    depends_on:
+      mysql:
+        condition: service_started
+
+networks:
+  board_default:
+    external: true
+  database:
+
+volumes:
+  mysql-volume:
+  redis-volume:

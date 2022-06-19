@@ -6,8 +6,9 @@ import (
 )
 
 type VisitorApplication interface {
-	GetVisitorsStat() *domain.Visitors
-	CountUpVisitors()
+	GetVisitorsStat() (*domain.Visitor, error)
+	CountupVisitors() (*domain.Visitor, error)
+	ResetVisitors() (*domain.Visitor, error)
 }
 
 type visitorApplication struct {
@@ -20,8 +21,45 @@ func NewVisitorApplication(vr repository.VisitorRepository) *visitorApplication 
 	}
 }
 
-func (v *visitorApplication) GetVisitorsStat() *domain.Visitors {
-	return v.visitorRepo.Get()
+func (v *visitorApplication) GetVisitorsStat() (*domain.Visitor, error) {
+	visitor, err := v.visitorRepo.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	return visitor, nil
 }
 
-func (v *visitorApplication) CountUpVisitors() {}
+func (v *visitorApplication) CountupVisitors() (*domain.Visitor, error) {
+	visitor, err := v.visitorRepo.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	visitor.CoutupTodayVisitor()
+	visitor.CountupSumVisitor()
+
+	updatedVisitors, err := v.visitorRepo.Update(visitor)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedVisitors, nil
+}
+
+func (v *visitorApplication) ResetVisitors() (*domain.Visitor, error) {
+	visitor, err := v.visitorRepo.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	visitor.SetYesterdayVisitor(visitor.GetTodayVisitor())
+	visitor.ResetTodayVisitor(0)
+
+	updatedVisitors, err := v.visitorRepo.Update(visitor)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedVisitors, nil
+}

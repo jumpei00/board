@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
 	"github.com/jumpei00/board/backend/app/domain"
+	appError "github.com/jumpei00/board/backend/app/library/error"
+	"github.com/jumpei00/board/backend/app/library/logger"
 	"github.com/jumpei00/board/backend/app/params"
 )
 
@@ -27,33 +29,61 @@ func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
 	r.DELETE("/:thread_key", t.delete)
 }
 
+// Thread godoc
+// @Summary スレッドを全て取得
+// @Description スレッドを全て取得します
+// @Tags thread
+// @Accept json
+// @Produce json
+// @Success 200 {object} responseThreads
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/thread [get]
+// Thread godoc
 func (t *ThreadHandler) getAll(c *gin.Context) {
 	threads, err := t.threadApplication.GetAllThread()
 
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
 	var res responseThreads
-	for _, thread := range threads {
-		res.Threads = append(res.Threads, NewResponseThread(thread))
+	for _, thread := range *threads {
+		res.Threads = append(res.Threads, NewResponseThread(&thread))
 	}
 
 	c.JSON(http.StatusOK, res)
 }
 
+// Thread godoc
+// @Summary 指定のスレッドを取得
+// @Description スレッドキーに当てはまるスレッドを取得
+// @Tags thread
+// @Accept json
+// @Produce json
+// @Param thread_key path string true "スレッドキー"
+// @Success 200 {object} responseThread
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/thread/{thread_key} [get]
+// Thread godoc
 func (t *ThreadHandler) get(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
-		handleError(c)
+		logger.Warning("thread get, but not thread key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
 		return
 	}
 
 	thread, err := t.threadApplication.GetByThreadKey(threadKey)
 
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -61,21 +91,36 @@ func (t *ThreadHandler) get(c *gin.Context) {
 	c.JSON(http.StatusOK, responseThread)
 }
 
+// Thread godoc
+// @Summary スレッドを新規作成
+// @Description 新しいスレッドを作成します
+// @Tags thread
+// @Accept json
+// @Produce json
+// @Param body body requestThreadCreate true "スレッド作成情報"
+// @Success 200 {object} responseThread
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/thread [post]
+// Thread godoc
 func (t *ThreadHandler) create(c *gin.Context) {
 	var req requestThreadCreate
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c)
+		logger.Error("thread create, requesting json bind error", "error", err, "binded_request", req)
+		handleError(c, err)
 		return
 	}
 
 	param := params.CreateThreadAppLayerParam{
-		Title: req.Title,
+		Title:       req.Title,
 		Contributor: req.Contributor,
 	}
 
 	thread, err := t.threadApplication.CreateThread(&param)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -83,28 +128,45 @@ func (t *ThreadHandler) create(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// Thread godoc
+// @Summary 指定のスレッドを更新
+// @Description 指定されたスレッドを編集し更新する
+// @Tags thread
+// @Accept json
+// @Produce json
+// @Param thread_key path string true "スレッドキー"
+// @Param body body requestThreadEdit true "スレッド編集情報"
+// @Success 200 {object} responseThread
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/thread/{thread_key} [put]
+// Thread godoc
 func (t *ThreadHandler) edit(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
-		handleError(c)
+		logger.Warning("thread edit, but not thread key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
 		return
 	}
 
 	var req requestThreadEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c)
+		logger.Error("thread edit, requesting json bind error", "error", err, "binded_request", req)
+		handleError(c, err)
 		return
 	}
 
 	param := params.EditThreadAppLayerParam{
-		ThreadKey: threadKey,
-		Title: req.Title,
+		ThreadKey:   threadKey,
+		Title:       req.Title,
 		Contributor: req.Contributor,
 	}
 
 	thread, err := t.threadApplication.EditThread(&param)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -112,26 +174,43 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// Thread godoc
+// @Summary 指定のスレッドを削除
+// @Description 指定されたスレッドを削除し、それに紐づいているコメントも同時に削除する
+// @Tags thread
+// @Accept json
+// @Produce json
+// @Param thread_key path string true "スレッドキー"
+// @Param body body requestThreadDelete true "スレッド削除情報"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/thread/{thread_key} [delete]
+// Thread godoc
 func (t *ThreadHandler) delete(c *gin.Context) {
 	threadKey := c.Param("thread_key")
 	if threadKey == "" {
-		handleError(c)
+		logger.Warning("thread delete, but not thread key")
+		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
 		return
 	}
 
 	var req requestThreadDelete
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c)
+		logger.Error("thread delete, requesting json bind error", "error", err, "binded_request", req)
+		handleError(c, err)
 		return
 	}
 
 	param := params.DeleteThreadAppLayerParam{
-		ThreadKey: threadKey,
+		ThreadKey:   threadKey,
 		Contributor: req.Contributor,
 	}
 
 	if err := t.threadApplication.DeleteThread(&param); err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -160,18 +239,18 @@ type responseThread struct {
 	ThreadKey   string `json:"thread_key"`
 	Title       string `json:"title"`
 	Contributor string `json:"contributor"`
-	PostDate    string `json:"post_date"`
+	UpdateDate  string `json:"update_date"`
 	Views       int    `json:"views"`
-	SumComment  int    `json:"sum_comment"`
+	CommentSum  int    `json:"comment_sum"`
 }
 
 func NewResponseThread(thread *domain.Thread) *responseThread {
 	return &responseThread{
-		ThreadKey:   thread.ThreadKey(),
-		Title:       thread.Title(),
-		Contributor: thread.Contributor(),
-		PostDate:    thread.FormatPostDate(),
-		Views:       thread.Views(),
-		SumComment:  thread.SumComment(),
+		ThreadKey:   thread.GetKey(),
+		Title:       thread.GetTitle(),
+		Contributor: thread.GetContributor(),
+		UpdateDate:  thread.FormatUpdatedDate(),
+		Views:       thread.GetViews(),
+		CommentSum:  thread.GetCommentSum(),
 	}
 }

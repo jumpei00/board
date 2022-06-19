@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: ./docker/dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+    networks:
+      - board_default
+    command: yarn start
+    environment:
+      - VIRTUAL_HOST=localhost.web
+      - VIRTUAL_PORT=3000
+      - API_ENV=development
+
+networks:
+  board_default:
+    external: true

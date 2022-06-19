@@ -1,0 +1,6 @@
+docker
+docker-compose.yaml
+tmp
+.dockerignore
+.gitignore
+.air.toml

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
 	"github.com/jumpei00/board/backend/app/domain"
+	"github.com/jumpei00/board/backend/app/library/logger"
 	"github.com/jumpei00/board/backend/app/params"
 )
 
@@ -33,7 +34,8 @@ func (u *UserHandler) me(c *gin.Context) {
 func (u *UserHandler) signup(c *gin.Context) {
 	var req requestSignUp
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c)
+		logger.Error("requesting json bind error on signup", "error", err, "binded_request", req)
+		handleError(c, err)
 		return
 	}
 
@@ -44,7 +46,7 @@ func (u *UserHandler) signup(c *gin.Context) {
 
 	user, err := u.userApp.CreateUser(&param)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -55,7 +57,8 @@ func (u *UserHandler) signup(c *gin.Context) {
 func (u *UserHandler) signin(c *gin.Context) {
 	var req requestSignIn
 	if err := c.ShouldBindJSON(&req); err != nil {
-		handleError(c)
+		logger.Error("requesting json bind error on signin", "error", err, "binded_request", req)
+		handleError(c, err)
 		return
 	}
 
@@ -66,7 +69,7 @@ func (u *UserHandler) signin(c *gin.Context) {
 
 	user, err := u.userApp.ValidateUser(&param)
 	if err != nil {
-		handleError(c)
+		handleError(c, err)
 		return
 	}
 
@@ -75,6 +78,7 @@ func (u *UserHandler) signin(c *gin.Context) {
 }
 
 func (u *UserHandler) signout(c *gin.Context) {
+	// TODO: sessionの開発が完了後、こちらも修正する
 	c.Status(http.StatusOK)
 }
 
@@ -94,7 +98,7 @@ type responseSignUp struct {
 
 func NewResponseSignUp(user *domain.User) *responseSignUp {
 	return &responseSignUp{
-		Username: user.Username(),
+		Username: user.GetUsername(),
 	}
 }
 
@@ -104,6 +108,6 @@ type responseSignIn struct {
 
 func NewResponseSignIn(user *domain.User) *responseSignIn {
 	return &responseSignIn{
-		Username: user.Username(),
+		Username: user.GetUsername(),
 	}
 }

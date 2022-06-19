@@ -3,86 +3,96 @@ package domain
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/jumpei00/board/backend/app/params"
 )
 
 type Thread struct {
-	threadKey   string
-	title       string
-	contributor string
-	updateDate    time.Time
-	views       int
-	sumComment  int
+	Key         string    `gorm:"primaryKey;column:thread_key"`
+	Title       string    `gorm:"column:title"`
+	Contributor string    `gorm:"column:contributor"`
+	Views       *int      `gorm:"column:views;default:0"`
+	CommentSum  *int      `gorm:"column:comment_sum;default:0"`
+	CreatedAt   time.Time `gorm:"column:created_at"`
+	UpdatedAt   time.Time `gorm:"column:updated_at"`
 }
 
 func NewThread(param *params.CreateThreadDomainLayerParam) *Thread {
 	thread := &Thread{
-		title:       param.Title,
-		contributor: param.Contributor,
-		updateDate:    time.Now(),
-		views:       0,
-		sumComment:  0,
+		Title:       param.Title,
+		Contributor: param.Contributor,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
-	thread.setThreadKey()
+	thread.setKey()
 
 	return thread
 }
 
 func (t *Thread) UpdateThread(param *params.EditThreadDomainLayerParam) *Thread {
-	t.title = param.Title
-	t.updateDate = time.Now()
+	t.Title = param.Title
+	t.UpdatedAt = time.Now()
 
 	return t
 }
 
-func (t *Thread) ThreadKey() string {
-	return t.threadKey
+func (t *Thread) GetKey() string {
+	return t.Key
 }
 
-func (t *Thread) Title() string {
-	return t.title
+func (t *Thread) GetTitle() string {
+	return t.Title
 }
 
-func (t *Thread) Contributor() string {
-	return t.contributor
+func (t *Thread) GetContributor() string {
+	return t.Contributor
 }
 
-func (t *Thread) UpdateDate() time.Time {
-	return t.updateDate
+func (t *Thread) GetCreatedAt() time.Time {
+	return t.CreatedAt
 }
 
-func (t *Thread) Views() int {
-	return t.views
+func (t *Thread) GetUpdatedAt() time.Time {
+	return t.UpdatedAt
 }
 
-func (t *Thread) SumComment() int {
-	return t.sumComment
+func (t *Thread) GetViews() int {
+	return *t.Views
 }
 
-func (t *Thread) setThreadKey() {
-	t.threadKey = "hello"
+func (t *Thread) GetCommentSum() int {
+	return *t.CommentSum
 }
 
-func (t *Thread) IsNotSameContritubor(contributor string) bool {
-	return t.contributor != contributor
+func (t *Thread) setKey() {
+	t.Key = uuid.New().String()
 }
 
-func (t *Thread) FormatUpdateDate() string {
-	return t.updateDate.Format("2006/01/02 15:04")
+func (t *Thread) IsNotSameContributor(contributor string) bool {
+	return t.Contributor != contributor
 }
 
-func (t *Thread) UpdateLatestUpdateDate() {
-	t.updateDate = time.Now()
+func (t *Thread) FormatCreatedDate() string {
+	return t.CreatedAt.Format("2006/01/02 15:04")
+}
+
+func (t *Thread) FormatUpdatedDate() string {
+	return t.UpdatedAt.Format("2006/01/02 15:04")
+}
+
+func (t *Thread) UpdateLatestUpdatedDate() {
+	t.UpdatedAt = time.Now()
 }
 
 func (t *Thread) CountupViews() {
-	t.views += 1
+	*t.Views += 1
 }
 
-func (t *Thread) CountupSumComment() {
-	t.sumComment += 1
+func (t *Thread) CountupCommentSum() {
+	*t.CommentSum += 1
 }
 
-func (t *Thread) CountdownSumComment() {
-	t.sumComment -= 1
+func (t *Thread) CountdownCommentSum() {
+	*t.CommentSum -= 1
 }

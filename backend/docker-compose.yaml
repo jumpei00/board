@@ -15,10 +15,16 @@ services:
       - VIRTUAL_HOST=localhost.api
       - VIRTUAL_PORT=8080
       - API_ENV=development
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=development
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE_NAME=board
     depends_on:
       - mysql
       - redis
   mysql:
+    container_name: mysql
     image: mysql:8.0
     ports:
       - "13306:3306"
@@ -30,6 +36,7 @@ services:
       - MYSQL_PASSWORD=password
       - MYSQL_DATABASE=board
   redis:
+    container_name: redis
     image: redis:7.0
     ports:
       - "16379:6379"

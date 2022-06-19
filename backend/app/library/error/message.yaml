@@ -1,0 +1,10 @@
+ErrNotSameContributor:
+  message: 同じ投稿者でないと操作できません
+ErrAlreadyUsernameExist:
+  message: 既にそのユーザー名は使われています。違うユーザー名を登録してください。
+ErrSignInBadRequest:
+  message: ユーザー名かパスワードが違います
+ErrNotThreadKey:
+  message: 特定のスレッドを示してください
+ErrNotCommentKey:
+  message: 特定のコメントを示してください

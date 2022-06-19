@@ -55,7 +55,7 @@ func (c *CommentDB) GetByKey(commentKey string) (*domain.Comment, error) {
 func (c *CommentDB) Insert(comment *domain.Comment) (*domain.Comment, error) {
 	err := c.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(comment).Error; err != nil {
-			logger.Error("comment insert failed", "error", err)
+			logger.Error("comment insert failed", "error", err, "comment", comment)
 			return err
 		}
 		return nil
@@ -71,7 +71,7 @@ func (c *CommentDB) Insert(comment *domain.Comment) (*domain.Comment, error) {
 func (c *CommentDB) Update(comment *domain.Comment) (*domain.Comment, error) {
 	err := c.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(comment).Error; err != nil {
-			logger.Error("comment update failed", "error", err)
+			logger.Error("comment update failed", "error", err, "comment", comment)
 			return err
 		}
 		return nil
@@ -87,7 +87,7 @@ func (c *CommentDB) Update(comment *domain.Comment) (*domain.Comment, error) {
 func (c *CommentDB) Delete(comment *domain.Comment) error {
 	err := c.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Delete(comment).Error; err != nil {
-			logger.Error("comment delete failed", "error", err)
+			logger.Error("comment delete failed", "error", err, "comment", comment)
 			return err
 		}
 		return nil

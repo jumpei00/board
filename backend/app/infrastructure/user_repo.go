@@ -36,7 +36,7 @@ func (u *UserDB) GetByUsername(username string) (*domain.User, error) {
 func (u *UserDB) Insert(user *domain.User) (*domain.User, error) {
 	err := u.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(user).Error; err != nil {
-			logger.Error("new user create failed", "user", user)
+			logger.Error("new user create failed", "error", err, "user", user)
 			return err
 		}
 		return nil

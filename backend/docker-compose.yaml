@@ -5,7 +5,7 @@ services:
     container_name: api
     build:
       context: .
-      dockerfile: ./docker/dockerfile
+      dockerfile: ./docker/api/dockerfile
     ports:
       - "8080:8080"
     volumes:
@@ -42,6 +42,14 @@ services:
       - "16379:6379"
     volumes:
       - redis-volume:/data
+  migration:
+    container_name: migration
+    build:
+      context: ./docker/migration/
+      dockerfile: dockerfile
+    command: sql-migrate up -config=dbconfig.yaml -env="development"
+    depends_on:
+      - mysql
 
 volumes:
   mysql-volume:

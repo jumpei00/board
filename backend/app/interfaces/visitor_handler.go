@@ -9,12 +9,12 @@ import (
 )
 
 type VisitorsHandler struct {
-	visitorApp application.VisitorApplication
+	visitorApplication application.VisitorApplication
 }
 
 func NewVisitorsHandler(va application.VisitorApplication) *VisitorsHandler {
 	return &VisitorsHandler{
-		visitorApp: va,
+		visitorApplication: va,
 	}
 }
 
@@ -38,7 +38,7 @@ func (v *VisitorsHandler) SetupRouter(r *gin.RouterGroup) {
 // @Router /api/visitor [get]
 // Visitor godoc
 func (v *VisitorsHandler) get(c *gin.Context) {
-	visitors, err := v.visitorApp.GetVisitorsStat()
+	visitors, err := v.visitorApplication.GetVisitorsStat()
 	if err != nil {
 		handleError(c, err)
 		return
@@ -62,7 +62,7 @@ func (v *VisitorsHandler) get(c *gin.Context) {
 // @Router /api/visitor [put]
 // Visitor godoc
 func (v *VisitorsHandler) visited(c *gin.Context) {
-	visitors, err := v.visitorApp.CountupVisitors()
+	visitors, err := v.visitorApplication.CountupVisitors()
 	if err != nil {
 		handleError(c, err)
 		return
@@ -86,7 +86,7 @@ func (v *VisitorsHandler) visited(c *gin.Context) {
 // @Router /api/visitor/reset [put]
 // Visitor godoc
 func (v *VisitorsHandler) reset(c *gin.Context) {
-	_, err := v.visitorApp.ResetVisitors()
+	_, err := v.visitorApplication.ResetVisitors()
 	if err != nil {
 		handleError(c, err)
 		return

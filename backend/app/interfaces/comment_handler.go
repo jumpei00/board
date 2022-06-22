@@ -6,28 +6,34 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
 	"github.com/jumpei00/board/backend/app/domain"
-	"github.com/jumpei00/board/backend/app/params"
-	"github.com/jumpei00/board/backend/app/library/logger"
+	"github.com/jumpei00/board/backend/app/interfaces/middleware"
+	"github.com/jumpei00/board/backend/app/interfaces/session"
 	appError "github.com/jumpei00/board/backend/app/library/error"
+	"github.com/jumpei00/board/backend/app/library/logger"
+	"github.com/jumpei00/board/backend/app/params"
 )
 
 type CommentHandler struct {
+	sessionManager     session.Manager
 	threadApplication  application.ThreadApplication
 	commentApplication application.CommentApplication
 }
 
-func NewCommentHandler(ta application.ThreadApplication, ca application.CommentApplication) *CommentHandler {
+func NewCommentHandler(sm session.Manager, ta application.ThreadApplication, ca application.CommentApplication) *CommentHandler {
 	return &CommentHandler{
+		sessionManager:     sm,
 		threadApplication:  ta,
 		commentApplication: ca,
 	}
 }
 
 func (co *CommentHandler) SetupRouter(r *gin.RouterGroup) {
+	operatePermissionMiddleware := middleware.NewOperatePermissionMiddleware(co.sessionManager)
+
 	r.GET("/:thread_key", co.getAll)
-	r.POST("/:thread_key", co.create)
-	r.PUT("/:thread_key", co.edit)
-	r.DELETE("/:thread_key", co.delete)
+	r.POST("/:thread_key", operatePermissionMiddleware, co.create)
+	r.PUT("/:thread_key", operatePermissionMiddleware, co.edit)
+	r.DELETE("/:thread_key", operatePermissionMiddleware, co.delete)
 }
 
 // Comment godoc

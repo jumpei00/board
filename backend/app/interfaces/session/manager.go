@@ -88,9 +88,8 @@ func (m *manager) get(c *gin.Context) (*Session, error) {
 	// 一応削除を試みる
 	if !ok {
 		if err := m.delete(c); err != nil {
-			errors.WithStack(err)
+			return nil, appError.NewErrSessionCastFailed("session cast and delete error -> error: %s", err)
 		}
-		return nil, appError.NewErrSessionCastFailed("session cast error")
 	}
 
 	var session *Session

@@ -23,6 +23,8 @@ services:
       - MYSQL_USER=development
       - MYSQL_PASSWORD=password
       - MYSQL_DATABASE_NAME=board
+      - REDIS_HOST=redis:6379
+      - SESSION_SECRET=boad_session
     depends_on:
       - mysql
       - redis

@@ -1,11 +1,17 @@
 package main
 
 import (
+	"time"
+
+	"github.com/gin-contrib/sessions"
+	ginRedis "github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
+	"github.com/gomodule/redigo/redis"
 	"github.com/jumpei00/board/backend/app/application"
 	"github.com/jumpei00/board/backend/app/config"
 	"github.com/jumpei00/board/backend/app/infrastructure"
 	"github.com/jumpei00/board/backend/app/interfaces"
+	"github.com/jumpei00/board/backend/app/interfaces/session"
 	"github.com/jumpei00/board/backend/app/library/logger"
 	_ "github.com/jumpei00/board/backend/docs"
 	swaggerfiles "github.com/swaggo/files"
@@ -19,12 +25,39 @@ import (
 // license.name jumpei00
 // @BasePath /
 func main() {
-	// DB
+	// mysql
 	dbPool, err := infrastructure.GenerateDBPool()
 	if err != nil {
 		logger.Fatal("db session open error", "error", err)
 	}
 
+	// redis
+	redisPool := &redis.Pool{
+		MaxIdle: 3,
+		IdleTimeout: 240 * time.Second,
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", config.GetRedisHost())
+			if err != nil {
+				logger.Fatal("redis session open error", "error", err)
+			}
+			return c, nil
+		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			_, err := c.Do("PING")
+			return err
+		},
+	}
+
+	redisStore, err := ginRedis.NewStoreWithPool(redisPool, []byte(config.GetSessionSecret()))
+	if err != nil {
+		logger.Fatal("redis store open error", "error", err)
+	}
+
+	if err := ginRedis.SetKeyPrefix(redisStore, "user:"); err != nil {
+		logger.Fatal("redis store key prefix set error", "error", err)
+	}
+
+	session := session.NewSessionManager()
 	userDB := infrastructure.NewUserDB(dbPool)
 	visitorDB := infrastructure.NewVisitorDB(dbPool)
 	threadDB := infrastructure.NewThreadRepository(dbPool)
@@ -37,13 +70,16 @@ func main() {
 	commentApp := application.NewCommentApplication(threadDB, commentDB)
 
 	// handler
-	userHandler := interfaces.NewUserHandler(userApp)
+	userHandler := interfaces.NewUserHandler(session, userApp)
 	visitorHandler := interfaces.NewVisitorsHandler(visitApp)
-	threadHandler := interfaces.NewThreadHandler(threadApp)
-	commentHandler := interfaces.NewCommentHandler(threadApp, commentApp)
+	threadHandler := interfaces.NewThreadHandler(session, threadApp)
+	commentHandler := interfaces.NewCommentHandler(session, threadApp, commentApp)
 
 	// router setup
 	router := gin.Default()
+
+	// session middleware
+	router.Use(sessions.Sessions(config.SessionName, redisStore))
 
 	apigroup := router.Group("/api")
 	visitorGroup := router.Group("/api/visitor")

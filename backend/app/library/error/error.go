@@ -5,8 +5,9 @@ import (
 )
 
 var (
-	ErrNotFound     = errors.New("data not found")
-	ErrUnauthorized = errors.New("not authorized")
+	ErrNotFound          = errors.New("data not found")
+	ErrUnauthorized      = errors.New("not authorized")
+	ErrSessionCastFailed = errors.New("session cast failed")
 )
 
 type BadRequest struct {
@@ -33,4 +34,8 @@ func NewErrNotFound(format string, arg ...interface{}) error {
 
 func NewErrUnauthorized(format string, arg ...interface{}) error {
 	return errors.Wrapf(ErrUnauthorized, format, arg...)
+}
+
+func NewErrSessionCastFailed(format string, arg ...interface{}) error {
+	return errors.Wrapf(ErrSessionCastFailed, format, arg...)
 }

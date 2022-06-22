@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  domain.User:
+    properties:
+      id:
+        type: string
+      username:
+        type: string
+    type: object
   interfaces.requestCommentCreate:
     properties:
       comment:
@@ -65,16 +72,6 @@ definitions:
       contributor:
         type: string
       update_date:
-        type: string
-    type: object
-  interfaces.responseSignIn:
-    properties:
-      username:
-        type: string
-    type: object
-  interfaces.responseSignUp:
-    properties:
-      username:
         type: string
     type: object
   interfaces.responseThread:
@@ -255,6 +252,29 @@ paths:
       summary: 指定されたコメントを更新
       tags:
       - comment
+  /api/me:
+    get:
+      consumes:
+      - application/json
+      description: セッション情報からユーザーを取得する
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: ""
+        "401":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: ユーザー情報の取得
+      tags:
+      - user
   /api/signin:
     post:
       consumes:
@@ -273,7 +293,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/interfaces.responseSignIn'
+            $ref: '#/definitions/domain.User'
         "400":
           description: ""
         "401":
@@ -283,6 +303,27 @@ paths:
         "500":
           description: ""
       summary: ログイン
+      tags:
+      - user
+  /api/signout:
+    delete:
+      consumes:
+      - application/json
+      description: ユーザーをログアウトさせる
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: ""
+        "401":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: ログアウト
       tags:
       - user
   /api/signup:
@@ -303,7 +344,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/interfaces.responseSignUp'
+            $ref: '#/definitions/domain.User'
         "400":
           description: ""
         "401":

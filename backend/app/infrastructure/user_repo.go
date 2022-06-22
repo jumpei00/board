@@ -18,15 +18,30 @@ func NewUserDB(dbPool *gorm.DB) *UserDB {
 	}
 }
 
+func (u *UserDB) GetByID(ID string) (*domain.User, error) {
+	var user domain.User
+
+	if err := u.db.Where(&domain.User{ID: ID}).First(&user).Error; err != nil {
+		if errors.Cause(err) == gorm.ErrRecordNotFound {
+			logger.Info("search user by ID, but not found", "ID", ID)
+			return nil, appError.NewErrNotFound("no serarch user by ID -> ID: %s", ID)
+		}
+		logger.Error("search user by ID error", "error" , err, "ID", ID)
+		return nil, errors.WithStack(err)
+	}
+
+	return &user, nil
+}
+
 func (u *UserDB) GetByUsername(username string) (*domain.User, error) {
 	var user domain.User
 
 	if err := u.db.Where(&domain.User{Username: username}).First(&user).Error; err != nil {
 		if errors.Cause(err) == gorm.ErrRecordNotFound {
-			logger.Info("search user at targeted username, but not found", "username", username)
-			return nil, appError.NewErrNotFound("no search user at targeted username -> username: %s", username)
+			logger.Info("search user by targeted username, but not found", "username", username)
+			return nil, appError.NewErrNotFound("no search user by targeted username -> username: %s", username)
 		}
-		logger.Error("search user at targeted username error", "error", err, "username", username)
+		logger.Error("search user by targeted username error", "error", err, "username", username)
 		return nil, errors.WithStack(err)
 	}
 

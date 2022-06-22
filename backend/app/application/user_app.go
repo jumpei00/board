@@ -10,6 +10,7 @@ import (
 )
 
 type UserApplication interface {
+	GetUserByID(id string) (*domain.User, error)
 	GetUserByUsername(key string) (*domain.User, error)
 	CreateUser(param *params.UserSignUpApplicationLayerParam) (*domain.User, error)
 	ValidateUser(param *params.UserSignInApplicationLayerParam) (*domain.User, error)
@@ -23,6 +24,15 @@ func NewUserApplication(ur repository.UserRepository) *userApplication {
 	return &userApplication{
 		userRepo: ur,
 	}
+}
+
+func (u *userApplication) GetUserByID(id string) (*domain.User, error) {
+	user, err := u.userRepo.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, err
 }
 
 func (u *userApplication) GetUserByUsername(username string) (*domain.User, error) {

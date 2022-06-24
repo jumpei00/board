@@ -213,6 +213,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/me": {
+            "get": {
+                "description": "セッション情報からユーザーを取得する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "ユーザー情報の取得",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/signin": {
             "post": {
                 "description": "ユーザーがログインできるか検証する",
@@ -241,8 +276,40 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/interfaces.responseSignIn"
+                            "$ref": "#/definitions/domain.User"
                         }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/signout": {
+            "delete": {
+                "description": "ユーザーをログアウトさせる",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "ログアウト",
+                "responses": {
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": ""
@@ -287,7 +354,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/interfaces.responseSignUp"
+                            "$ref": "#/definitions/domain.User"
                         }
                     },
                     "400": {
@@ -629,6 +696,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "domain.User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "interfaces.requestCommentCreate": {
             "type": "object",
             "properties": {
@@ -730,22 +808,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "update_date": {
-                    "type": "string"
-                }
-            }
-        },
-        "interfaces.responseSignIn": {
-            "type": "object",
-            "properties": {
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "interfaces.responseSignUp": {
-            "type": "object",
-            "properties": {
-                "username": {
                     "type": "string"
                 }
             }

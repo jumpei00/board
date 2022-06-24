@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jumpei00/board/backend/app/library/logger"
 	"github.com/jumpei00/board/backend/app/params"
 	"github.com/pkg/errors"
@@ -11,19 +12,21 @@ import (
 )
 
 type User struct {
-	ID        int       `gorm:"primaryKey;column:id"`
-	Username  string    `gorm:"column:username"`
-	Password  []byte    `gorm:"column:password"`
-	CreatedAt time.Time `gorm:"column:created_at"`
-	UpdatedAt time.Time `gorm:"column:updated_at"`
+	ID        string    `json:"id"       gorm:"primaryKey;column:id"`
+	Username  string    `json:"username" gorm:"column:username"`
+	Password  []byte    `json:"-"        gorm:"column:password"`
+	CreatedAt time.Time `json:"-"        gorm:"column:created_at"`
+	UpdatedAt time.Time `json:"-"        gorm:"column:updated_at"`
 }
 
 func NewUser(param *params.UserSignUpDomainLayerParam) (*User, error) {
 	newUser := &User{
-		Username: param.Username,
+		Username:  param.Username,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
+
+	newUser.setId()
 
 	if err := newUser.setHashingPassword(param.Password); err != nil {
 		return nil, err
@@ -50,6 +53,10 @@ func (u *User) FormatCreatedDate() string {
 
 func (u *User) FormatUpdateDate() string {
 	return u.UpdatedAt.Format("2006/01/02 15:04")
+}
+
+func (u *User) setId() {
+	u.ID = uuid.New().String()
 }
 
 func (u *User) setHashingPassword(password string) error {

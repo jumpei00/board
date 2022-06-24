@@ -5,18 +5,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
-	"github.com/jumpei00/board/backend/app/domain"
+	"github.com/jumpei00/board/backend/app/interfaces/session"
 	"github.com/jumpei00/board/backend/app/library/logger"
 	"github.com/jumpei00/board/backend/app/params"
 )
 
 type UserHandler struct {
-	userApp application.UserApplication
+	sessionManager  session.Manager
+	userApplication application.UserApplication
 }
 
-func NewUserHandler(ua application.UserApplication) *UserHandler {
+func NewUserHandler(sm session.Manager, ua application.UserApplication) *UserHandler {
 	return &UserHandler{
-		userApp: ua,
+		sessionManager:  sm,
+		userApplication: ua,
 	}
 }
 
@@ -27,9 +29,33 @@ func (u *UserHandler) SetupRouter(r *gin.RouterGroup) {
 	r.DELETE("/signout", u.signout)
 }
 
+// User godoc
+// @Summary ユーザー情報の取得
+// @Description セッション情報からユーザーを取得する
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {object} domain.User
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/me [get]
+// User godoc
 func (u *UserHandler) me(c *gin.Context) {
-	// TODO: セッションが実装されたらこちらも実装する
-	c.Status(http.StatusOK)
+	session, err := u.sessionManager.Get(c)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+
+	user, err := u.userApplication.GetUserByID(session.UserID)
+	if err != nil {
+		handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
 
 // User godoc
@@ -39,7 +65,7 @@ func (u *UserHandler) me(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param body body requestSignUp true "新規ユーザー作成情報"
-// @Success 200 {object} responseSignUp
+// @Success 200 {object} domain.User
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -59,14 +85,18 @@ func (u *UserHandler) signup(c *gin.Context) {
 		Password: req.Password,
 	}
 
-	user, err := u.userApp.CreateUser(&param)
+	user, err := u.userApplication.CreateUser(&param)
 	if err != nil {
 		handleError(c, err)
 		return
 	}
 
-	res := NewResponseSignUp(user)
-	c.JSON(http.StatusOK, res)
+	if _, err := u.sessionManager.Create(c, user); err != nil {
+		handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
 
 // User godoc
@@ -76,7 +106,7 @@ func (u *UserHandler) signup(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param body body requestSignIn true "ログイン情報"
-// @Success 200 {object} responseSignIn
+// @Success 200 {object} domain.User
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -96,19 +126,40 @@ func (u *UserHandler) signin(c *gin.Context) {
 		Password: req.Password,
 	}
 
-	user, err := u.userApp.ValidateUser(&param)
+	user, err := u.userApplication.ValidateUser(&param)
 	if err != nil {
 		handleError(c, err)
 		return
 	}
 
-	res := NewResponseSignIn(user)
-	c.JSON(http.StatusOK, res)
+	if _, err := u.sessionManager.Create(c, user); err != nil {
+		handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
 
+// User godoc
+// @Summary ログアウト
+// @Description ユーザーをログアウトさせる
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 204
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /api/signout [delete]
+// User godoc
 func (u *UserHandler) signout(c *gin.Context) {
-	// TODO: sessionの開発が完了後、こちらも修正する
-	c.Status(http.StatusOK)
+	if err := u.sessionManager.Delete(c); err != nil {
+		handleError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 type requestSignUp struct {
@@ -119,24 +170,4 @@ type requestSignUp struct {
 type requestSignIn struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-}
-
-type responseSignUp struct {
-	Username string `json:"username"`
-}
-
-func NewResponseSignUp(user *domain.User) *responseSignUp {
-	return &responseSignUp{
-		Username: user.GetUsername(),
-	}
-}
-
-type responseSignIn struct {
-	Username string `json:"username"`
-}
-
-func NewResponseSignIn(user *domain.User) *responseSignIn {
-	return &responseSignIn{
-		Username: user.GetUsername(),
-	}
 }

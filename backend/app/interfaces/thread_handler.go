@@ -6,27 +6,33 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
 	"github.com/jumpei00/board/backend/app/domain"
+	"github.com/jumpei00/board/backend/app/interfaces/middleware"
+	"github.com/jumpei00/board/backend/app/interfaces/session"
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	"github.com/jumpei00/board/backend/app/library/logger"
 	"github.com/jumpei00/board/backend/app/params"
 )
 
 type ThreadHandler struct {
+	sessionManager    session.Manager
 	threadApplication application.ThreadApplication
 }
 
-func NewThreadHandler(ta application.ThreadApplication) *ThreadHandler {
+func NewThreadHandler(sm session.Manager, ta application.ThreadApplication) *ThreadHandler {
 	return &ThreadHandler{
+		sessionManager:    sm,
 		threadApplication: ta,
 	}
 }
 
 func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
+	operatePermissionMiddleware := middleware.NewOperatePermissionMiddleware(t.sessionManager)
+
 	r.GET("/", t.getAll)
 	r.GET("/:thread_key", t.get)
-	r.POST("/", t.create)
-	r.PUT("/:thread_key", t.edit)
-	r.DELETE("/:thread_key", t.delete)
+	r.POST("/", operatePermissionMiddleware, t.create)
+	r.PUT("/:thread_key", operatePermissionMiddleware, t.edit)
+	r.DELETE("/:thread_key", operatePermissionMiddleware, t.delete)
 }
 
 // Thread godoc

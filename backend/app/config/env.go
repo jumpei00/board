@@ -9,6 +9,8 @@ var (
     mysql_user = os.Getenv("MYSQL_USER")
     mysql_password = os.Getenv("MYSQL_PASSWORD")
     mysql_database_name = os.Getenv("MYSQL_DATABASE_NAME")
+	redis_host = os.Getenv("REDIS_HOST")
+	session_secret = os.Getenv("SESSION_SECRET")
 )
 
 func IsDevelopment() bool {
@@ -17,6 +19,13 @@ func IsDevelopment() bool {
 
 func IsProduction() bool {
 	return api_env == "production"
+}
+
+func GetFrontURL() string {
+	if IsDevelopment() {
+		return "http://localhost.web"
+	}
+	return ""
 }
 
 func GetMySQLHost() string {
@@ -37,4 +46,12 @@ func GetMySQLPassword() string {
 
 func GetMySQLDatabaseName() string {
 	return mysql_database_name
+}
+
+func GetRedisHost() string {
+	return redis_host
+}
+
+func GetSessionSecret() string {
+	return session_secret
 }

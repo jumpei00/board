@@ -21,6 +21,13 @@ func IsProduction() bool {
 	return api_env == "production"
 }
 
+func GetFrontURL() string {
+	if IsDevelopment() {
+		return "http://localhost.web"
+	}
+	return ""
+}
+
 func GetMySQLHost() string {
 	return mysql_host
 }

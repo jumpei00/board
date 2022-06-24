@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/secure"
 	"github.com/gin-contrib/sessions"
 	ginRedis "github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
@@ -33,7 +35,7 @@ func main() {
 
 	// redis
 	redisPool := &redis.Pool{
-		MaxIdle: 3,
+		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", config.GetRedisHost())
@@ -57,6 +59,33 @@ func main() {
 		logger.Fatal("redis store key prefix set error", "error", err)
 	}
 
+	// session
+	sessionMiddleware := sessions.Sessions(config.SessionName, redisStore)
+
+	// security
+	secureConfig := secure.Config{
+		SSLRedirect: true,
+		STSSeconds:  315360000,
+		STSIncludeSubdomains: true,
+		FrameDeny: true,
+		ContentTypeNosniff: true,
+		BrowserXssFilter: true,
+		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
+		IsDevelopment: config.IsDevelopment(),
+	}
+	secureMiddleware := secure.New(secureConfig)
+
+	// cross origin
+	crossOriginConfig := cors.Config{
+		AllowOrigins: []string{config.GetFrontURL()},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders: []string{"Origin", "Content-Length", "Content-Type"},
+		AllowCredentials: true,
+		MaxAge: 12 * time.Hour,
+	}
+	crossOriginMiddleware := cors.New(crossOriginConfig)
+
+	// repository
 	session := session.NewSessionManager()
 	userDB := infrastructure.NewUserDB(dbPool)
 	visitorDB := infrastructure.NewVisitorDB(dbPool)
@@ -78,9 +107,10 @@ func main() {
 	// router setup
 	router := gin.Default()
 
-	// session middleware
-	router.Use(sessions.Sessions(config.SessionName, redisStore))
+	// middleware
+	router.Use(sessionMiddleware, secureMiddleware, crossOriginMiddleware)
 
+	// routing setup
 	apigroup := router.Group("/api")
 	visitorGroup := router.Group("/api/visitor")
 	threadGroup := router.Group("/api/thread")

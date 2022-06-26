@@ -9,6 +9,7 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang/mock v1.6.0
 	github.com/gomodule/redigo v2.0.0+incompatible
+	github.com/google/go-cmp v0.5.8
 	github.com/google/uuid v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
@@ -36,7 +37,6 @@ require (
 	github.com/go-playground/validator/v10 v10.11.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/goccy/go-json v0.9.7 // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect

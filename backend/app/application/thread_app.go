@@ -50,7 +50,7 @@ func (t *threadApplication) GetByThreadKey(threadKey string) (*domain.Thread, er
 func (t *threadApplication) CreateThread(param *params.CreateThreadAppLayerParam) (*domain.Thread, error) {
 	domainParam := params.CreateThreadDomainLayerParam{
 		Title:       param.Title,
-		Contributor: param.Title,
+		Contributor: param.Contributor,
 	}
 
 	newThread := domain.NewThread(&domainParam)

@@ -25,8 +25,8 @@ func NewThread(param *params.CreateThreadDomainLayerParam) *Thread {
 	thread := &Thread{
 		Title:       param.Title,
 		Contributor: param.Contributor,
-		Views: &initViews,
-		CommentSum: &initCommentSum,
+		Views:       &initViews,
+		CommentSum:  &initCommentSum,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}

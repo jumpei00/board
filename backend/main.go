@@ -64,24 +64,24 @@ func main() {
 
 	// security
 	secureConfig := secure.Config{
-		SSLRedirect: true,
-		STSSeconds:  315360000,
+		SSLRedirect:          true,
+		STSSeconds:           315360000,
 		STSIncludeSubdomains: true,
-		FrameDeny: true,
-		ContentTypeNosniff: true,
-		BrowserXssFilter: true,
-		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
-		IsDevelopment: config.IsDevelopment(),
+		FrameDeny:            true,
+		ContentTypeNosniff:   true,
+		BrowserXssFilter:     true,
+		SSLProxyHeaders:      map[string]string{"X-Forwarded-Proto": "https"},
+		IsDevelopment:        config.IsDevelopment(),
 	}
 	secureMiddleware := secure.New(secureConfig)
 
 	// cross origin
 	crossOriginConfig := cors.Config{
-		AllowOrigins: []string{config.GetFrontURL()},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders: []string{"Origin", "Content-Length", "Content-Type"},
+		AllowOrigins:     []string{config.GetFrontURL()},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
 		AllowCredentials: true,
-		MaxAge: 12 * time.Hour,
+		MaxAge:           12 * time.Hour,
 	}
 	crossOriginMiddleware := cors.New(crossOriginConfig)
 

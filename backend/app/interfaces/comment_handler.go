@@ -5,12 +5,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
-	"github.com/jumpei00/board/backend/app/domain"
 	"github.com/jumpei00/board/backend/app/interfaces/middleware"
+	"github.com/jumpei00/board/backend/app/interfaces/request"
+	"github.com/jumpei00/board/backend/app/interfaces/response"
 	"github.com/jumpei00/board/backend/app/interfaces/session"
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	"github.com/jumpei00/board/backend/app/library/logger"
 	"github.com/jumpei00/board/backend/app/params"
+	"github.com/pkg/errors"
 )
 
 type CommentHandler struct {
@@ -52,17 +54,6 @@ func (co *CommentHandler) SetupRouter(r *gin.RouterGroup) {
 // Comment godoc
 func (co *CommentHandler) getAll(c *gin.Context) {
 	threadKey := c.Param("thread_key")
-	if threadKey == "" {
-		logger.Warning("comment get all, but not thread key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
-		return
-	}
-
-	comments, err := co.commentApplication.GetAllByThreadKey(threadKey)
-	if err != nil {
-		handleError(c, err)
-		return
-	}
 
 	thread, err := co.threadApplication.GetByThreadKey(threadKey)
 	if err != nil {
@@ -70,10 +61,21 @@ func (co *CommentHandler) getAll(c *gin.Context) {
 		return
 	}
 
-	var res responseThreadAndComments
-	res.Thread = NewResponseThread(thread)
-	for _, comment := range *comments {
-		res.Comments = append(res.Comments, NewResponseComment(&comment))
+	comments, err := co.commentApplication.GetAllByThreadKey(threadKey)
+
+	// もしエラーがNotFound以外のエラーだった場合はそこでエラーを返す
+	if err != nil && errors.Cause(err) != appError.ErrNotFound {
+		handleError(c, err)
+		return
+	}
+
+	var res response.ResponseThreadAndComments
+	res.Thread = response.NewResponseThread(thread)
+
+	if comments != nil {
+		for _, comment := range *comments {
+			res.Comments = append(res.Comments, response.NewResponseComment(&comment))
+		}
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -96,13 +98,8 @@ func (co *CommentHandler) getAll(c *gin.Context) {
 // Comment godoc
 func (co *CommentHandler) create(c *gin.Context) {
 	threadKey := c.Param("thread_key")
-	if threadKey == "" {
-		logger.Warning("comment create, but not thread key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
-		return
-	}
 
-	var req requestCommentCreate
+	var req request.RequestCommentCreate
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("comment create, requesting json bind error", "error", err, "binded_request", req)
 		handleError(c, err)
@@ -127,10 +124,10 @@ func (co *CommentHandler) create(c *gin.Context) {
 		return
 	}
 
-	var res responseThreadAndComments
-	res.Thread = NewResponseThread(thread)
+	var res response.ResponseThreadAndComments
+	res.Thread = response.NewResponseThread(thread)
 	for _, comment := range *comments {
-		res.Comments = append(res.Comments, NewResponseComment(&comment))
+		res.Comments = append(res.Comments, response.NewResponseComment(&comment))
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -159,7 +156,7 @@ func (co *CommentHandler) edit(c *gin.Context) {
 		return
 	}
 
-	var req requestCommentEdit
+	var req request.RequestCommentEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("comment edit, requesting json bind error", "error", err, "binded_request", req)
 		handleError(c, err)
@@ -191,10 +188,10 @@ func (co *CommentHandler) edit(c *gin.Context) {
 		return
 	}
 
-	var res responseThreadAndComments
-	res.Thread = NewResponseThread(thread)
+	var res response.ResponseThreadAndComments
+	res.Thread = response.NewResponseThread(thread)
 	for _, comment := range *comments {
-		res.Comments = append(res.Comments, NewResponseComment(&comment))
+		res.Comments = append(res.Comments, response.NewResponseComment(&comment))
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -223,7 +220,7 @@ func (co *CommentHandler) delete(c *gin.Context) {
 		return
 	}
 
-	var req requestCommentDelete
+	var req request.RequestCommentDelete
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("comment delete, requesting json bind error", "error", err, "binded_request", req)
 		handleError(c, err)
@@ -254,48 +251,11 @@ func (co *CommentHandler) delete(c *gin.Context) {
 		return
 	}
 
-	var res responseThreadAndComments
-	res.Thread = NewResponseThread(thread)
+	var res response.ResponseThreadAndComments
+	res.Thread = response.NewResponseThread(thread)
 	for _, comment := range *comments {
-		res.Comments = append(res.Comments, NewResponseComment(&comment))
+		res.Comments = append(res.Comments, response.NewResponseComment(&comment))
 	}
 
 	c.JSON(http.StatusOK, res)
-}
-
-type requestCommentCreate struct {
-	Comment     string `json:"comment"`
-	Contributor string `json:"contributor"`
-}
-
-type requestCommentEdit struct {
-	CommentKey  string `json:"comment_key"`
-	Comment     string `json:"comment"`
-	Contributor string `json:"contributor"`
-}
-
-type requestCommentDelete struct {
-	CommentKey  string `json:"comment_key"`
-	Contributor string `json:"contributor"`
-}
-
-type responseThreadAndComments struct {
-	Thread   *responseThread    `json:"thread"`
-	Comments []*responseComment `json:"comments"`
-}
-
-type responseComment struct {
-	CommentKey  string `joson:"comment_key"`
-	Contributor string `json:"contributor"`
-	Comment     string `json:"comment"`
-	UpdateDate  string `json:"update_date"`
-}
-
-func NewResponseComment(comment *domain.Comment) *responseComment {
-	return &responseComment{
-		CommentKey:  comment.GetKey(),
-		Contributor: comment.GetContributor(),
-		Comment:     comment.GetComment(),
-		UpdateDate:  comment.FormatUpdateDate(),
-	}
 }

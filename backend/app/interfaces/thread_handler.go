@@ -9,8 +9,10 @@ import (
 	"github.com/jumpei00/board/backend/app/interfaces/request"
 	"github.com/jumpei00/board/backend/app/interfaces/response"
 	"github.com/jumpei00/board/backend/app/interfaces/session"
+	appError "github.com/jumpei00/board/backend/app/library/error"
 	"github.com/jumpei00/board/backend/app/library/logger"
 	"github.com/jumpei00/board/backend/app/params"
+	"github.com/pkg/errors"
 )
 
 type ThreadHandler struct {
@@ -51,14 +53,16 @@ func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
 func (t *ThreadHandler) getAll(c *gin.Context) {
 	threads, err := t.threadApplication.GetAllThread()
 
-	if err != nil {
+	if err != nil && errors.Cause(err) != appError.ErrNotFound {
 		handleError(c, err)
 		return
 	}
 
 	var res response.ResponseThreads
-	for _, thread := range *threads {
-		res.Threads = append(res.Threads, response.NewResponseThread(&thread))
+	if threads != nil {
+		for _, thread := range *threads {
+			res.Threads = append(res.Threads, response.NewResponseThread(&thread))
+		}
 	}
 
 	c.JSON(http.StatusOK, res)

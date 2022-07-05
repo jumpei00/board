@@ -56,7 +56,7 @@ func TestThreadHandler_getAll(t *testing.T) {
 		{
 			name:       "空のスレッドの時のテスト",
 			input:      true,
-			statusCode: http.StatusNotFound,
+			statusCode: http.StatusOK,
 		},
 		{
 			name:       "空でない時のテスト",

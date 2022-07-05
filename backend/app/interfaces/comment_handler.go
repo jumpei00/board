@@ -150,22 +150,11 @@ func (co *CommentHandler) create(c *gin.Context) {
 // Comment godoc
 func (co *CommentHandler) edit(c *gin.Context) {
 	threadKey := c.Param("thread_key")
-	if threadKey == "" {
-		logger.Warning("comment edit, but not thread key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
-		return
-	}
 
 	var req request.RequestCommentEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("comment edit, requesting json bind error", "error", err, "binded_request", req)
 		handleError(c, err)
-		return
-	}
-
-	if req.CommentKey == "" {
-		logger.Warning("comment edit, but not comment key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotCommentKey, "not comment key"))
 		return
 	}
 
@@ -214,22 +203,11 @@ func (co *CommentHandler) edit(c *gin.Context) {
 // Comment godoc
 func (co *CommentHandler) delete(c *gin.Context) {
 	threadKey := c.Param("thread_key")
-	if threadKey == "" {
-		logger.Warning("comment delete, but not thread key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
-		return
-	}
 
 	var req request.RequestCommentDelete
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("comment delete, requesting json bind error", "error", err, "binded_request", req)
 		handleError(c, err)
-		return
-	}
-
-	if req.CommentKey == "" {
-		logger.Warning("comment delete, but not comment key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotCommentKey, "not comment key"))
 		return
 	}
 

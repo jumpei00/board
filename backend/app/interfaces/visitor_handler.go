@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
-	"github.com/jumpei00/board/backend/app/domain"
+	"github.com/jumpei00/board/backend/app/interfaces/response"
 )
 
 type VisitorsHandler struct {
@@ -19,8 +19,8 @@ func NewVisitorsHandler(va application.VisitorApplication) *VisitorsHandler {
 }
 
 func (v *VisitorsHandler) SetupRouter(r *gin.RouterGroup) {
-	r.GET("/", v.get)
-	r.PUT("/", v.visited)
+	r.GET("", v.get)
+	r.PUT("", v.visited)
 	r.PUT("/reset", v.reset)
 }
 
@@ -30,7 +30,7 @@ func (v *VisitorsHandler) SetupRouter(r *gin.RouterGroup) {
 // @Tags visitor
 // @Accept json
 // @Produce json
-// @Success 200 {object} responseVisitor
+// @Success 200 {object} response.responseVisitor
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -44,7 +44,7 @@ func (v *VisitorsHandler) get(c *gin.Context) {
 		return
 	}
 
-	res := NewResponseVisitor(visitors)
+	res := response.NewResponseVisitor(visitors)
 	c.JSON(http.StatusOK, res)
 }
 
@@ -54,7 +54,7 @@ func (v *VisitorsHandler) get(c *gin.Context) {
 // @Tags visitor
 // @Accept json
 // @Produce json
-// @Success 200 {object} responseVisitor
+// @Success 200 {object} response.responseVisitor
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -68,7 +68,7 @@ func (v *VisitorsHandler) visited(c *gin.Context) {
 		return
 	}
 
-	res := NewResponseVisitor(visitors)
+	res := response.NewResponseVisitor(visitors)
 	c.JSON(http.StatusOK, res)
 }
 
@@ -92,19 +92,5 @@ func (v *VisitorsHandler) reset(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
-}
-
-type responseVisitor struct {
-	Yesterday int `json:"yesterday"`
-	Today     int `json:"today"`
-	Sum       int `json:"sum"`
-}
-
-func NewResponseVisitor(visitor *domain.Visitor) *responseVisitor {
-	return &responseVisitor{
-		Yesterday: visitor.GetYesterdayVisitor(),
-		Today: visitor.GetTodayVisitor(),
-		Sum: visitor.GetVisitorSum(),
-	}
+	c.Status(http.StatusNoContent)
 }

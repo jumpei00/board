@@ -11,189 +11,256 @@ import (
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	mock_repository "github.com/jumpei00/board/backend/app/mock/repository"
 	"github.com/jumpei00/board/backend/app/params"
+	"github.com/pkg/errors"
 )
 
 func TestThreadApp_GetAllThread(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	//
 	// setup
 	//
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
 	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
 	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
 
-	testThreads := []domain.Thread{
-		{Key: "1", Title: "Test1", Contributor: "test-name-1"},
-		{Key: "2", Title: "Test2", Contributor: "test-name-2"},
+	type mockField struct {
+		threadRepository  *mock_repository.MockThreadRepository
+		commentRepository *mock_repository.MockCommentRepository
 	}
 
-	// mock
-	threadRepository.EXPECT().GetAll().Return(&testThreads, nil)
+	field := mockField{
+		threadRepository:  threadRepository,
+		commentRepository: commentRepository,
+	}
 
 	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
 
 	//
 	// execute
 	//
-	threads, err := threadApplication.GetAllThread()
-	if err != nil {
-		t.Errorf("thread application, get all error, expected: nil, actual: %s", err)
-	}
-	for i, thread := range *threads {
-		if diff := cmp.Diff(thread, testThreads[i]); diff != "" {
-			t.Errorf("thread application, get all different contents, index: %v, diff: %s, want: %v, got: %v",
-				i, diff, testThreads[i], thread,
-			)
+	var (
+		testThreads = []domain.Thread{
+			{Key: "1", Title: "Test1", Contributor: "test-name-1"},
+			{Key: "2", Title: "Test2", Contributor: "test-name-2"},
 		}
+	)
+	cases := []struct {
+		testCase        string
+		prepare         func(*mockField)
+		expectedThreads *[]domain.Thread
+		expectedError   error
+	}{
+		{
+			testCase: "スレッドが存在していて取得できれば成功する",
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetAll().Return(&testThreads, nil)
+			},
+			expectedThreads: &testThreads,
+			expectedError:   nil,
+		},
+		{
+			testCase: "スレッドが存在していなければ失敗する",
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetAll().Return(nil, appError.ErrNotFound)
+			},
+			expectedThreads: nil,
+			expectedError:   appError.ErrNotFound,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			threads, err := threadApplication.GetAllThread()
+
+			if err != c.expectedError {
+				t.Errorf("different error.\nwant: nil\ngot: %s", err)
+			}
+
+			if diff := cmp.Diff(threads, c.expectedThreads); diff != "" {
+				t.Errorf("different threads.\ndiff: %s\nwant: %v\ngot: %v", diff, c.expectedThreads, threads)
+			}
+		})
 	}
 }
 
 func TestThreadApp_GetByThreadKey(t *testing.T) {
-	// mock controller
+	//
+	// setup
+	//
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
+	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
+
+	type mockField struct {
+		threadRepository  *mock_repository.MockThreadRepository
+		commentRepository *mock_repository.MockCommentRepository
+	}
+
+	field := mockField{
+		threadRepository:  threadRepository,
+		commentRepository: commentRepository,
+	}
+
+	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
+
 	//
-	// setup
+	// execute
 	//
 	var (
 		correctKey = "correct-thread-key"
 		wrongKey   = "wrong-thread-key"
 		thread     = domain.Thread{Key: correctKey, Title: "test-title", Contributor: "test-user"}
 	)
-
-	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
-	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
-
-	// mock
-	var threadKey string
-	threadRepository.EXPECT().GetByKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*domain.Thread, error) {
-			if threadKey == correctKey {
-				return &thread, nil
-			}
-			return nil, appError.ErrNotFound
-		},
-	)
-
-	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
-
-	//
-	// execute
-	//
 	cases := []struct {
-		name           string
+		testCase       string
 		input          string
+		prepare        func(*mockField)
 		expectedThread *domain.Thread
 		expectedError  error
 	}{
 		{
-			name:           "正しいスレッドキーのテスト",
-			input:          correctKey,
+			testCase: "キーに対するスレッドが存在する場合は成功するテスト",
+			input:    correctKey,
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correctKey).Return(&thread, nil)
+			},
 			expectedThread: &thread,
 			expectedError:  nil,
 		},
 		{
-			name:           "間違ったスレッドキーのテスト",
-			input:          wrongKey,
+			testCase: "キーに対するスレッドが存在しない場合は失敗するテスト",
+			input:    wrongKey,
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(wrongKey).Return(nil, appError.ErrNotFound)
+			},
 			expectedThread: nil,
 			expectedError:  appError.ErrNotFound,
 		},
 	}
 
 	for _, c := range cases {
-		thread, err := threadApplication.GetByThreadKey(c.input)
-		if diff := cmp.Diff(c.expectedThread, thread); diff != "" {
-			t.Errorf("thread application, get by thread-key wrong thread got, name: %s, diff: %s, want: %v, got: %v",
-				c.name, diff, c.expectedThread, thread,
-			)
-		}
-		if !isSameError(c.expectedError, err) {
-			t.Errorf("thread application, get bey thread-key wrong got error, name: %s, want: %s, got: %s",
-				c.name, c.expectedError, err,
-			)
-		}
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			thread, err := threadApplication.GetByThreadKey(c.input)
+
+			if diff := cmp.Diff(c.expectedThread, thread); diff != "" {
+				t.Errorf("different thread.\ndiff: %s\nwant: %v\ngot: %v", diff, c.expectedThread, thread)
+			}
+			if !isSameError(c.expectedError, err) {
+				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
+			}
+		})
 	}
 }
 
 func TestThreadApp_CreateThread(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	//
 	// setup
 	//
-	var (
-		initialVews       = 0
-		initialCommentSum = 0
-		title             = "test-title"
-		contibutor        = "test-user"
-	)
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
 	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
 	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
 
-	// mock
-	threadRepository.EXPECT().Insert(gomock.AssignableToTypeOf(&domain.Thread{})).AnyTimes().DoAndReturn(
-		func(thread *domain.Thread) (*domain.Thread, error) {
-			return thread, nil
-		},
-	)
+	type mockField struct {
+		threadRepository  *mock_repository.MockThreadRepository
+		commentRepository *mock_repository.MockCommentRepository
+	}
+
+	field := mockField{
+		threadRepository:  threadRepository,
+		commentRepository: commentRepository,
+	}
 
 	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
 
 	//
 	// execute
 	//
+	var (
+		initialVews       = 0
+		initialCommentSum = 0
+		title             = "test-title"
+		contibutor        = "test-user"
+		Error             = errors.New("Internal Server Error")
+	)
 	cases := []struct {
-		name           string
-		input          *params.CreateThreadAppLayerParam
+		testCase       string
+		input          params.CreateThreadAppLayerParam
+		prepare        func(*mockField)
 		expectedThread *domain.Thread
+		expectedError  error
 	}{
 		{
-			name:           "適切なパラメータのテスト",
-			input:          &params.CreateThreadAppLayerParam{Title: title, Contributor: contibutor},
+			testCase: "スレッドが作成された場合は成功する",
+			input:    params.CreateThreadAppLayerParam{Title: title, Contributor: contibutor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().Insert(gomock.Any()).DoAndReturn(
+					func(thread *domain.Thread) (*domain.Thread, error) {
+						return thread, nil
+					},
+				)
+			},
 			expectedThread: &domain.Thread{Title: title, Contributor: contibutor, Views: &initialVews, CommentSum: &initialCommentSum},
+			expectedError:  nil,
+		},
+		{
+			testCase: "スレッド作成時にエラーが発生した場合は失敗する",
+			input:    params.CreateThreadAppLayerParam{Title: title, Contributor: contibutor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().Insert(gomock.Any()).Return(nil, Error)
+			},
+			expectedThread: nil,
+			expectedError:  Error,
 		},
 	}
 
 	opt := cmpopts.IgnoreFields(domain.Thread{}, "Key", "Views", "CommentSum", "CreatedAt", "UpdatedAt")
+
 	for _, c := range cases {
-		thread, err := threadApplication.CreateThread(c.input)
-		if diff := cmp.Diff(thread, c.expectedThread, opt); diff != "" {
-			t.Errorf(
-				"thread application, create wrong return thread, name: %s, diff: %s, want: %v, got %v",
-				c.name, diff, c.expectedThread, thread,
-			)
-		}
-		if *c.expectedThread.Views != *thread.Views {
-			t.Errorf("thread application, create views difference, name: %s, want: %v, got: %v",
-				c.name, *c.expectedThread.Views, *thread.Views,
-			)
-		}
-		if *c.expectedThread.CommentSum != *thread.CommentSum {
-			t.Errorf(
-				"thread application, create comment-sum difference, name: %s, want: %v, got: %v",
-				c.name, *c.expectedThread.CommentSum, *thread.CommentSum,
-			)
-		}
-		if err != nil {
-			t.Errorf("thread application, create error return, name: %s, error: %s",
-				c.name, err,
-			)
-		}
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			thread, err := threadApplication.CreateThread(&c.input)
+
+			if diff := cmp.Diff(thread, c.expectedThread, opt); diff != "" {
+				t.Errorf("different thread.\ndiff: %s\nwant: %v\ngot %v", diff, c.expectedThread, thread)
+			}
+			if !isSameError(c.expectedError, err) {
+				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
+			}
+		})
 	}
 }
 
 func TestThreadApp_EditThread(t *testing.T) {
-	// mock controller
+	//
+	// setup
+	//
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
+	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
+
+	type mockField struct {
+		threadRepository  *mock_repository.MockThreadRepository
+		commentRepository *mock_repository.MockCommentRepository
+	}
+
+	field := mockField{
+		threadRepository:  threadRepository,
+		commentRepository: commentRepository,
+	}
+
+	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
+
 	//
-	// setup
+	// exucute
 	//
 	var (
 		initialViews         = 0
@@ -206,81 +273,88 @@ func TestThreadApp_EditThread(t *testing.T) {
 		differentContributor = "different-contributor"
 		originalThread       = domain.Thread{Key: correctKey, Title: originalTitle, Contributor: originalContributor, Views: &initialViews, CommentSum: &initialCommentSum}
 	)
-	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
-	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
-
-	// mock
-	var threadKey string
-	threadRepository.EXPECT().GetByKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*domain.Thread, error) {
-			if threadKey == correctKey {
-				return &originalThread, nil
-			}
-			return nil, appError.ErrNotFound
-		},
-	)
-	threadRepository.EXPECT().Update(gomock.AssignableToTypeOf(&domain.Thread{})).AnyTimes().DoAndReturn(
-		func(thread *domain.Thread) (*domain.Thread, error) {
-			return thread, nil
-		},
-	)
-
-	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
-
-	//
-	// exucute
-	//
 	cases := []struct {
-		name           string
-		input          *params.EditThreadAppLayerParam
+		testCase       string
+		input          params.EditThreadAppLayerParam
+		prepare        func(*mockField)
 		expectedThread *domain.Thread
 		expectedError  error
 	}{
 		{
-			name:           "間違ったスレッドキーの場合は失敗する",
-			input:          &params.EditThreadAppLayerParam{ThreadKey: wrongKey, Title: editedTitle, Contributor: originalContributor},
+			testCase: "スレッドが存在しない場合は失敗する",
+			input:    params.EditThreadAppLayerParam{ThreadKey: wrongKey, Title: editedTitle, Contributor: originalContributor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(wrongKey).Return(nil, appError.ErrNotFound)
+			},
 			expectedThread: nil,
 			expectedError:  appError.ErrNotFound,
 		},
 		{
-			name:           "違う投稿者が編集しようとすると失敗する",
-			input:          &params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, Contributor: differentContributor},
+			testCase: "違う投稿者が編集しようとすると失敗する",
+			input:    params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, Contributor: differentContributor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correctKey).Return(&originalThread, nil)
+			},
 			expectedThread: nil,
 			expectedError:  &appError.BadRequest{},
 		},
 		{
-			name:           "正常な投稿は成功する",
-			input:          &params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, Contributor: originalContributor},
+			testCase: "編集が正しく終了した場合は成功する",
+			input:    params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, Contributor: originalContributor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correctKey).Return(&originalThread, nil)
+				mf.threadRepository.EXPECT().Update(gomock.Any()).DoAndReturn(
+					func(thread *domain.Thread) (*domain.Thread, error) {
+						return thread, nil
+					},
+				)
+			},
 			expectedThread: &domain.Thread{Key: correctKey, Title: editedTitle, Contributor: originalContributor, Views: &initialViews, CommentSum: &initialCommentSum},
 			expectedError:  nil,
 		},
 	}
 
 	opt := cmpopts.IgnoreFields(domain.Thread{}, "CreatedAt", "UpdatedAt")
+
 	for _, c := range cases {
-		thread, err := threadApplication.EditThread(c.input)
-		if diff := cmp.Diff(c.expectedThread, thread, opt); diff != "" {
-			t.Errorf(
-				"thread application, edit wrong thread, name: %s, diff: %s, want: %v, got %v",
-				c.name, diff, c.expectedThread, thread,
-			)
-		}
-		if !isSameError(c.expectedError, err) {
-			t.Errorf(
-				"thread application, edit wrong error, name: %s, want: %v, got: %v",
-				c.name, c.expectedError, err,
-			)
-		}
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			thread, err := threadApplication.EditThread(&c.input)
+
+			if diff := cmp.Diff(c.expectedThread, thread, opt); diff != "" {
+				t.Errorf("different thread.\ndiff: %s\nwant: %v\ngot %v", diff, c.expectedThread, thread)
+			}
+			if !isSameError(c.expectedError, err) {
+				t.Errorf("different error.\nwant: %v\ngot: %v", c.expectedError, err)
+			}
+		})
 	}
 }
 
 func TestThreadApp_DeleteThread(t *testing.T) {
-	// mock controller
+	//
+	// setup
+	//
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
+	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
+
+	type mockField struct {
+		threadRepository  *mock_repository.MockThreadRepository
+		commentRepository *mock_repository.MockCommentRepository
+	}
+
+	field := mockField{
+		threadRepository:  threadRepository,
+		commentRepository: commentRepository,
+	}
+
+	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
+
 	//
-	// setup
+	// execute
 	//
 	var (
 		correntThreadKey          = "correct-key"
@@ -291,66 +365,58 @@ func TestThreadApp_DeleteThread(t *testing.T) {
 		thread                    = domain.Thread{Key: correntThreadKey, Contributor: originalContributor}
 		comments                  = []domain.Comment{}
 	)
-	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
-	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
-
-	// mock
-	var threadKey string
-	threadRepository.EXPECT().GetByKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*domain.Thread, error) {
-			if threadKey == wrongThreadKey {
-				return nil, appError.ErrNotFound
-			}
-			return &thread, nil
-		},
-	)
-	threadRepository.EXPECT().Delete(gomock.AssignableToTypeOf(&domain.Thread{})).MinTimes(1).Return(nil)
-	threadRepository.EXPECT().DeleteThreadAndComments(gomock.AssignableToTypeOf(&domain.Thread{}), gomock.AssignableToTypeOf(&[]domain.Comment{})).Return(nil)
-	commentRepository.EXPECT().GetAllByKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*[]domain.Comment, error) {
-			if threadKey == correctNoCommentThreadKey {
-				return nil, appError.ErrNotFound
-			}
-			return &comments, nil
-		},
-	)
-
-	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
-
-	//
-	// execute
-	//
 	cases := []struct {
-		name          string
-		input         *params.DeleteThreadAppLayerParam
+		testCase      string
+		input         params.DeleteThreadAppLayerParam
+		prepare       func(*mockField)
 		expectedError error
 	}{
 		{
-			name:          "間違ったスレッドキーの場合は失敗する",
-			input:         &params.DeleteThreadAppLayerParam{ThreadKey: wrongThreadKey, Contributor: originalContributor},
+			testCase: "スレッドが存在しない場合は失敗する",
+			input:    params.DeleteThreadAppLayerParam{ThreadKey: wrongThreadKey, Contributor: originalContributor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(wrongThreadKey).Return(nil, appError.ErrNotFound)
+			},
 			expectedError: appError.ErrNotFound,
 		},
 		{
-			name: "異なる投稿者の場合は失敗する",
-			input: &params.DeleteThreadAppLayerParam{ThreadKey: correntThreadKey, Contributor: differentContributor},
+			testCase: "異なる投稿者の場合は失敗する",
+			input:    params.DeleteThreadAppLayerParam{ThreadKey: correntThreadKey, Contributor: differentContributor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correntThreadKey).Return(&thread, nil)
+			},
 			expectedError: &appError.BadRequest{},
 		},
 		{
-			name: "スレッドに対応するコメントが無い場合は成功する",
-			input: &params.DeleteThreadAppLayerParam{ThreadKey: correctNoCommentThreadKey, Contributor: originalContributor},
+			testCase: "スレッドに対応するコメントが無い場合は成功する",
+			input:    params.DeleteThreadAppLayerParam{ThreadKey: correctNoCommentThreadKey, Contributor: originalContributor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correctNoCommentThreadKey).Return(&thread, nil)
+				mf.commentRepository.EXPECT().GetAllByKey(correctNoCommentThreadKey).Return(nil, appError.ErrNotFound)
+				mf.threadRepository.EXPECT().Delete(&thread).Return(nil)
+			},
 			expectedError: nil,
 		},
 		{
-			name: "スレッドに対応するコメントがある場合は成功する",
-			input: &params.DeleteThreadAppLayerParam{ThreadKey: correntThreadKey, Contributor: originalContributor},
+			testCase: "スレッドに対応するコメントがあって、削除できた場合は成功する",
+			input:    params.DeleteThreadAppLayerParam{ThreadKey: correntThreadKey, Contributor: originalContributor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correntThreadKey).Return(&thread, nil)
+				mf.commentRepository.EXPECT().GetAllByKey(correntThreadKey).Return(&comments, nil)
+				mf.threadRepository.EXPECT().DeleteThreadAndComments(&thread, &comments).Return(nil)
+			},
 			expectedError: nil,
 		},
 	}
 
 	for _, c := range cases {
-		err := threadApplication.DeleteThread(c.input)
-		if !isSameError(c.expectedError, err) {
-			t.Errorf("thread application, wrong error return, name: %s, want: %s, got: %s", c.name, c.expectedError, err)
-		}
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			err := threadApplication.DeleteThread(&c.input)
+
+			if !isSameError(c.expectedError, err) {
+				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
+			}
+		})
 	}
 }

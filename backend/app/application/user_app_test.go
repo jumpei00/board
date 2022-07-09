@@ -16,220 +16,240 @@ import (
 )
 
 func TestUserApp_GetUserByID(t *testing.T) {
-	// mock controller
+	//
+	// setup
+	//
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	userReposotory := mock_repository.NewMockUserRepository(mockCtrl)
+
+	type mockField struct {
+		userRepository *mock_repository.MockUserRepository
+	}
+
+	field := mockField{
+		userRepository: userReposotory,
+	}
+
+	userApplication := application.NewUserApplication(userReposotory)
+
 	//
-	// setup
+	// execute
 	//
 	var (
 		correntID = "correct-id"
 		wrongID   = "wrong-id"
 		user      = domain.User{ID: correntID}
 	)
+	cases := []struct {
+		testCase      string
+		input         string
+		prepare       func(*mockField)
+		expectedUser  *domain.User
+		expectedError error
+	}{
+		{
+			testCase: "IDに対するユーザー見つからない場合は失敗する",
+			input:    wrongID,
+			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByID(wrongID).Return(nil, appError.ErrNotFound)
+			},
+			expectedUser:  nil,
+			expectedError: appError.ErrNotFound,
+		},
+		{
+			testCase: "IDに対するユーザーが見つかった場合は成功する",
+			input:    correntID,
+			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByID(correntID).Return(&user, nil)
+			},
+			expectedUser:  &user,
+			expectedError: nil,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			user, err := userApplication.GetUserByID(c.input)
+
+			if user != c.expectedUser {
+				t.Errorf("different user.\nwant: %s\ngot: %s", c.expectedUser, user)
+			}
+			if !isSameError(err, c.expectedError) {
+				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
+			}
+		})
+	}
+}
+
+func TestUserApp_GetUserByUsername(t *testing.T) {
+	//
+	// setup
+	//
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
 	userReposotory := mock_repository.NewMockUserRepository(mockCtrl)
 
-	// mock
-	var id string
-	userReposotory.EXPECT().GetByID(gomock.AssignableToTypeOf(id)).AnyTimes().DoAndReturn(
-		func(id string) (*domain.User, error) {
-			if id == wrongID {
-				return nil, appError.ErrNotFound
-			}
-			return &user, nil
-		},
-	)
+	type mockField struct {
+		userRepository *mock_repository.MockUserRepository
+	}
+
+	field := mockField{
+		userRepository: userReposotory,
+	}
 
 	userApplication := application.NewUserApplication(userReposotory)
 
 	//
 	// execute
-	//
-	cases := []struct {
-		name          string
-		input         string
-		expectedUser  *domain.User
-		expectedError error
-	}{
-		{
-			name:          "異なるIDの場合は失敗する",
-			input:         wrongID,
-			expectedUser:  nil,
-			expectedError: appError.ErrNotFound,
-		},
-		{
-			name:          "正しいIDの場合は成功する",
-			input:         correntID,
-			expectedUser:  &user,
-			expectedError: nil,
-		},
-	}
-	for _, c := range cases {
-		user, err := userApplication.GetUserByID(c.input)
-		if user != c.expectedUser {
-			t.Errorf(
-				"user application, get user by id, different user, name: %s, want: %s, got: %s",
-				c.name, c.expectedUser, user,
-			)
-		}
-		if !isSameError(err, c.expectedError) {
-			t.Errorf(
-				"user application, get user by id, different error, name: %s, want: %s, got: %s",
-				c.name, c.expectedError, err,
-			)
-		}
-	}
-}
-
-func TestUserApp_GetUserByUsername(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	//
-	// setup
 	//
 	var (
 		correntUsername = "correct-username"
 		wrongUsername   = "wrong-username"
 		user            = domain.User{Username: correntUsername}
 	)
+	cases := []struct {
+		testCase      string
+		input         string
+		prepare       func(*mockField)
+		expectedUser  *domain.User
+		expectedError error
+	}{
+		{
+			testCase: "ユーザー名に対するユーザーが存在しない場合は失敗する",
+			input:    wrongUsername,
+			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByUsername(wrongUsername).Return(nil, appError.ErrNotFound)
+			},
+			expectedUser:  nil,
+			expectedError: appError.ErrNotFound,
+		},
+		{
+			testCase: "ユーザー名に対するユーザーが存在する場合は成功する",
+			input:    correntUsername,
+			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByUsername(correntUsername).Return(&user, nil)
+			},
+			expectedUser:  &user,
+			expectedError: nil,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			user, err := userApplication.GetUserByUsername(c.input)
+
+			if user != c.expectedUser {
+				t.Errorf("different user.\nwant: %s.\ngot: %s", c.expectedUser, user)
+			}
+			if !isSameError(err, c.expectedError) {
+				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
+			}
+		})
+	}
+}
+
+func TestUserApp_CreateUser(t *testing.T) {
+	//
+	// setup
+	//
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
 	userReposotory := mock_repository.NewMockUserRepository(mockCtrl)
 
-	// mock
-	var username string
-	userReposotory.EXPECT().GetByUsername(gomock.AssignableToTypeOf(username)).AnyTimes().DoAndReturn(
-		func(username string) (*domain.User, error) {
-			if username == wrongUsername {
-				return nil, appError.ErrNotFound
-			}
-			return &user, nil
-		},
-	)
+	type mockField struct {
+		userRepository *mock_repository.MockUserRepository
+	}
+
+	field := mockField{
+		userRepository: userReposotory,
+	}
 
 	userApplication := application.NewUserApplication(userReposotory)
 
 	//
 	// execute
-	//
-	cases := []struct {
-		name          string
-		input         string
-		expectedUser  *domain.User
-		expectedError error
-	}{
-		{
-			name:          "異なるユーザー名の場合は失敗する",
-			input:         wrongUsername,
-			expectedUser:  nil,
-			expectedError: appError.ErrNotFound,
-		},
-		{
-			name:          "正しいユーザー名の場合は成功する",
-			input:         correntUsername,
-			expectedUser:  &user,
-			expectedError: nil,
-		},
-	}
-	for _, c := range cases {
-		user, err := userApplication.GetUserByUsername(c.input)
-		if user != c.expectedUser {
-			t.Errorf(
-				"user application, get user by id, different user, name: %s, want: %s, got: %s",
-				c.name, c.expectedUser, user,
-			)
-		}
-		if !isSameError(err, c.expectedError) {
-			t.Errorf(
-				"user application, get user by id, different error, name: %s, want: %s, got: %s",
-				c.name, c.expectedError, err,
-			)
-		}
-	}
-}
-
-func TestUserApp_CreateUser(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	//
-	// setup
 	//
 	var (
 		newUsername     = "new-username"
 		existedUsername = "existed-username"
 		password        = "password"
 	)
-	userReposotory := mock_repository.NewMockUserRepository(mockCtrl)
-
-	// mock
-	var username string
-	userReposotory.EXPECT().GetByUsername(gomock.AssignableToTypeOf(username)).AnyTimes().DoAndReturn(
-		func(username string) (*domain.User, error) {
-			if username == existedUsername {
-				return &domain.User{Username: existedUsername}, nil
-			}
-			return nil, appError.ErrNotFound
-		},
-	)
-	userReposotory.EXPECT().Insert(gomock.AssignableToTypeOf(&domain.User{})).AnyTimes().DoAndReturn(
-		func(user *domain.User) (*domain.User, error) {
-			return user, nil
-		},
-	)
-
-	userApplication := application.NewUserApplication(userReposotory)
-
-	//
-	// execute
-	//
 	cases := []struct {
-		name          string
+		testCase      string
 		input         params.UserSignUpApplicationLayerParam
+		prepare       func(*mockField)
 		expectedUser  *domain.User
 		expectedError error
 	}{
 		{
-			name:          "既に登録済みのユーザーの場合は失敗する",
-			input:         params.UserSignUpApplicationLayerParam{Username: existedUsername, Password: password},
+			testCase: "既に登録済みのユーザーの場合は失敗する",
+			input:    params.UserSignUpApplicationLayerParam{Username: existedUsername, Password: password},
+			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByUsername(existedUsername).Return(nil, nil)
+			},
 			expectedUser:  nil,
 			expectedError: &appError.BadRequest{},
 		},
 		{
-			name:          "新規ユーザーの場合は成功する",
-			input:         params.UserSignUpApplicationLayerParam{Username: newUsername, Password: password},
+			testCase: "新規ユーザーの場合は成功する",
+			input:    params.UserSignUpApplicationLayerParam{Username: newUsername, Password: password},
+			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByUsername(newUsername).Return(nil, appError.ErrNotFound)
+				mf.userRepository.EXPECT().Insert(gomock.Any()).DoAndReturn(
+					func(user *domain.User) (*domain.User, error) {
+						return user, nil
+					},
+				)
+			},
 			expectedUser:  &domain.User{Username: newUsername},
 			expectedError: nil,
 		},
 	}
 
 	opt := cmpopts.IgnoreFields(domain.User{}, "ID", "Password", "CreatedAt", "UpdatedAt")
+
 	for _, c := range cases {
-		user, err := userApplication.CreateUser(&c.input)
-		if diff := cmp.Diff(user, c.expectedUser, opt); diff != "" {
-			t.Errorf(
-				"user application, create user, different user, name: %s, diff: %s, want: %v, got: %v",
-				c.name, diff, c.expectedUser, user,
-			)
-		}
-		if !isSameError(err, c.expectedError) {
-			t.Errorf(
-				"user application, create user, different error, name: %s, want: %v, got: %v",
-				c.name, c.expectedError, err,
-			)
-		}
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			user, err := userApplication.CreateUser(&c.input)
+
+			if diff := cmp.Diff(user, c.expectedUser, opt); diff != "" {
+				t.Errorf("different user.\ndiff: %s, want: %v, got: %v", diff, c.expectedUser, user)
+			}
+			if !isSameError(err, c.expectedError) {
+				t.Errorf("different error.\nwant: %v\ngot: %v", c.expectedError, err)
+			}
+		})
 	}
 }
 
 func TestUserApp_ValidateUser(t *testing.T) {
-	// mock controller
+	//
+	// setup
+	//
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	userReposotory := mock_repository.NewMockUserRepository(mockCtrl)
+
+	type mockField struct {
+		userRepository *mock_repository.MockUserRepository
+	}
+
+	field := mockField{
+		userRepository: userReposotory,
+	}
+
+	userApplication := application.NewUserApplication(userReposotory)
+
 	//
-	// setup
+	// execute
 	//
 	var (
 		id              = "1"
@@ -239,65 +259,56 @@ func TestUserApp_ValidateUser(t *testing.T) {
 		wrongPassword   = "wrong-password"
 		user            = domain.User{ID: id, Username: correctUsername, Password: generatePassword(correctPassword)}
 	)
-	userReposotory := mock_repository.NewMockUserRepository(mockCtrl)
-
-	// mock
-	var username string
-	userReposotory.EXPECT().GetByUsername(gomock.AssignableToTypeOf(username)).AnyTimes().DoAndReturn(
-		func(username string) (*domain.User, error) {
-			if username == wrongUsername {
-				return nil, appError.ErrNotFound
-			}
-			return &user, nil
-		},
-	)
-
-	userApplication := application.NewUserApplication(userReposotory)
-
-	//
-	// execute
-	//
 	cases := []struct {
-		name          string
+		testCase      string
 		input         params.UserSignInApplicationLayerParam
+		prepare       func(*mockField)
 		expectedUser  *domain.User
 		expectedError error
 	}{
 		{
-			name:          "違うユーザー名の場合は失敗する",
-			input:         params.UserSignInApplicationLayerParam{Username: wrongUsername, Password: correctPassword},
+			testCase: "違うユーザー名の場合は失敗する",
+			input:    params.UserSignInApplicationLayerParam{Username: wrongUsername, Password: correctPassword},
+			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByUsername(wrongUsername).Return(nil, appError.ErrNotFound)
+			},
 			expectedUser:  nil,
 			expectedError: &appError.BadRequest{},
 		},
 		{
-			name:          "違うパスワードの場合は失敗する",
-			input:         params.UserSignInApplicationLayerParam{Username: correctUsername, Password: wrongPassword},
+			testCase: "違うパスワードの場合は失敗する",
+			input:    params.UserSignInApplicationLayerParam{Username: correctUsername, Password: wrongPassword},
+			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByUsername(correctUsername).Return(&user, nil)
+			},
 			expectedUser:  nil,
 			expectedError: &appError.BadRequest{},
 		},
 		{
-			name:          "正しいデータの場合は成功する",
-			input:         params.UserSignInApplicationLayerParam{Username: correctUsername, Password: correctPassword},
+			testCase: "ログイン可能な場合は成功する",
+			input:    params.UserSignInApplicationLayerParam{Username: correctUsername, Password: correctPassword},
+			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByUsername(correctUsername).Return(&user, nil)
+			},
 			expectedUser:  &user,
 			expectedError: nil,
 		},
 	}
 
 	opt := cmpopts.IgnoreFields(domain.User{}, "CreatedAt", "UpdatedAt")
+
 	for _, c := range cases {
-		user, err := userApplication.ValidateUser(&c.input)
-		if diff := cmp.Diff(user, c.expectedUser, opt); diff != "" {
-			t.Errorf(
-				"user application, validate user, different user, name: %s, diff: %s, want: %v, got: %v",
-				c.name, diff, c.expectedUser, user,
-			)
-		}
-		if !isSameError(err, c.expectedError) {
-			t.Errorf(
-				"user application, validate user, different error, name: %s, want: %v, got: %v",
-				c.name, c.expectedError, err,
-			)
-		}
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			user, err := userApplication.ValidateUser(&c.input)
+
+			if diff := cmp.Diff(user, c.expectedUser, opt); diff != "" {
+				t.Errorf("different user.\ndiff: %s\nwant: %v\ngot: %v", diff, c.expectedUser, user)
+			}
+			if !isSameError(err, c.expectedError) {
+				t.Errorf("different error.\nwant: %v\ngot: %v", c.expectedError, err)
+			}
+		})
 	}
 }
 

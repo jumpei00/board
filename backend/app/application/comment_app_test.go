@@ -14,81 +14,100 @@ import (
 )
 
 func TestCommentApp_GetAllByThreadKey(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	//
 	// setup
 	//
-	var (
-		correctThreadKey = "correct-key"
-		wrongThreadKey   = "wrong-key"
-		comments         = []domain.Comment{}
-	)
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
 	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
 	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
 
-	// mock
-	var threadKey string
-	commentRepository.EXPECT().GetAllByKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*[]domain.Comment, error) {
-			if threadKey == wrongThreadKey {
-				return nil, appError.ErrNotFound
-			}
-			return &comments, nil
-		},
-	)
+	type mockField struct {
+		threadRepository  *mock_repository.MockThreadRepository
+		commentRepository *mock_repository.MockCommentRepository
+	}
+
+	field := mockField{
+		threadRepository:  threadRepository,
+		commentRepository: commentRepository,
+	}
 
 	commentApplication := application.NewCommentApplication(threadRepository, commentRepository)
 
 	//
 	// execute
 	//
+	var (
+		correctThreadKey = "correct-key"
+		wrongThreadKey   = "wrong-key"
+		comments         = []domain.Comment{}
+	)
 	cases := []struct {
-		name             string
+		testCase         string
 		input            string
+		prepare          func(*mockField)
 		expectedComments *[]domain.Comment
 		expectedError    error
 	}{
 		{
-			name:             "間違ったスレッドキーの場合は失敗する",
-			input:            wrongThreadKey,
+			testCase: "間違ったスレッドキーの場合は失敗する",
+			input:    wrongThreadKey,
+			prepare: func(mf *mockField) {
+				mf.commentRepository.EXPECT().GetAllByKey(wrongThreadKey).Return(nil, appError.ErrNotFound)
+			},
 			expectedComments: nil,
 			expectedError:    appError.ErrNotFound,
 		},
 		{
-			name:             "正しいスレッドキーの場合は成功する",
-			input:            correctThreadKey,
+			testCase: "正しいスレッドキーの場合は成功する",
+			input:    correctThreadKey,
+			prepare: func(mf *mockField) {
+				mf.commentRepository.EXPECT().GetAllByKey(correctThreadKey).Return(&comments, nil)
+			},
 			expectedComments: &comments,
 			expectedError:    nil,
 		},
 	}
 
 	for _, c := range cases {
-		comments, err := commentApplication.GetAllByThreadKey(c.input)
-		if comments != c.expectedComments {
-			t.Errorf(
-				"comment application, get all by thread key, different comment, name: %s, want: %v, got: %v",
-				c.name, c.expectedComments, comments,
-			)
-		}
-		if !isSameError(err, c.expectedError) {
-			t.Errorf(
-				"comment application, get all by thread key, different error, name: %s, want: %s, got: %s",
-				c.name, c.expectedError, err,
-			)
-		}
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			comments, err := commentApplication.GetAllByThreadKey(c.input)
+			if comments != c.expectedComments {
+				t.Errorf("different comment.\nwant: %v\ngot: %v", c.expectedComments, comments)
+			}
+			if !isSameError(err, c.expectedError) {
+				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
+			}
+		})
 	}
 }
 
 func TestCommentApp_CreateComment(t *testing.T) {
-	// mock controller
+	//
+	// setup
+	//
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
+	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
+
+	type mockField struct {
+		threadRepository  *mock_repository.MockThreadRepository
+		commentRepository *mock_repository.MockCommentRepository
+	}
+
+	field := mockField{
+		threadRepository:  threadRepository,
+		commentRepository: commentRepository,
+	}
+
+	commentApplication := application.NewCommentApplication(threadRepository, commentRepository)
+
 	//
-	// setup
+	// execute
 	//
 	var (
 		correctThreadKey  = "correct-thread-key"
@@ -99,91 +118,82 @@ func TestCommentApp_CreateComment(t *testing.T) {
 		thread            = domain.Thread{Key: correctThreadKey, CommentSum: &initialCommentSum}
 		comments          = []domain.Comment{}
 	)
-	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
-	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
-
-	var threadKey string
-	threadRepository.EXPECT().GetByKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*domain.Thread, error) {
-			if threadKey == wrongThreadKey {
-				return nil, appError.ErrNotFound
-			}
-			return &thread, nil
-		},
-	)
-	threadRepository.EXPECT().Update(gomock.AssignableToTypeOf(&domain.Thread{})).AnyTimes().DoAndReturn(
-		func(thread *domain.Thread) (*domain.Thread, error) {
-			return thread, nil
-		},
-	)
-	commentRepository.EXPECT().Insert(gomock.AssignableToTypeOf(&domain.Comment{})).AnyTimes().DoAndReturn(
-		func(comment *domain.Comment) (*domain.Comment, error) {
-			// init
-			comments = []domain.Comment{}
-
-			comments = append(comments, *comment)
-			return comment, nil
-		},
-	)
-	commentRepository.EXPECT().GetAllByKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*[]domain.Comment, error) {
-			if threadKey == wrongThreadKey {
-				return nil, appError.ErrNotFound
-			}
-			return &comments, nil
-		},
-	)
-
-	commentApplication := application.NewCommentApplication(threadRepository, commentRepository)
-
-	//
-	// execute
-	//
 	cases := []struct {
-		name             string
+		testCase         string
 		input            params.CreateCommentAppLayerParam
+		prepare          func(*mockField)
 		expectedComments *[]domain.Comment
 		expectedError    error
 	}{
 		{
-			name:             "間違ったスレッドキーの場合は失敗する",
-			input:            params.CreateCommentAppLayerParam{ThreadKey: wrongThreadKey, Comment: comment, Contributor: contibutor},
+			testCase: "間違ったスレッドキーの場合は失敗する",
+			input:    params.CreateCommentAppLayerParam{ThreadKey: wrongThreadKey, Comment: comment, Contributor: contibutor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(wrongThreadKey).Return(nil, appError.ErrNotFound)
+			},
 			expectedComments: nil,
 			expectedError:    appError.ErrNotFound,
 		},
 		{
-			name:             "正しいスレッドキーの場合は成功する",
-			input:            params.CreateCommentAppLayerParam{ThreadKey: correctThreadKey, Comment: comment, Contributor: contibutor},
+			testCase: "正しいスレッドキーの場合は成功する",
+			input:    params.CreateCommentAppLayerParam{ThreadKey: correctThreadKey, Comment: comment, Contributor: contibutor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correctThreadKey).Return(&thread, nil)
+				mf.threadRepository.EXPECT().Update(gomock.Any()).Return(nil, nil)
+				mf.commentRepository.EXPECT().Insert(gomock.Any()).DoAndReturn(
+					func(comment *domain.Comment) (*domain.Comment, error) {
+						comments = append(comments, *comment)
+						return comment, nil
+					},
+				)
+				mf.commentRepository.EXPECT().GetAllByKey(correctThreadKey).Return(&comments, nil)
+			},
 			expectedComments: &[]domain.Comment{{ThreadKey: correctThreadKey, Comment: comment, Contributor: contibutor}},
 			expectedError:    nil,
 		},
 	}
 
 	opt := cmpopts.IgnoreFields(domain.Comment{}, "Key", "CreatedAt", "UpdatedAt")
+
 	for _, c := range cases {
-		comments, err := commentApplication.CreateComment(&c.input)
-		if diff := cmp.Diff(comments, c.expectedComments, opt); diff != "" {
-			t.Errorf(
-				"comment application, create comment, different comments, name: %s, diff: %s, want: %v, got: %v",
-				c.name, diff, c.expectedComments, comments,
-			)
-		}
-		if !isSameError(err, c.expectedError) {
-			t.Errorf(
-				"comment application, create comment, different error, name: %s, want: %s, got: %s",
-				c.name, c.expectedError, err,
-			)
-		}
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			comments, err := commentApplication.CreateComment(&c.input)
+
+			if diff := cmp.Diff(comments, c.expectedComments, opt); diff != "" {
+				t.Errorf("different comments.\ndiff: %s\nwant: %v\ngot: %v", diff, c.expectedComments, comments)
+			}
+			if !isSameError(err, c.expectedError) {
+				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
+			}
+		})
 	}
 }
 
 func TestCommentApp_EditComment(t *testing.T) {
-	// mock controller
+	//
+	// setup
+	//
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
+	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
+
+	type mockField struct {
+		threadRepository  *mock_repository.MockThreadRepository
+		commentRepository *mock_repository.MockCommentRepository
+	}
+
+	field := mockField{
+		threadRepository:  threadRepository,
+		commentRepository: commentRepository,
+	}
+
+	commentApplication := application.NewCommentApplication(threadRepository, commentRepository)
+
 	//
-	// setup
+	// exucute
 	//
 	var (
 		correctThreadKey   = "correct-thread-key"
@@ -192,122 +202,111 @@ func TestCommentApp_EditComment(t *testing.T) {
 		wrongThreadKey     = "wrong-thread-key"
 		wrongCommentKey    = "wrong-comment-key"
 		wrongContributor   = "wrong-contributor"
-		initialComment     = "initial-comment"
 		editedComment      = "edited-comment"
 		thread             = domain.Thread{Key: correctThreadKey}
 		comment            = domain.Comment{Key: correctCommentKey, ThreadKey: correctThreadKey, Contributor: correctContributor}
 		comments           = []domain.Comment{}
 	)
-	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
-	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
-
-	var threadKey string
-	var commentKey string
-	threadRepository.EXPECT().GetByKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*domain.Thread, error) {
-			if threadKey == wrongThreadKey {
-				return nil, appError.ErrNotFound
-			}
-			return &thread, nil
-		},
-	)
-	threadRepository.EXPECT().Update(gomock.AssignableToTypeOf(&domain.Thread{})).AnyTimes().DoAndReturn(
-		func(thread *domain.Thread) (*domain.Thread, error) {
-			return thread, nil
-		},
-	)
-	commentRepository.EXPECT().GetByKey(gomock.AssignableToTypeOf(commentKey)).AnyTimes().DoAndReturn(
-		func(commentKey string) (*domain.Comment, error) {
-			if commentKey == wrongCommentKey {
-				return nil, appError.ErrNotFound
-			}
-
-			// init
-			comment.Comment = initialComment
-
-			return &comment, nil
-		},
-	)
-	commentRepository.EXPECT().Insert(gomock.AssignableToTypeOf(&domain.Comment{})).AnyTimes().DoAndReturn(
-		func(comment *domain.Comment) (*domain.Comment, error) {
-			// init
-			comments = []domain.Comment{}
-
-			comments = append(comments, *comment)
-			return comment, nil
-		},
-	)
-	commentRepository.EXPECT().GetAllByKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*[]domain.Comment, error) {
-			if threadKey == wrongThreadKey {
-				return nil, appError.ErrNotFound
-			}
-			return &comments, nil
-		},
-	)
-
-	commentApplication := application.NewCommentApplication(threadRepository, commentRepository)
-
-	//
-	// exucute
-	//
 	cases := []struct {
-		name             string
+		testCase         string
 		input            params.EditCommentAppLayerParam
+		prepare          func(*mockField)
 		expectedComments *[]domain.Comment
 		expectedError    error
 	}{
 		{
-			name:             "間違ったスレッドキーの場合失敗する",
-			input:            params.EditCommentAppLayerParam{ThreadKey: wrongThreadKey},
+			testCase: "間違ったスレッドキーの場合失敗する",
+			input:    params.EditCommentAppLayerParam{ThreadKey: wrongThreadKey},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(wrongThreadKey).Return(nil, appError.ErrNotFound)
+			},
 			expectedComments: nil,
 			expectedError:    appError.ErrNotFound,
 		},
 		{
-			name:             "間違ったコメントキーの場合失敗する",
-			input:            params.EditCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: wrongCommentKey},
+			testCase: "間違ったコメントキーの場合失敗する",
+			input:    params.EditCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: wrongCommentKey},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correctThreadKey).Return(&thread, nil)
+				mf.commentRepository.EXPECT().GetByKey(wrongCommentKey).Return(nil, appError.ErrNotFound)
+			},
 			expectedComments: nil,
 			expectedError:    appError.ErrNotFound,
 		},
 		{
-			name:             "違うユーザーは編集できない",
-			input:            params.EditCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, Contributor: wrongContributor},
+			testCase: "違うユーザーは編集できない",
+			input:    params.EditCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, Contributor: wrongContributor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correctThreadKey).Return(&thread, nil)
+				mf.commentRepository.EXPECT().GetByKey(correctCommentKey).Return(&comment, nil)
+			},
 			expectedComments: nil,
 			expectedError:    &appError.BadRequest{},
 		},
 		{
-			name:             "正常なパラメータであれば成功する",
-			input:            params.EditCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, Contributor: correctContributor, Comment: editedComment},
+			testCase: "同じユーザーの場合は成功する",
+			input:    params.EditCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, Contributor: correctContributor, Comment: editedComment},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correctThreadKey).Return(&thread, nil)
+				mf.commentRepository.EXPECT().GetByKey(correctCommentKey).Return(&comment, nil)
+				mf.commentRepository.EXPECT().Insert(gomock.Any()).DoAndReturn(
+					func(comment *domain.Comment) (*domain.Comment, error) {
+						comments = append(comments, *comment)
+						return comment, nil
+					},
+				)
+				mf.threadRepository.EXPECT().Update(gomock.Any()).Return(nil, nil)
+				mf.commentRepository.EXPECT().GetAllByKey(correctThreadKey).Return(&comments, nil)
+			},
 			expectedComments: &[]domain.Comment{{Key: correctCommentKey, ThreadKey: correctThreadKey, Contributor: correctContributor, Comment: editedComment}},
 			expectedError:    nil,
 		},
 	}
 
+	//
+	// execute
+	//
 	opt := cmpopts.IgnoreFields(domain.Comment{}, "CreatedAt", "UpdatedAt")
+
 	for _, c := range cases {
-		comments, err := commentApplication.EditComment(&c.input)
-		if diff := cmp.Diff(comments, c.expectedComments, opt); diff != "" {
-			t.Errorf(
-				"comment application, edit different comments, name: %s, diff: %s, want: %v, got: %v",
-				c.name, diff, c.expectedComments, comments,
-			)
-		}
-		if !isSameError(err, c.expectedError) {
-			t.Errorf(
-				"comment application, edit different error, name: %s, want: %s, got: %s",
-				c.name, c.expectedError, err,
-			)
-		}
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			comments, err := commentApplication.EditComment(&c.input)
+
+			if diff := cmp.Diff(comments, c.expectedComments, opt); diff != "" {
+				t.Errorf("different comments.\ndiff: %s\nwant: %v, got: %v", diff, c.expectedComments, comments)
+			}
+			if !isSameError(err, c.expectedError) {
+				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
+			}
+		})
 	}
 }
 
 func TestCommentApp_DeleteComment(t *testing.T) {
-	// mock controller
+	//
+	// setup
+	//
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
+	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
+
+	type mockField struct {
+		threadRepository  *mock_repository.MockThreadRepository
+		commentRepository *mock_repository.MockCommentRepository
+	}
+
+	field := mockField{
+		threadRepository:  threadRepository,
+		commentRepository: commentRepository,
+	}
+
+	commentApplication := application.NewCommentApplication(threadRepository, commentRepository)
+
 	//
-	// setup
+	// exucute
 	//
 	var (
 		correctThreadKey   = "correct-thread-key"
@@ -321,96 +320,68 @@ func TestCommentApp_DeleteComment(t *testing.T) {
 		comment            = domain.Comment{Key: correctCommentKey, ThreadKey: correctThreadKey, Contributor: correctContributor}
 		comments           = []domain.Comment{}
 	)
-	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
-	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
-
-	var threadKey string
-	var commentKey string
-	threadRepository.EXPECT().GetByKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*domain.Thread, error) {
-			if threadKey == wrongThreadKey {
-				return nil, appError.ErrNotFound
-			}
-			return &thread, nil
-		},
-	)
-	threadRepository.EXPECT().Update(gomock.AssignableToTypeOf(&domain.Thread{})).AnyTimes().DoAndReturn(
-		func(thread *domain.Thread) (*domain.Thread, error) {
-			return thread, nil
-		},
-	)
-	commentRepository.EXPECT().GetByKey(gomock.AssignableToTypeOf(commentKey)).AnyTimes().DoAndReturn(
-		func(commentKey string) (*domain.Comment, error) {
-			if commentKey == wrongCommentKey {
-				return nil, appError.ErrNotFound
-			}
-			return &comment, nil
-		},
-	)
-	commentRepository.EXPECT().Delete(gomock.AssignableToTypeOf(&domain.Comment{})).AnyTimes().DoAndReturn(
-		func(comment *domain.Comment) error {
-			return nil
-		},
-	)
-	commentRepository.EXPECT().GetAllByKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*[]domain.Comment, error) {
-			if threadKey == wrongThreadKey {
-				return nil, appError.ErrNotFound
-			}
-			return &comments, nil
-		},
-	)
-
-	commentApplication := application.NewCommentApplication(threadRepository, commentRepository)
-
-	//
-	// exucute
-	//
 	cases := []struct {
-		name             string
+		testCase         string
 		input            params.DeleteCommentAppLayerParam
+		prepare          func(*mockField)
 		expectedComments *[]domain.Comment
 		expectedError    error
 	}{
 		{
-			name: "間違ったスレッドキーの場合失敗する",
-			input: params.DeleteCommentAppLayerParam{ThreadKey: wrongThreadKey},
+			testCase: "間違ったスレッドキーの場合失敗する",
+			input:    params.DeleteCommentAppLayerParam{ThreadKey: wrongThreadKey},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(wrongThreadKey).Return(nil, appError.ErrNotFound)
+			},
 			expectedComments: nil,
-			expectedError: appError.ErrNotFound,
+			expectedError:    appError.ErrNotFound,
 		},
 		{
-			name: "間違ったコメントキーの場合失敗する",
-			input: params.DeleteCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: wrongCommentKey},
+			testCase: "間違ったコメントキーの場合失敗する",
+			input:    params.DeleteCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: wrongCommentKey},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correctThreadKey).Return(&thread, nil)
+				mf.commentRepository.EXPECT().GetByKey(wrongCommentKey).Return(nil, appError.ErrNotFound)
+			},
 			expectedComments: nil,
-			expectedError: appError.ErrNotFound,
+			expectedError:    appError.ErrNotFound,
 		},
 		{
-			name: "違うユーザーは削除できない",
-			input: params.DeleteCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, Contributor: wrongContributor},
+			testCase: "違うユーザーは削除できない",
+			input:    params.DeleteCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, Contributor: wrongContributor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correctThreadKey).Return(&thread, nil)
+				mf.commentRepository.EXPECT().GetByKey(correctCommentKey).Return(&comment, nil)
+			},
 			expectedComments: nil,
-			expectedError: &appError.BadRequest{},
+			expectedError:    &appError.BadRequest{},
 		},
 		{
-			name: "正常なパラメータであれば成功する",
-			input: params.DeleteCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, Contributor: correctContributor},
+			testCase: "正常なパラメータであれば成功する",
+			input:    params.DeleteCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, Contributor: correctContributor},
+			prepare: func(mf *mockField) {
+				mf.threadRepository.EXPECT().GetByKey(correctThreadKey).Return(&thread, nil)
+				mf.commentRepository.EXPECT().GetByKey(correctCommentKey).Return(&comment, nil)
+				mf.commentRepository.EXPECT().Delete(gomock.Any()).Return(nil)
+				mf.threadRepository.EXPECT().Update(gomock.Any()).Return(nil, nil)
+				mf.commentRepository.EXPECT().GetAllByKey(correctThreadKey).Return(&comments, nil)
+			},
 			expectedComments: &comments,
-			expectedError: nil,
+			expectedError:    nil,
 		},
 	}
 
 	for _, c := range cases {
-		comments, err := commentApplication.DeleteComment(&c.input)
-		if comments != c.expectedComments {
-			t.Errorf(
-				"comment application, delete different comments, name: %s, want: %v, got: %v",
-				c.name, c.expectedComments, comments,
-			)
-		}
-		if !isSameError(err, c.expectedError) {
-			t.Errorf(
-				"comment application, delete different error, name: %s, want: %s, got: %s",
-				c.name, c.expectedError, err,
-			)
-		}
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			comments, err := commentApplication.DeleteComment(&c.input)
+
+			if comments != c.expectedComments {
+				t.Errorf("different comments.\nwant: %v\ngot: %v", c.expectedComments, comments)
+			}
+			if !isSameError(err, c.expectedError) {
+				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
+			}
+		})
 	}
 }

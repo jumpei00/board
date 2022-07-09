@@ -12,40 +12,80 @@ import (
 )
 
 func TestVisiorApp_GetVisitorsStat(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	//
 	// setup
 	//
-	var visitor domain.Visitor
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
 
-	// mock
 	visitorRepository := mock_repository.NewMockVisitorRepository(mockCtrl)
-	visitorRepository.EXPECT().Get().Return(&visitor, nil)
+
+	type mockField struct {
+		visitorRepository *mock_repository.MockVisitorRepository
+	}
+
+	field := mockField{
+		visitorRepository: visitorRepository,
+	}
 
 	visitorApplication := application.NewVisitorApplication(visitorRepository)
 
 	//
 	// exucute
 	//
-	v, err := visitorApplication.GetVisitorsStat()
-	if v != &visitor {
-		t.Errorf("visitor application, get visitors stat, different visitor, want: %v, got: %v", visitor, v)
+	var visitor = domain.Visitor{}
+	cases := []struct {
+		testCase        string
+		prepare         func(*mockField)
+		expectedVisitor *domain.Visitor
+		expectedError   error
+	}{
+		{
+			testCase: "訪問者データが取得できれば成功する",
+			prepare: func(mf *mockField) {
+				mf.visitorRepository.EXPECT().Get().Return(&visitor, nil)
+			},
+			expectedVisitor: &visitor,
+			expectedError:   nil,
+		},
 	}
-	if err != nil {
-		t.Errorf("visitor application, get visitors stat, different error, want: nil, got: %s", err)
+
+	for _, c := range cases {
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			v, err := visitorApplication.GetVisitorsStat()
+
+			if v != c.expectedVisitor {
+				t.Errorf("different visitor.\nwant: %v\ngot: %v", c.expectedVisitor, v)
+			}
+			if err != c.expectedError {
+				t.Errorf("different error.\nwant: %s.\ngot: %s", c.expectedError, err)
+			}
+		})
 	}
 }
 
 func TestVisiorApp_CountupVisitors(t *testing.T) {
-	// mock controller
+	//
+	// setup
+	//
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	visitorRepository := mock_repository.NewMockVisitorRepository(mockCtrl)
+
+	type mockField struct {
+		visitorRepository *mock_repository.MockVisitorRepository
+	}
+
+	field := mockField{
+		visitorRepository: visitorRepository,
+	}
+
+	visitorApplication := application.NewVisitorApplication(visitorRepository)
+
 	//
-	// setup
+	// exucute
 	//
 	var (
 		yesterdayVisitor     = 0
@@ -53,77 +93,110 @@ func TestVisiorApp_CountupVisitors(t *testing.T) {
 		sumVisitor           = 0
 		counupedTodayVisitor = todayVisitor + 1
 		coutupedSumVisitor   = sumVisitor + 1
-		visitor              = domain.Visitor{ID: 1, YesterdayVisitor: &yesterdayVisitor, TodayVisitor: &todayVisitor, VisitorSum: &sumVisitor}
+		originalVisitor      = &domain.Visitor{ID: 1, YesterdayVisitor: &yesterdayVisitor, TodayVisitor: &todayVisitor, VisitorSum: &sumVisitor}
+		expectedVisitor      = &domain.Visitor{ID: 1, YesterdayVisitor: &yesterdayVisitor, TodayVisitor: &counupedTodayVisitor, VisitorSum: &coutupedSumVisitor}
 	)
-
-	// mock
-	visitorRepository := mock_repository.NewMockVisitorRepository(mockCtrl)
-	visitorRepository.EXPECT().Get().Return(&visitor, nil)
-	visitorRepository.EXPECT().Update(gomock.AssignableToTypeOf(&domain.Visitor{})).DoAndReturn(
-		func(v *domain.Visitor) (*domain.Visitor, error) {
-			return v, nil
+	cases := []struct {
+		testCase        string
+		prepare         func(*mockField)
+		expectedVisitor *domain.Visitor
+		expectedError   error
+	}{
+		{
+			testCase: "カウントアップが行えたら成功する",
+			prepare: func(mf *mockField) {
+				mf.visitorRepository.EXPECT().Get().Return(originalVisitor, nil)
+				mf.visitorRepository.EXPECT().Update(gomock.Any()).DoAndReturn(
+					func(visitor *domain.Visitor) (*domain.Visitor, error) {
+						return visitor, nil
+					},
+				)
+			},
+			expectedVisitor: expectedVisitor,
+			expectedError:   nil,
 		},
-	)
+	}
+
+	opt := cmpopts.IgnoreFields(domain.Visitor{}, "CreatedAt", "UpdatedAt")
+
+	for _, c := range cases {
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			v, err := visitorApplication.CountupVisitors()
+
+			if diff := cmp.Diff(v, expectedVisitor, opt); diff != "" {
+				t.Errorf("different visitor.\ndiff: %s\nwant: %v\ngot: %v", diff, expectedVisitor, v)
+			}
+			if err != c.expectedError {
+				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
+			}
+		})
+	}
+}
+
+func TestVisitorApp_ResetVisitors(t *testing.T) {
+	//
+	// setup
+	//
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	visitorRepository := mock_repository.NewMockVisitorRepository(mockCtrl)
+
+	type mockField struct {
+		visitorRepository *mock_repository.MockVisitorRepository
+	}
+
+	field := mockField{
+		visitorRepository: visitorRepository,
+	}
 
 	visitorApplication := application.NewVisitorApplication(visitorRepository)
 
 	//
 	// exucute
 	//
-	expectedVisitor := &domain.Visitor{ID: 1, YesterdayVisitor: &yesterdayVisitor, TodayVisitor: &counupedTodayVisitor, VisitorSum: &coutupedSumVisitor}
-
-	opt := cmpopts.IgnoreFields(domain.Visitor{}, "CreatedAt", "UpdatedAt")
-	v, err := visitorApplication.CountupVisitors()
-	if diff := cmp.Diff(v, expectedVisitor, opt); diff != "" {
-		t.Errorf(
-			"visitor application, coutup visitor, different visitor, diff: %s, want: %v, got: %v",
-			diff, expectedVisitor, v,
-		)
-	}
-	if err != nil {
-		t.Errorf("visitor application, coutup visitor, different error, want: nil, got: %s", err)
-	}
-}
-
-func TestVisitorApp_ResetVisitors(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	var (
 		yesterdayVisitor    = 50
 		todayVisitor        = 100
 		sumVisitor          = 1000
 		setYesterdayVisitor = todayVisitor
 		resetTodayVisitor   = 0
-		visitor             = domain.Visitor{ID: 1, YesterdayVisitor: &yesterdayVisitor, TodayVisitor: &todayVisitor, VisitorSum: &sumVisitor}
+		originalVisitor     = &domain.Visitor{ID: 1, YesterdayVisitor: &yesterdayVisitor, TodayVisitor: &todayVisitor, VisitorSum: &sumVisitor}
+		expectedVisitor     = &domain.Visitor{ID: 1, YesterdayVisitor: &setYesterdayVisitor, TodayVisitor: &resetTodayVisitor, VisitorSum: &sumVisitor}
 	)
-
-	// mock
-	visitorRepository := mock_repository.NewMockVisitorRepository(mockCtrl)
-	visitorRepository.EXPECT().Get().Return(&visitor, nil)
-	visitorRepository.EXPECT().Update(gomock.AssignableToTypeOf(&domain.Visitor{})).DoAndReturn(
-		func(v *domain.Visitor) (*domain.Visitor, error) {
-			return v, nil
+	cases := []struct {
+		testCase        string
+		prepare         func(*mockField)
+		expectedVisitor *domain.Visitor
+		expectedError   error
+	}{
+		{
+			testCase: "訪問者のリセット処理が完了すると成功する",
+			prepare: func(mf *mockField) {
+				mf.visitorRepository.EXPECT().Get().Return(originalVisitor, nil)
+				mf.visitorRepository.EXPECT().Update(gomock.Any()).DoAndReturn(
+					func(visitor *domain.Visitor) (*domain.Visitor, error) {
+						return visitor, nil
+					},
+				)
+			},
 		},
-	)
-
-	visitorApplication := application.NewVisitorApplication(visitorRepository)
-
-	//
-	// exucute
-	//
-	expectedVisitor := &domain.Visitor{ID: 1, YesterdayVisitor: &setYesterdayVisitor, TodayVisitor: &resetTodayVisitor, VisitorSum: &sumVisitor}
+	}
 
 	opt := cmpopts.IgnoreFields(domain.Visitor{}, "CreatedAt", "UpdatedAt")
-	v, err := visitorApplication.ResetVisitors()
-	if diff := cmp.Diff(v, expectedVisitor, opt); diff != "" {
-		t.Errorf(
-			"visitor application, reset visitors, different visitor, diff: %s, want: %v, got: %v",
-			diff, expectedVisitor, v,
-		)
-	}
-	if err != nil {
-		t.Errorf("visitor application, reset visitors, different error, want: nil, got: %s", err)
+
+	for _, c := range cases {
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
+			v, err := visitorApplication.ResetVisitors()
+
+			if diff := cmp.Diff(v, expectedVisitor, opt); diff != "" {
+				t.Errorf("different visitor.\ndiff: %s\nwant: %v\ngot: %v", diff, expectedVisitor, v)
+			}
+			if err != c.expectedError {
+				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
+			}
+		})
 	}
 }

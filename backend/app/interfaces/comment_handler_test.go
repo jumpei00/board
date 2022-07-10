@@ -11,60 +11,36 @@ import (
 	"github.com/jumpei00/board/backend/app/domain"
 	"github.com/jumpei00/board/backend/app/interfaces"
 	"github.com/jumpei00/board/backend/app/interfaces/request"
-	"github.com/jumpei00/board/backend/app/interfaces/session"
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	mock_application "github.com/jumpei00/board/backend/app/mock/application"
 	mock_session "github.com/jumpei00/board/backend/app/mock/session"
-	"github.com/jumpei00/board/backend/app/params"
 	"github.com/pkg/errors"
 )
 
 func TestCommentHandler_getAll(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	//
 	// setup
 	//
 	r := gin.Default()
 
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
 	sessionManager := mock_session.NewMockManager(mockCtrl)
 	threadApplication := mock_application.NewMockThreadApplication(mockCtrl)
 	commentApplication := mock_application.NewMockCommentApplication(mockCtrl)
 
-	var (
-		correctThreadkey = "correct-thread-key"
-		wrongThreadKey1  = "wrong-thread-key1"
-		wrongThreadKey2  = "wrong-thread-key2"
-		wrongThreadKey3  = "wrong-thread-key3"
-		initViews        = 0
-		commentSum       = 0
-	)
+	type mockField struct {
+		sessionManager     *mock_session.MockManager
+		threadApplication  *mock_application.MockThreadApplication
+		commentApplication *mock_application.MockCommentApplication
+	}
 
-	var threadKey string
-
-	threadApplication.EXPECT().GetByThreadKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*domain.Thread, error) {
-			if threadKey == wrongThreadKey1 {
-				return nil, appError.ErrNotFound
-			}
-			return &domain.Thread{Views: &initViews, CommentSum: &commentSum}, nil
-		},
-	)
-
-	commentApplication.EXPECT().GetAllByThreadKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*[]domain.Comment, error) {
-			switch threadKey {
-			case wrongThreadKey2:
-				return nil, appError.ErrNotFound
-			case wrongThreadKey3:
-				return nil, errors.New("Internal Server Error")
-			default:
-				return &[]domain.Comment{}, nil
-			}
-		},
-	)
+	field := mockField{
+		sessionManager:     sessionManager,
+		threadApplication:  threadApplication,
+		commentApplication: commentApplication,
+	}
 
 	commentHandler := interfaces.NewCommentHandler(sessionManager, threadApplication, commentApplication)
 	commentHandler.SetupRouter(r.Group("/api/comment"))
@@ -72,37 +48,63 @@ func TestCommentHandler_getAll(t *testing.T) {
 	//
 	// execute
 	//
+	var (
+		correctThreadkey = "correct-thread-key"
+		wrongThreadKey1  = "wrong-thread-key1"
+		wrongThreadKey2  = "wrong-thread-key2"
+		wrongThreadKey3  = "wrong-thread-key3"
+		initViews        = 0
+		commentSum       = 0
+		thread           = &domain.Thread{Views: &initViews, CommentSum: &commentSum}
+	)
 	cases := []struct {
-		name       string
+		testCase   string
 		threadKey  string
+		prepare    func(*mockField)
 		statusCode int
 	}{
 		{
-			name:       "スレッドもしくはコメントが存在するようなスレッドキーの場合は200となる",
-			threadKey:  correctThreadkey,
+			testCase:  "スレッドもしくはコメントが存在するようなスレッドキーの場合は200となる",
+			threadKey: correctThreadkey,
+			prepare: func(mf *mockField) {
+				mf.threadApplication.EXPECT().GetByThreadKey(correctThreadkey).Return(thread, nil)
+				mf.commentApplication.EXPECT().GetAllByThreadKey(correctThreadkey).Return(&[]domain.Comment{}, nil)
+			},
 			statusCode: http.StatusOK,
 		},
 		{
-			name:       "スレッドが存在しないようなスレッドキーの場合は404となる",
-			threadKey:  wrongThreadKey1,
+			testCase:  "スレッドが存在しないようなスレッドキーの場合は404となる",
+			threadKey: wrongThreadKey1,
+			prepare: func(mf *mockField) {
+				mf.threadApplication.EXPECT().GetByThreadKey(wrongThreadKey1).Return(nil, appError.ErrNotFound)
+			},
 			statusCode: http.StatusNotFound,
 		},
 		{
-			name:       "コメントが存在しないようなスレッドキーの場合は200となる",
-			threadKey:  wrongThreadKey2,
+			testCase:  "コメントが存在しないようなスレッドキーの場合は200となる",
+			threadKey: wrongThreadKey2,
+			prepare: func(mf *mockField) {
+				mf.threadApplication.EXPECT().GetByThreadKey(wrongThreadKey2).Return(thread, nil)
+				mf.commentApplication.EXPECT().GetAllByThreadKey(wrongThreadKey2).Return(nil, appError.ErrNotFound)
+			},
 			statusCode: http.StatusOK,
 		},
 		{
-			name:       "コメントを取得時にNotFound以外のエラーを発生させるとそれに応じたエラーとなる",
-			threadKey:  wrongThreadKey3,
+			testCase:  "コメントを取得時にNotFound以外のエラーを発生させるとそれに応じたエラーとなる",
+			threadKey: wrongThreadKey3,
+			prepare: func(mf *mockField) {
+				mf.threadApplication.EXPECT().GetByThreadKey(wrongThreadKey3).Return(thread, nil)
+				mf.commentApplication.EXPECT().GetAllByThreadKey(wrongThreadKey3).Return(nil, errors.New("Internal Server Error"))
+			},
 			statusCode: http.StatusInternalServerError,
 		},
 	}
 
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
 			path := "/api/comment/" + c.threadKey
-			response := executeHttpTest(r, "GET", path, nil)
+			response := executeHttpTest(r, http.MethodGet, path, nil)
 
 			if response.Code != c.statusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.statusCode, response.Code)
@@ -112,60 +114,29 @@ func TestCommentHandler_getAll(t *testing.T) {
 }
 
 func TestCommenHandler_create(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	//
 	// setup
 	//
 	r := gin.Default()
 
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
 	sessionManager := mock_session.NewMockManager(mockCtrl)
 	threadApplication := mock_application.NewMockThreadApplication(mockCtrl)
 	commentApplication := mock_application.NewMockCommentApplication(mockCtrl)
 
-	var (
-		correctThreadKey = "correct-thread-key"
-		wrongThreadKey1  = "wrong-thread-key1"
-		wrongThreadKey2  = "wrong-thread-key2"
-		notSession       bool
-		errSession       bool
-		initViews        = 0
-		commentSum       = 0
-	)
+	type mockField struct {
+		sessionManager     *mock_session.MockManager
+		threadApplication  *mock_application.MockThreadApplication
+		commentApplication *mock_application.MockCommentApplication
+	}
 
-	var threadKey string
-
-	sessionManager.EXPECT().Get(gomock.AssignableToTypeOf(&gin.Context{})).AnyTimes().DoAndReturn(
-		func(c *gin.Context) (*session.Session, error) {
-			if notSession {
-				return nil, appError.ErrNotFound
-			}
-			if errSession {
-				return nil, errors.New("internal server error")
-			}
-			return &session.Session{}, nil
-		},
-	)
-
-	threadApplication.EXPECT().GetByThreadKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*domain.Thread, error) {
-			if threadKey == wrongThreadKey2 {
-				return nil, appError.ErrNotFound
-			}
-			return &domain.Thread{Views: &initViews, CommentSum: &commentSum}, nil
-		},
-	)
-
-	commentApplication.EXPECT().CreateComment(gomock.AssignableToTypeOf(&params.CreateCommentAppLayerParam{})).AnyTimes().DoAndReturn(
-		func(params *params.CreateCommentAppLayerParam) (*[]domain.Comment, error) {
-			if params.ThreadKey == wrongThreadKey1 {
-				return nil, errors.New("Internal Server Error")
-			}
-			return &[]domain.Comment{}, nil
-		},
-	)
+	field := mockField{
+		sessionManager:     sessionManager,
+		threadApplication:  threadApplication,
+		commentApplication: commentApplication,
+	}
 
 	commentHandler := interfaces.NewCommentHandler(sessionManager, threadApplication, commentApplication)
 	commentHandler.SetupRouter(r.Group("/api/comment"))
@@ -173,80 +144,97 @@ func TestCommenHandler_create(t *testing.T) {
 	//
 	// execute
 	//
+	var (
+		correctThreadKey = "correct-thread-key"
+		wrongThreadKey   = "wrong-thread-key"
+		initViews        = 0
+		commentSum       = 0
+		thread           = &domain.Thread{Views: &initViews, CommentSum: &commentSum}
+	)
 	cases := []struct {
-		name       string
-		notSession bool
-		errSession bool
+		testCase   string
 		threadKey  string
-		request    request.RequestCommentCreate
+		prepare    func(*mockField)
+		body       request.RequestCommentCreate
 		statusCode int
 	}{
 		{
-			name:       "コメントが欠けている場合は500となる",
-			notSession: false,
-			errSession: false,
+			testCase: "コメントが欠けている場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentCreate{Contributor: "user"},
+			body:       request.RequestCommentCreate{Contributor: "user"},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "投稿者が欠けている場合は500となる",
-			notSession: false,
-			errSession: false,
+			testCase: "投稿者が欠けている場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentCreate{Comment: "comment"},
+			body:       request.RequestCommentCreate{Comment: "comment"},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "セッションが無い場合は401となる",
-			notSession: true,
-			errSession: false,
+			testCase: "セッションが無い場合は401となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, appError.ErrNotFound)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
 			statusCode: http.StatusUnauthorized,
 		},
 		{
-			name:       "セッションがエラーの場合は500になる",
-			notSession: false,
-			errSession: true,
+			testCase: "セッションがエラーの場合は500になる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "コメント生成もスレッド取得も問題ない場合200となる",
-			notSession: false,
-			errSession: false,
+			testCase: "コメント生成もスレッド取得も問題ない場合200となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.commentApplication.EXPECT().CreateComment(gomock.Any()).Return(&[]domain.Comment{}, nil)
+				mf.threadApplication.EXPECT().GetByThreadKey(correctThreadKey).Return(thread, nil)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
 			statusCode: http.StatusOK,
 		},
 		{
-			name:       "コメント作成に失敗した場合は500となる",
-			notSession: false,
-			errSession: false,
-			threadKey:  wrongThreadKey1,
-			request:    request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
+			testCase: "コメント作成に失敗した場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.commentApplication.EXPECT().CreateComment(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
+			},
+			threadKey:  wrongThreadKey,
+			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "コメント作成後のスレッド取得に失敗した場合は404となる",
-			notSession: false,
-			errSession: false,
-			threadKey:  wrongThreadKey2,
-			request:    request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
+			testCase: "コメント作成後のスレッド取得に失敗した場合は404となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.commentApplication.EXPECT().CreateComment(gomock.Any()).Return(&[]domain.Comment{}, nil)
+				mf.threadApplication.EXPECT().GetByThreadKey(wrongThreadKey).Return(nil, appError.ErrNotFound)
+			},
+			threadKey:  wrongThreadKey,
+			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
 			statusCode: http.StatusNotFound,
 		},
 	}
 
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			notSession = c.notSession
-			errSession = c.errSession
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
 			path := "/api/comment/" + c.threadKey
-			j, _ := json.Marshal(&c.request)
+			j, _ := json.Marshal(&c.body)
 
-			response := executeHttpTest(r, "POST", path, bytes.NewBuffer(j))
+			response := executeHttpTest(r, http.MethodPost, path, bytes.NewBuffer(j))
 
 			if response.Code != c.statusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.statusCode, response.Code)
@@ -257,59 +245,30 @@ func TestCommenHandler_create(t *testing.T) {
 
 func TestCommentService_edit(t *testing.T) {
 	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
 
 	//
 	// setup
 	//
 	r := gin.Default()
 
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
 	sessionManager := mock_session.NewMockManager(mockCtrl)
 	threadApplication := mock_application.NewMockThreadApplication(mockCtrl)
 	commentApplication := mock_application.NewMockCommentApplication(mockCtrl)
 
-	var (
-		correctThreadKey = "correct-thread-key"
-		wrongThreadKey1  = "wrong-thread-key1"
-		wrongThreadKey2  = "wrong-thread-key2"
-		notSession       bool
-		errSession       bool
-		initViews        = 0
-		commentSum       = 0
-	)
+	type mockField struct {
+		sessionManager     *mock_session.MockManager
+		threadApplication  *mock_application.MockThreadApplication
+		commentApplication *mock_application.MockCommentApplication
+	}
 
-	var threadKey string
-
-	sessionManager.EXPECT().Get(gomock.AssignableToTypeOf(&gin.Context{})).AnyTimes().DoAndReturn(
-		func(c *gin.Context) (*session.Session, error) {
-			if notSession {
-				return nil, appError.ErrNotFound
-			}
-			if errSession {
-				return nil, errors.New("internal server error")
-			}
-			return &session.Session{}, nil
-		},
-	)
-
-	threadApplication.EXPECT().GetByThreadKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*domain.Thread, error) {
-			if threadKey == wrongThreadKey2 {
-				return nil, appError.ErrNotFound
-			}
-			return &domain.Thread{Views: &initViews, CommentSum: &commentSum}, nil
-		},
-	)
-
-	commentApplication.EXPECT().EditComment(gomock.AssignableToTypeOf(&params.EditCommentAppLayerParam{})).AnyTimes().DoAndReturn(
-		func(params *params.EditCommentAppLayerParam) (*[]domain.Comment, error) {
-			if params.ThreadKey == wrongThreadKey1 {
-				return nil, errors.New("Internal Server Error")
-			}
-			return &[]domain.Comment{}, nil
-		},
-	)
+	field := mockField{
+		sessionManager:     sessionManager,
+		threadApplication:  threadApplication,
+		commentApplication: commentApplication,
+	}
 
 	commentHandler := interfaces.NewCommentHandler(sessionManager, threadApplication, commentApplication)
 	commentHandler.SetupRouter(r.Group("/api/comment"))
@@ -317,88 +276,106 @@ func TestCommentService_edit(t *testing.T) {
 	//
 	// execute
 	//
+	var (
+		correctThreadKey = "correct-thread-key"
+		wrongThreadKey   = "wrong-thread-key"
+		initViews        = 0
+		commentSum       = 0
+		thread           = &domain.Thread{Views: &initViews, CommentSum: &commentSum}
+	)
 	cases := []struct {
-		name       string
-		notSession bool
-		errSession bool
+		testCase   string
+		prepare    func(*mockField)
 		threadKey  string
-		request    request.RequestCommentEdit
+		body       request.RequestCommentEdit
 		StatusCode int
 	}{
 		{
-			name:       "コメントキーが欠けている場合は500となる",
-			notSession: false,
-			errSession: false,
+			testCase: "コメントキーが欠けている場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentEdit{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentEdit{Comment: "comment", Contributor: "user"},
 			StatusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "コメントが欠けている場合は500となる",
-			notSession: false,
-			errSession: false,
+			testCase: "コメントが欠けている場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentEdit{CommentKey: "key", Contributor: "user"},
+			body:       request.RequestCommentEdit{CommentKey: "key", Contributor: "user"},
 			StatusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "投稿者が欠けている場合は500となる",
-			notSession: false,
-			errSession: false,
+			testCase: "投稿者が欠けている場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentEdit{CommentKey: "key", Comment: "comment"},
+			body:       request.RequestCommentEdit{CommentKey: "key", Comment: "comment"},
 			StatusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "セッションが無い場合は401となる",
-			notSession: true,
-			errSession: false,
+			testCase: "セッションが無い場合は401となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, appError.ErrNotFound)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentEdit{CommentKey: "key", Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentEdit{CommentKey: "key", Comment: "comment", Contributor: "user"},
 			StatusCode: http.StatusUnauthorized,
 		},
 		{
-			name:       "セッションがエラーの場合は500となる",
-			notSession: false,
-			errSession: true,
+			testCase: "セッションがエラーの場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentEdit{CommentKey: "key", Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentEdit{CommentKey: "key", Comment: "comment", Contributor: "user"},
 			StatusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "コメントの編集に成功した場合は200となる",
-			notSession: false,
-			errSession: false,
+			testCase: "コメントの編集に成功した場合は200となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.commentApplication.EXPECT().EditComment(gomock.Any()).Return(&[]domain.Comment{}, nil)
+				mf.threadApplication.EXPECT().GetByThreadKey(correctThreadKey).Return(thread, nil)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentEdit{CommentKey: "key", Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentEdit{CommentKey: "key", Comment: "comment", Contributor: "user"},
 			StatusCode: http.StatusOK,
 		},
 		{
-			name:       "コメントの編集に失敗した場合は500となる",
-			notSession: false,
-			errSession: false,
-			threadKey:  wrongThreadKey1,
-			request:    request.RequestCommentEdit{CommentKey: "key", Comment: "comment", Contributor: "user"},
+			testCase: "コメントの編集に失敗した場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.commentApplication.EXPECT().EditComment(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
+			},
+			threadKey:  wrongThreadKey,
+			body:       request.RequestCommentEdit{CommentKey: "key", Comment: "comment", Contributor: "user"},
 			StatusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "コメント編集後のスレッド取得に失敗した場合は404となる",
-			notSession: false,
-			errSession: false,
-			threadKey:  wrongThreadKey2,
-			request:    request.RequestCommentEdit{CommentKey: "key", Comment: "comment", Contributor: "user"},
+			testCase: "コメント編集後のスレッド取得に失敗した場合は404となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.commentApplication.EXPECT().EditComment(gomock.Any()).Return(&[]domain.Comment{}, nil)
+				mf.threadApplication.EXPECT().GetByThreadKey(wrongThreadKey).Return(nil, appError.ErrNotFound)
+			},
+			threadKey:  wrongThreadKey,
+			body:       request.RequestCommentEdit{CommentKey: "key", Comment: "comment", Contributor: "user"},
 			StatusCode: http.StatusNotFound,
 		},
 	}
 
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			notSession = c.notSession
-			errSession = c.errSession
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
 			path := "/api/comment/" + c.threadKey
-			j, _ := json.Marshal(&c.request)
+			j, _ := json.Marshal(&c.body)
 
-			response := executeHttpTest(r, "PUT", path, bytes.NewBuffer(j))
+			response := executeHttpTest(r, http.MethodPut, path, bytes.NewBuffer(j))
 
 			if response.Code != c.StatusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.StatusCode, response.Code)
@@ -408,60 +385,28 @@ func TestCommentService_edit(t *testing.T) {
 }
 
 func TestCommentService_delete(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	//
 	// setup
 	//
 	r := gin.Default()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
 
 	sessionManager := mock_session.NewMockManager(mockCtrl)
 	threadApplication := mock_application.NewMockThreadApplication(mockCtrl)
 	commentApplication := mock_application.NewMockCommentApplication(mockCtrl)
 
-	var (
-		correctThreadKey = "correct-thread-key"
-		wrongThreadKey1  = "wrong-thread-key1"
-		wrongThreadKey2  = "wrong-thread-key2"
-		notSession       bool
-		errSession       bool
-		initViews        = 0
-		commentSum       = 0
-	)
+	type mockField struct {
+		sessionManager     *mock_session.MockManager
+		threadApplication  *mock_application.MockThreadApplication
+		commentApplication *mock_application.MockCommentApplication
+	}
 
-	var threadKey string
-
-	sessionManager.EXPECT().Get(gomock.AssignableToTypeOf(&gin.Context{})).AnyTimes().DoAndReturn(
-		func(c *gin.Context) (*session.Session, error) {
-			if notSession {
-				return nil, appError.ErrNotFound
-			}
-			if errSession {
-				return nil, errors.New("internal server error")
-			}
-			return &session.Session{}, nil
-		},
-	)
-
-	threadApplication.EXPECT().GetByThreadKey(gomock.AssignableToTypeOf(threadKey)).AnyTimes().DoAndReturn(
-		func(threadKey string) (*domain.Thread, error) {
-			if threadKey == wrongThreadKey2 {
-				return nil, appError.ErrNotFound
-			}
-			return &domain.Thread{Views: &initViews, CommentSum: &commentSum}, nil
-		},
-	)
-
-	commentApplication.EXPECT().DeleteComment(gomock.AssignableToTypeOf(&params.DeleteCommentAppLayerParam{})).AnyTimes().DoAndReturn(
-		func(params *params.DeleteCommentAppLayerParam) (*[]domain.Comment, error) {
-			if params.ThreadKey == wrongThreadKey1 {
-				return nil, errors.New("Internal Server Error")
-			}
-			return &[]domain.Comment{}, nil
-		},
-	)
+	field := mockField{
+		sessionManager:     sessionManager,
+		threadApplication:  threadApplication,
+		commentApplication: commentApplication,
+	}
 
 	commentHandler := interfaces.NewCommentHandler(sessionManager, threadApplication, commentApplication)
 	commentHandler.SetupRouter(r.Group("/api/comment"))
@@ -469,80 +414,97 @@ func TestCommentService_delete(t *testing.T) {
 	//
 	// execute
 	//
+	var (
+		correctThreadKey = "correct-thread-key"
+		wrongThreadKey   = "wrong-thread-key"
+		initViews        = 0
+		commentSum       = 0
+		thread           = &domain.Thread{Views: &initViews, CommentSum: &commentSum}
+	)
 	cases := []struct {
-		name       string
-		notSession bool
-		errSession bool
+		testCase   string
+		prepare    func(*mockField)
 		threadKey  string
-		request    request.RequestCommentDelete
+		body       request.RequestCommentDelete
 		StatusCode int
 	}{
 		{
-			name:       "コメントキーが欠けている場合は500となる",
-			notSession: false,
-			errSession: false,
+			testCase: "コメントキーが欠けている場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentDelete{Contributor: "user"},
+			body:       request.RequestCommentDelete{Contributor: "user"},
 			StatusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "投稿者が欠けている場合は500となる",
-			notSession: false,
-			errSession: false,
+			testCase: "投稿者が欠けている場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentDelete{CommentKey: "key"},
+			body:       request.RequestCommentDelete{CommentKey: "key"},
 			StatusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "セッションが無い場合は401となる",
-			notSession: true,
-			errSession: false,
+			testCase: "セッションが無い場合は401となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, appError.ErrNotFound)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentDelete{CommentKey: "key", Contributor: "user"},
+			body:       request.RequestCommentDelete{CommentKey: "key", Contributor: "user"},
 			StatusCode: http.StatusUnauthorized,
 		},
 		{
-			name:       "セッションがエラーの場合は500となる",
-			notSession: false,
-			errSession: true,
+			testCase: "セッションがエラーの場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentDelete{CommentKey: "key", Contributor: "user"},
+			body:       request.RequestCommentDelete{CommentKey: "key", Contributor: "user"},
 			StatusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "コメントの削除に成功した場合は200となる",
-			notSession: false,
-			errSession: false,
+			testCase: "コメントの削除に成功した場合は200となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.commentApplication.EXPECT().DeleteComment(gomock.Any()).Return(&[]domain.Comment{}, nil)
+				mf.threadApplication.EXPECT().GetByThreadKey(correctThreadKey).Return(thread, nil)
+			},
 			threadKey:  correctThreadKey,
-			request:    request.RequestCommentDelete{CommentKey: "key", Contributor: "user"},
+			body:       request.RequestCommentDelete{CommentKey: "key", Contributor: "user"},
 			StatusCode: http.StatusOK,
 		},
 		{
-			name:       "コメントの削除に失敗した場合は500となる",
-			notSession: false,
-			errSession: false,
-			threadKey:  wrongThreadKey1,
-			request:    request.RequestCommentDelete{CommentKey: "key", Contributor: "user"},
+			testCase: "コメントの削除に失敗した場合は500となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.commentApplication.EXPECT().DeleteComment(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
+			},
+			threadKey:  wrongThreadKey,
+			body:       request.RequestCommentDelete{CommentKey: "key", Contributor: "user"},
 			StatusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "コメント編集後のスレッド取得に失敗した場合は404となる",
-			notSession: false,
-			errSession: false,
-			threadKey:  wrongThreadKey2,
-			request:    request.RequestCommentDelete{CommentKey: "key", Contributor: "user"},
+			testCase: "コメント削除後のスレッド取得に失敗した場合は404となる",
+			prepare: func(mf *mockField) {
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.commentApplication.EXPECT().DeleteComment(gomock.Any()).Return(&[]domain.Comment{}, nil)
+				mf.threadApplication.EXPECT().GetByThreadKey(wrongThreadKey).Return(nil, appError.ErrNotFound)
+			},
+			threadKey:  wrongThreadKey,
+			body:       request.RequestCommentDelete{CommentKey: "key", Contributor: "user"},
 			StatusCode: http.StatusNotFound,
 		},
 	}
 
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			notSession = c.notSession
-			errSession = c.errSession
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
 			path := "/api/comment/" + c.threadKey
-			j, _ := json.Marshal(&c.request)
+			j, _ := json.Marshal(&c.body)
 
-			response := executeHttpTest(r, "DELETE", path, bytes.NewBuffer(j))
+			response := executeHttpTest(r, http.MethodDelete, path, bytes.NewBuffer(j))
 
 			if response.Code != c.StatusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.StatusCode, response.Code)

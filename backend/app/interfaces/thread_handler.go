@@ -31,10 +31,10 @@ func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
 	operatePermissionMiddleware := middleware.NewOperatePermissionMiddleware(t.sessionManager)
 
 	r.GET("", t.getAll)
-	r.GET("/:thread_key", t.get)
+	r.GET("/:threadKey", t.get)
 	r.POST("", operatePermissionMiddleware, t.create)
-	r.PUT("/:thread_key", operatePermissionMiddleware, t.edit)
-	r.DELETE("/:thread_key", operatePermissionMiddleware, t.delete)
+	r.PUT("/:threadKey", operatePermissionMiddleware, t.edit)
+	r.DELETE("/:threadKey", operatePermissionMiddleware, t.delete)
 }
 
 // Thread godoc
@@ -43,7 +43,7 @@ func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Success 200 {object} responseThreads
+// @Success 200 {object} response.responseThreads
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -74,8 +74,8 @@ func (t *ThreadHandler) getAll(c *gin.Context) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Param thread_key path string true "スレッドキー"
-// @Success 200 {object} responseThread
+// @Param threadKey path string true "スレッドキー"
+// @Success 200 {object} response.responseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -83,7 +83,7 @@ func (t *ThreadHandler) getAll(c *gin.Context) {
 // @Router /api/thread/{thread_key} [get]
 // Thread godoc
 func (t *ThreadHandler) get(c *gin.Context) {
-	threadKey := c.Param("thread_key")
+	threadKey := c.Param("threadKey")
 
 	thread, err := t.threadApplication.GetByThreadKey(threadKey)
 
@@ -102,8 +102,8 @@ func (t *ThreadHandler) get(c *gin.Context) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Param body body requestThreadCreate true "スレッド作成情報"
-// @Success 200 {object} responseThread
+// @Param body body request.requestThreadCreate true "スレッド作成情報"
+// @Success 200 {object} response.responseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -139,17 +139,17 @@ func (t *ThreadHandler) create(c *gin.Context) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Param thread_key path string true "スレッドキー"
-// @Param body body requestThreadEdit true "スレッド編集情報"
-// @Success 200 {object} responseThread
+// @Param threadKey path string true "スレッドキー"
+// @Param body body request.requestThreadEdit true "スレッド編集情報"
+// @Success 200 {object} response.responseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread/{thread_key} [put]
+// @Router /api/thread/{threadKey} [put]
 // Thread godoc
 func (t *ThreadHandler) edit(c *gin.Context) {
-	threadKey := c.Param("thread_key")
+	threadKey := c.Param("threadKey")
 
 	var req request.RequestThreadEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -180,17 +180,17 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Param thread_key path string true "スレッドキー"
-// @Param body body requestThreadDelete true "スレッド削除情報"
+// @Param threadKey path string true "スレッドキー"
+// @Param body body request.requestThreadDelete true "スレッド削除情報"
 // @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread/{thread_key} [delete]
+// @Router /api/thread/{threadKey} [delete]
 // Thread godoc
 func (t *ThreadHandler) delete(c *gin.Context) {
-	threadKey := c.Param("thread_key")
+	threadKey := c.Param("threadKey")
 
 	var req request.RequestThreadDelete
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -209,5 +209,5 @@ func (t *ThreadHandler) delete(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.Status(http.StatusNoContent)
 }

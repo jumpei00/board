@@ -19,22 +19,26 @@ import (
 )
 
 func TestUserHandler_me(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	//
 	// setup
 	//
 	r := gin.Default()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	sessionManager := mock_session.NewMockManager(mockCtrl)
+	userApplication := mock_application.NewMockUserApplication(mockCtrl)
 
 	type mockField struct {
 		sessionManager  *mock_session.MockManager
 		userApplication *mock_application.MockUserApplication
 	}
 
-	sessionManager := mock_session.NewMockManager(mockCtrl)
-	userApplication := mock_application.NewMockUserApplication(mockCtrl)
+	field := mockField{
+		sessionManager:  sessionManager,
+		userApplication: userApplication,
+	}
 
 	userHandler := interfaces.NewUserHandler(sessionManager, userApplication)
 	userHandler.SetupRouter(r.Group("/api/user"))
@@ -43,41 +47,40 @@ func TestUserHandler_me(t *testing.T) {
 	// execute
 	//
 	cases := []struct {
-		name       string
-		mock       func(*mockField)
+		testCase   string
+		prepare    func(*mockField)
 		statusCode int
 	}{
 		{
-			name: "セッションが確認できない場合は404となる",
-			mock: func(mf *mockField) {
+			testCase: "セッションが確認できない場合は404となる",
+			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, appError.ErrNotFound)
 			},
 			statusCode: http.StatusNotFound,
 		},
 		{
-			name: "セッションのユーザーIDに対するユーザーが存在しない時は404となる",
-			mock: func(mf *mockField) {
+			testCase: "セッションのユーザーIDに対するユーザーが存在しない時は404となる",
+			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(&session.Session{}, nil)
 				mf.userApplication.EXPECT().GetUserByID(gomock.Any()).Return(nil, appError.ErrNotFound)
 			},
 			statusCode: http.StatusNotFound,
 		},
 		{
-			name:         "セッションのユーザーIDに対するユーザーが存在する時は200となる",
-			mock: func(mf *mockField) {
+			testCase: "セッションのユーザーIDに対するユーザーが存在する時は200となる",
+			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(&session.Session{}, nil)
 				mf.userApplication.EXPECT().GetUserByID(gomock.Any()).Return(&domain.User{}, nil)
 			},
-			statusCode:   http.StatusOK,
+			statusCode: http.StatusOK,
 		},
 	}
 
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			// execute mock
-			c.mock(&mockField{sessionManager: sessionManager, userApplication: userApplication})
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
 
-			response := executeHttpTest(r, "GET", "/api/user/me", nil)
+			response := executeHttpTest(r, http.MethodGet, "/api/user/me", nil)
 
 			if response.Code != c.statusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.statusCode, response.Code)
@@ -87,27 +90,26 @@ func TestUserHandler_me(t *testing.T) {
 }
 
 func TestUserHandler_signup(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	//
 	// setup
 	//
-	var (
-		username = "username"
-		password = "password"
-	)
-
 	r := gin.Default()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	sessionManager := mock_session.NewMockManager(mockCtrl)
+	userApplication := mock_application.NewMockUserApplication(mockCtrl)
 
 	type mockField struct {
 		sessionManager  *mock_session.MockManager
 		userApplication *mock_application.MockUserApplication
 	}
 
-	sessionManager := mock_session.NewMockManager(mockCtrl)
-	userApplication := mock_application.NewMockUserApplication(mockCtrl)
+	field := mockField{
+		sessionManager:  sessionManager,
+		userApplication: userApplication,
+	}
 
 	userHandler := interfaces.NewUserHandler(sessionManager, userApplication)
 	userHandler.SetupRouter(r.Group("/api/user"))
@@ -115,15 +117,19 @@ func TestUserHandler_signup(t *testing.T) {
 	//
 	// execute
 	//
+	var (
+		username = "username"
+		password = "password"
+	)
 	cases := []struct {
-		name       string
-		mock       func(*mockField)
+		testCase   string
+		prepare    func(*mockField)
 		body       request.RequestSignUp
 		statusCode int
 	}{
 		{
-			name: "ユーザー登録が成功したら200となる",
-			mock: func(mf *mockField) {
+			testCase: "ユーザー登録が成功したら200となる",
+			prepare: func(mf *mockField) {
 				mf.userApplication.EXPECT().CreateUser(gomock.Any()).Return(&domain.User{}, nil)
 				mf.sessionManager.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, nil)
 			},
@@ -131,28 +137,28 @@ func TestUserHandler_signup(t *testing.T) {
 			statusCode: http.StatusOK,
 		},
 		{
-			name:       "ユーザー名が空文字の場合は500となる",
-			mock:       func(mf *mockField) {},
+			testCase:   "ユーザー名が空文字の場合は500となる",
+			prepare:    func(mf *mockField) {},
 			body:       request.RequestSignUp{Username: "", Password: password},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "パスワードが空文字の場合は500となる",
-			mock:       func(mf *mockField) {},
+			testCase:   "パスワードが空文字の場合は500となる",
+			prepare:    func(mf *mockField) {},
 			body:       request.RequestSignUp{Username: username, Password: ""},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
-			name: "ユーザーの登録時にエラーとなった場合は500となる",
-			mock: func(mf *mockField) {
+			testCase: "ユーザーの登録時にエラーとなった場合は500となる",
+			prepare: func(mf *mockField) {
 				mf.userApplication.EXPECT().CreateUser(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
 			},
 			body:       request.RequestSignUp{Username: username, Password: password},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
-			name: "セッション登録時にエラーとなった場合は500となる",
-			mock: func(mf *mockField) {
+			testCase: "セッション登録時にエラーとなった場合は500となる",
+			prepare: func(mf *mockField) {
 				mf.userApplication.EXPECT().CreateUser(gomock.Any()).Return(&domain.User{}, nil)
 				mf.sessionManager.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, errors.New("Internal Server Error"))
 			},
@@ -162,12 +168,11 @@ func TestUserHandler_signup(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			// mock execute
-			c.mock(&mockField{sessionManager: sessionManager, userApplication: userApplication})
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
 
 			j, _ := json.Marshal(&c.body)
-			response := executeHttpTest(r, "POST", "/api/user/signup", bytes.NewBuffer(j))
+			response := executeHttpTest(r, http.MethodPost, "/api/user/signup", bytes.NewBuffer(j))
 
 			if response.Code != c.statusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.statusCode, response.Code)
@@ -177,27 +182,26 @@ func TestUserHandler_signup(t *testing.T) {
 }
 
 func TestUserHandler_signin(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	//
 	// setup
 	//
-	var (
-		username = "username"
-		password = "password"
-	)
-
 	r := gin.Default()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	sessionManager := mock_session.NewMockManager(mockCtrl)
+	userApplication := mock_application.NewMockUserApplication(mockCtrl)
 
 	type mockField struct {
 		sessionManager  *mock_session.MockManager
 		userApplication *mock_application.MockUserApplication
 	}
 
-	sessionManager := mock_session.NewMockManager(mockCtrl)
-	userApplication := mock_application.NewMockUserApplication(mockCtrl)
+	field := mockField{
+		sessionManager:  sessionManager,
+		userApplication: userApplication,
+	}
 
 	userHandler := interfaces.NewUserHandler(sessionManager, userApplication)
 	userHandler.SetupRouter(r.Group("/api/user"))
@@ -205,15 +209,19 @@ func TestUserHandler_signin(t *testing.T) {
 	//
 	// execute
 	//
+	var (
+		username = "username"
+		password = "password"
+	)
 	cases := []struct {
-		name       string
-		mock       func(*mockField)
+		testCase   string
+		prepare    func(*mockField)
 		body       request.RequestSignIn
 		statusCode int
 	}{
 		{
-			name: "ログインが成功したら200となる",
-			mock: func(mf *mockField) {
+			testCase: "ログインが成功したら200となる",
+			prepare: func(mf *mockField) {
 				mf.userApplication.EXPECT().ValidateUser(gomock.Any()).Return(&domain.User{}, nil)
 				mf.sessionManager.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, nil)
 			},
@@ -221,28 +229,28 @@ func TestUserHandler_signin(t *testing.T) {
 			statusCode: http.StatusOK,
 		},
 		{
-			name:       "ユーザー名が空文字の場合は500となる",
-			mock:       func(mf *mockField) {},
+			testCase:   "ユーザー名が空文字の場合は500となる",
+			prepare:    func(mf *mockField) {},
 			body:       request.RequestSignIn{Username: "", Password: password},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
-			name:       "パスワードが空文字の場合は500となる",
-			mock:       func(mf *mockField) {},
+			testCase:   "パスワードが空文字の場合は500となる",
+			prepare:    func(mf *mockField) {},
 			body:       request.RequestSignIn{Username: username, Password: ""},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
-			name: "ログインに失敗した場合は400となる",
-			mock: func(mf *mockField) {
+			testCase: "ログインに失敗した場合は400となる",
+			prepare: func(mf *mockField) {
 				mf.userApplication.EXPECT().ValidateUser(gomock.Any()).Return(nil, &appError.BadRequest{})
 			},
 			body:       request.RequestSignIn{Username: username, Password: password},
 			statusCode: http.StatusBadRequest,
 		},
 		{
-			name: "セッション登録時にエラーとなった場合は500となる",
-			mock: func(mf *mockField) {
+			testCase: "セッション登録時にエラーとなった場合は500となる",
+			prepare: func(mf *mockField) {
 				mf.userApplication.EXPECT().ValidateUser(gomock.Any()).Return(&domain.User{}, nil)
 				mf.sessionManager.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, errors.New("Internal Server Error"))
 			},
@@ -252,12 +260,11 @@ func TestUserHandler_signin(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			// mock execute
-			c.mock(&mockField{sessionManager: sessionManager, userApplication: userApplication})
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
 
 			j, _ := json.Marshal(&c.body)
-			response := executeHttpTest(r, "POST", "/api/user/signin", bytes.NewBuffer(j))
+			response := executeHttpTest(r, http.MethodPost, "/api/user/signin", bytes.NewBuffer(j))
 
 			if response.Code != c.statusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.statusCode, response.Code)
@@ -267,22 +274,26 @@ func TestUserHandler_signin(t *testing.T) {
 }
 
 func TestUserHandler_signout(t *testing.T) {
-	// mock controller
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
 	//
 	// setup
 	//
 	r := gin.Default()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	sessionManager := mock_session.NewMockManager(mockCtrl)
+	userApplication := mock_application.NewMockUserApplication(mockCtrl)
 
 	type mockField struct {
 		sessionManager  *mock_session.MockManager
 		userApplication *mock_application.MockUserApplication
 	}
 
-	sessionManager := mock_session.NewMockManager(mockCtrl)
-	userApplication := mock_application.NewMockUserApplication(mockCtrl)
+	field := mockField{
+		sessionManager:  sessionManager,
+		userApplication: userApplication,
+	}
 
 	userHandler := interfaces.NewUserHandler(sessionManager, userApplication)
 	userHandler.SetupRouter(r.Group("/api/user"))
@@ -291,20 +302,20 @@ func TestUserHandler_signout(t *testing.T) {
 	// execute
 	//
 	cases := []struct {
-		name       string
-		mock       func(*mockField)
+		testCase   string
+		prepare    func(*mockField)
 		statusCode int
 	}{
 		{
-			name: "セッションの削除に失敗した場合は500となる",
-			mock: func(mf *mockField) {
+			testCase: "セッションの削除に失敗した場合は500となる",
+			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Delete(gomock.Any()).Return(errors.New("Internal Server Error"))
 			},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
-			name: "セッションの削除に成功した場合は204となる",
-			mock: func(mf *mockField) {
+			testCase: "セッションの削除に成功した場合は204となる",
+			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Delete(gomock.Any()).Return(nil)
 			},
 			statusCode: http.StatusNoContent,
@@ -312,11 +323,10 @@ func TestUserHandler_signout(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			// mock execute
-			c.mock(&mockField{sessionManager: sessionManager, userApplication: userApplication})
+		t.Run(c.testCase, func(t *testing.T) {
+			c.prepare(&field)
 
-			response := executeHttpTest(r, "DELETE", "/api/user/signout", nil)
+			response := executeHttpTest(r, http.MethodDelete, "/api/user/signout", nil)
 
 			if response.Code != c.statusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.statusCode, response.Code)

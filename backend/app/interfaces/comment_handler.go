@@ -32,10 +32,10 @@ func NewCommentHandler(sm session.Manager, ta application.ThreadApplication, ca 
 func (co *CommentHandler) SetupRouter(r *gin.RouterGroup) {
 	operatePermissionMiddleware := middleware.NewOperatePermissionMiddleware(co.sessionManager)
 
-	r.GET("/:threadKey", co.getAll)
-	r.POST("/:threadKey", operatePermissionMiddleware, co.create)
-	r.PUT("/:threadKey", operatePermissionMiddleware, co.edit)
-	r.DELETE("/:threadKey", operatePermissionMiddleware, co.delete)
+	r.GET("/:threadKey/comments", co.getAll)
+	r.POST("/:threadKey/comments", operatePermissionMiddleware, co.create)
+	r.PUT("/:threadKey/comments/:commentKey", operatePermissionMiddleware, co.edit)
+	r.DELETE("/:threadKey/comments/:commentKey", operatePermissionMiddleware, co.delete)
 }
 
 // Comment godoc
@@ -50,7 +50,7 @@ func (co *CommentHandler) SetupRouter(r *gin.RouterGroup) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/comment/{threadKey} [get]
+// @Router /api/threads/{threadKey}/comments [get]
 // Comment godoc
 func (co *CommentHandler) getAll(c *gin.Context) {
 	threadKey := c.Param("threadKey")
@@ -94,7 +94,7 @@ func (co *CommentHandler) getAll(c *gin.Context) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/comment/{threadKey} [post]
+// @Router /api/threads/{threadKey}/comments [post]
 // Comment godoc
 func (co *CommentHandler) create(c *gin.Context) {
 	threadKey := c.Param("threadKey")
@@ -140,16 +140,18 @@ func (co *CommentHandler) create(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
+// @Param commentKey path string true "コメントキー"
 // @Param body body request.requestCommentEdit true "コメント編集情報"
 // @Success 200 {object} response.responseThreadAndComments
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/comment/{threadKey} [put]
+// @Router /api/threads/{threadKey}/comments/{commentKey} [put]
 // Comment godoc
 func (co *CommentHandler) edit(c *gin.Context) {
 	threadKey := c.Param("threadKey")
+	commentKey := c.Param("commentKey")
 
 	var req request.RequestCommentEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -160,7 +162,7 @@ func (co *CommentHandler) edit(c *gin.Context) {
 
 	param := params.EditCommentAppLayerParam{
 		ThreadKey:   threadKey,
-		CommentKey:  req.CommentKey,
+		CommentKey:  commentKey,
 		Comment:     req.Comment,
 		Contributor: req.Contributor,
 	}
@@ -193,16 +195,18 @@ func (co *CommentHandler) edit(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
+// @Param commentKey path string true "コメントキー"
 // @Param body body requestCommentDelete true "コメント削除情報"
 // @Success 200 {object} response.responseThreadAndComments
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/comment/{threadKey} [delete]
+// @Router /api/threads/{threadKey}/comments/{commentKey} [delete]
 // Comment godoc
 func (co *CommentHandler) delete(c *gin.Context) {
 	threadKey := c.Param("threadKey")
+	commentKey := c.Param("commentKey")
 
 	var req request.RequestCommentDelete
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -213,7 +217,7 @@ func (co *CommentHandler) delete(c *gin.Context) {
 
 	param := params.DeleteCommentAppLayerParam{
 		ThreadKey:   threadKey,
-		CommentKey:  req.CommentKey,
+		CommentKey:  commentKey,
 		Contributor: req.Contributor,
 	}
 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
+	"github.com/jumpei00/board/backend/app/interfaces/request"
 	"github.com/jumpei00/board/backend/app/interfaces/session"
 	"github.com/jumpei00/board/backend/app/library/logger"
 	"github.com/jumpei00/board/backend/app/params"
@@ -73,7 +74,7 @@ func (u *UserHandler) me(c *gin.Context) {
 // @Router /api/signup [post]
 // User godoc
 func (u *UserHandler) signup(c *gin.Context) {
-	var req requestSignUp
+	var req request.RequestSignUp
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("requesting json bind error on signup", "error", err, "binded_request", req)
 		handleError(c, err)
@@ -114,7 +115,7 @@ func (u *UserHandler) signup(c *gin.Context) {
 // @Router /api/signin [post]
 // User godoc
 func (u *UserHandler) signin(c *gin.Context) {
-	var req requestSignIn
+	var req request.RequestSignIn
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("requesting json bind error on signin", "error", err, "binded_request", req)
 		handleError(c, err)
@@ -160,14 +161,4 @@ func (u *UserHandler) signout(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
-}
-
-type requestSignUp struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type requestSignIn struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
 }

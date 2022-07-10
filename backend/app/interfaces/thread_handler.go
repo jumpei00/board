@@ -48,7 +48,7 @@ func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread [get]
+// @Router /api/threads [get]
 // Thread godoc
 func (t *ThreadHandler) getAll(c *gin.Context) {
 	threads, err := t.threadApplication.GetAllThread()
@@ -80,7 +80,7 @@ func (t *ThreadHandler) getAll(c *gin.Context) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread/{thread_key} [get]
+// @Router /api/threads/{threadKey} [get]
 // Thread godoc
 func (t *ThreadHandler) get(c *gin.Context) {
 	threadKey := c.Param("threadKey")
@@ -108,7 +108,7 @@ func (t *ThreadHandler) get(c *gin.Context) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread [post]
+// @Router /api/threads [post]
 // Thread godoc
 func (t *ThreadHandler) create(c *gin.Context) {
 	var req request.RequestThreadCreate
@@ -146,7 +146,7 @@ func (t *ThreadHandler) create(c *gin.Context) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread/{threadKey} [put]
+// @Router /api/threads/{threadKey} [put]
 // Thread godoc
 func (t *ThreadHandler) edit(c *gin.Context) {
 	threadKey := c.Param("threadKey")
@@ -187,7 +187,7 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread/{threadKey} [delete]
+// @Router /api/threads/{threadKey} [delete]
 // Thread godoc
 func (t *ThreadHandler) delete(c *gin.Context) {
 	threadKey := c.Param("threadKey")

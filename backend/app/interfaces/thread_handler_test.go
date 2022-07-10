@@ -40,7 +40,7 @@ func TestThreadHandler_getAll(t *testing.T) {
 	}
 
 	threadHandler := interfaces.NewThreadHandler(sessionManager, threadApplication)
-	threadHandler.SetupRouter(r.Group("/api/thread"))
+	threadHandler.SetupRouter(r.Group("/api/threads"))
 
 	//
 	// exucute
@@ -69,7 +69,7 @@ func TestThreadHandler_getAll(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.testCase, func(t *testing.T) {
 			c.prepare(&field)
-			response := executeHttpTest(r, http.MethodGet, "/api/thread", nil)
+			response := executeHttpTest(r, http.MethodGet, "/api/threads", nil)
 
 			if response.Code != c.statusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.statusCode, response.Code)
@@ -99,7 +99,7 @@ func TestThreadHandler_get(t *testing.T) {
 	}
 
 	threadHandler := interfaces.NewThreadHandler(sessionManager, threadApplication)
-	threadHandler.SetupRouter(r.Group("/api/thread"))
+	threadHandler.SetupRouter(r.Group("/api/threads"))
 
 	//
 	// execute
@@ -138,7 +138,7 @@ func TestThreadHandler_get(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.testCase, func(t *testing.T) {
 			c.prepare(&field)
-			path := "/api/thread/" + c.threadKey
+			path := "/api/threads/" + c.threadKey
 			response := executeHttpTest(r, http.MethodGet, path, nil)
 
 			if response.Code != c.statucCode {
@@ -171,7 +171,7 @@ func TestThreaHandler_create(t *testing.T) {
 	}
 
 	threadHandler := interfaces.NewThreadHandler(sessionManager, threadApplication)
-	threadHandler.SetupRouter(r.Group("/api/thread"))
+	threadHandler.SetupRouter(r.Group("/api/threads"))
 
 	//
 	// execute
@@ -244,7 +244,7 @@ func TestThreaHandler_create(t *testing.T) {
 			c.prepare(&field)
 			j, _ := json.Marshal(&c.body)
 
-			response := executeHttpTest(r, http.MethodPost, "/api/thread", bytes.NewBuffer(j))
+			response := executeHttpTest(r, http.MethodPost, "/api/threads", bytes.NewBuffer(j))
 
 			if response.Code != c.statusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.statusCode, response.Code)
@@ -277,7 +277,7 @@ func TestThreadHandler_edit(t *testing.T) {
 	}
 
 	threadHandler := interfaces.NewThreadHandler(sessionManager, threadApplication)
-	threadHandler.SetupRouter(r.Group("/api/thread"))
+	threadHandler.SetupRouter(r.Group("/api/threads"))
 
 	//
 	// execute
@@ -357,7 +357,7 @@ func TestThreadHandler_edit(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.testCase, func(t *testing.T) {
 			c.prepare(&field)
-			path := "/api/thread/" + c.threadKey
+			path := "/api/threads/" + c.threadKey
 			j, _ := json.Marshal(&c.body)
 
 			response := executeHttpTest(r, http.MethodPut, path, bytes.NewBuffer(j))
@@ -392,7 +392,7 @@ func TestThreadHandler_delete(t *testing.T) {
 	}
 
 	threadHandler := interfaces.NewThreadHandler(sessionManager, threadApplication)
-	threadHandler.SetupRouter(r.Group("/api/thread"))
+	threadHandler.SetupRouter(r.Group("/api/threads"))
 
 	//
 	// execute
@@ -460,7 +460,7 @@ func TestThreadHandler_delete(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.testCase, func(t *testing.T) {
 			c.prepare(&field)
-			path := "/api/thread/" + c.threadKey
+			path := "/api/threads/" + c.threadKey
 			j, _ := json.Marshal(&c.body)
 
 			response := executeHttpTest(r, http.MethodDelete, path, bytes.NewBuffer(j))

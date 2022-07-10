@@ -5,10 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
+	"github.com/jumpei00/board/backend/app/application/params"
 	"github.com/jumpei00/board/backend/app/interfaces/request"
 	"github.com/jumpei00/board/backend/app/interfaces/session"
 	"github.com/jumpei00/board/backend/app/library/logger"
-	"github.com/jumpei00/board/backend/app/params"
 )
 
 type UserHandler struct {

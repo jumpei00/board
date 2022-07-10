@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Box, HStack, Text } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
-import { signout } from "../../../state/user/redux";
+import { signout } from "../../../state/user";
 
 type HeaderNavigationProps = {
     isSignupText: boolean;

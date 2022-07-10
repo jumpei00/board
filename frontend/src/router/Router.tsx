@@ -1,10 +1,10 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { Header } from "../components/templates/header/Header";
-import { Home } from "../pages/home/Page";
+import { Home } from "../pages/threads/Page";
 import { SingUp } from "../pages/singup/Page";
 import { SignIn } from "../pages/signin/Page";
-import { ThreadContent } from "../pages/threadContent/Page";
+import { ThreadContent } from "../pages/threads/comments/Page";
 import { NotFind } from "../pages/404/Page";
 
 export const Router: React.FC = () => {

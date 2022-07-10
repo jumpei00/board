@@ -2,14 +2,14 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Box } from "@chakra-ui/react";
-import { ThreadBoard } from "../../components/organisms/thread/ThreadBoard";
-import { CommentPostform } from "../../components/organisms/form/CommentPostForm";
-import { CommentBoardList } from "../../components/templates/comments/CommentBoardList";
-import { RootState } from "../../store/store";
-import { getAllCommentByThreadKey } from "./redux/comments";
-import { getThreadByThreadKeyPayload } from "./redux/thread/type";
-import { getThreadByThreadKey } from "./redux/thread";
-import { getAllCommentPayload } from "./redux/comments/type";
+import { ThreadBoard } from "../../../components/organisms/thread/ThreadBoard";
+import { CommentPostform } from "../../../components/organisms/form/CommentPostForm";
+import { CommentBoardList } from "../../../components/templates/comments/CommentBoardList";
+import { RootState } from "../../../store/store";
+import { getAllCommentByThreadKey } from "../../../state/comments";
+import { getThreadByThreadKeyPayload } from "../../threadContent/redux/thread/type";
+import { getThreadByThreadKey } from "../../threadContent/redux/thread";
+import { getAllCommentPayload } from "../../threadContent/redux/comments/type";
 
 export const ThreadContent: React.FC = () => {
     const urlParams = useParams();

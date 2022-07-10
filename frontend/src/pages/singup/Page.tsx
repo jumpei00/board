@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { AuthForm } from "../../components/organisms/form/AuthForm";
-import { signup } from "../../state/user/redux";
+import { signup } from "../../state/user";
 import { userPayload } from "../../state/user/redux/type";
 
 export const SingUp: React.FC = () => {

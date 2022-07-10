@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { threadsReducer } from "../pages/home/redux/threads";
-import { visitorsReducer } from "../pages/home/redux/visitors";
-import { commentsReducer } from "../pages/threadContent/redux/comments";
+import { threadsReducer } from "../state/threads";
+import { visitorsReducer } from "../state/visitor";
+import { commentsReducer } from "../state/comments";
 import { threadReducer } from "../pages/threadContent/redux/thread";
-import { userReducer } from "../state/user/redux";
+import { userReducer } from "../state/user";
 
 export const store = configureStore({
     reducer: {

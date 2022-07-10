@@ -4,8 +4,8 @@ import { VisitorStat } from "../../components/organisms/stat/VisitorStat";
 import { ThreadPostForm } from "../../components/organisms/form/ThreadPostForm";
 import { ThreadsBoardList } from "../../components/templates/threads/ThreadBoardList";
 import { RootState } from "../../store/store";
-import { getAllThread } from "./redux/threads";
-import { getVisitors } from "./redux/visitors";
+import { getAllThread } from "../../state/threads";
+import { getVisitors } from "../../state/visitor";
 
 export const Home: React.FC = () => {
     const user = useSelector((state: RootState) => state.user);

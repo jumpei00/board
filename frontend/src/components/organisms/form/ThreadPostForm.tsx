@@ -2,8 +2,8 @@ import React, { useState, ChangeEvent } from "react";
 import { useDispatch } from "react-redux";
 import { Text, Input, Box } from "@chakra-ui/react";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
-import { createThreadPayload } from "../../../pages/home/redux/threads/type";
-import { createThread } from "../../../pages/home/redux/threads";
+import { createThreadPayload } from "../../../pages/threads/redux/threads/type";
+import { createThread } from "../../../state/threads";
 
 type ThreadPostFormProps = {
     loginUsername: string;

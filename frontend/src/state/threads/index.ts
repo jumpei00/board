@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Thread, Threads } from "../../../../models/Thread";
+import { Thread, Threads } from "../../models/Thread";
 import { createThreadPayload, deleteThreadPayload, editThreadPayload } from "./type";
 
 const initialState: Threads = {

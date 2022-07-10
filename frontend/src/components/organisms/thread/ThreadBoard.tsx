@@ -6,8 +6,8 @@ import { Thread } from "../../../models/Thread";
 import { MenuIconButton } from "../../atoms/button/MenuIconButton";
 import { ThreadViewButton } from "../../atoms/button/ThreadViewButton";
 import { GeneralModal } from "../modal/GeneralModal";
-import { deleteThreadPayload, editThreadPayload } from "../../../pages/home/redux/threads/type";
-import { deleteThread, editThreadTitle } from "../../../pages/home/redux/threads";
+import { deleteThreadPayload, editThreadPayload } from "../../../pages/threads/redux/threads/type";
+import { deleteThread, editThreadTitle } from "../../../state/threads";
 
 interface ThreadBoadProps extends Thread {
     isStatic?: boolean;

@@ -4,7 +4,7 @@ import { Box, Text, Input, Flex, Spacer } from "@chakra-ui/react";
 import { ImageButton } from "../../atoms/button/ImageButton";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
 import { createCommentPayload } from "../../../pages/threadContent/redux/comments/type";
-import { createComment } from "../../../pages/threadContent/redux/comments";
+import { createComment } from "../../../state/comments";
 
 type CommentPostFormProps = {
     loginUsername: string;

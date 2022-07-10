@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Comment, Comments } from "../../../../models/Comment";
+import { Comment, Comments } from "../../models/Comment";
 import { getAllCommentPayload, createCommentPayload, editCommentPayload, deleteCommentPayload } from "./type";
 
 const initialState: Comments = {

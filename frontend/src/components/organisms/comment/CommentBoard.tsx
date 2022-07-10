@@ -7,7 +7,7 @@ import { Picture } from "../../atoms/picture/Picture";
 import { Comment } from "../../../models/Comment";
 import { GeneralModal } from "../modal/GeneralModal";
 import { deleteCommentPayload, editCommentPayload } from "../../../pages/threadContent/redux/comments/type";
-import { deleteComment, editComment } from "../../../pages/threadContent/redux/comments";
+import { deleteComment, editComment } from "../../../state/comments";
 
 export const CommentBoard: React.FC<Comment> = (props) => {
     const dispatch = useDispatch();

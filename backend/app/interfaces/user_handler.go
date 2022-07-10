@@ -41,7 +41,7 @@ func (u *UserHandler) SetupRouter(r *gin.RouterGroup) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/me [get]
+// @Router /api/user/me [get]
 // User godoc
 func (u *UserHandler) me(c *gin.Context) {
 	session, err := u.sessionManager.Get(c)
@@ -71,7 +71,7 @@ func (u *UserHandler) me(c *gin.Context) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/signup [post]
+// @Router /api/user/signup [post]
 // User godoc
 func (u *UserHandler) signup(c *gin.Context) {
 	var req request.RequestSignUp
@@ -112,7 +112,7 @@ func (u *UserHandler) signup(c *gin.Context) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/signin [post]
+// @Router /api/user/signin [post]
 // User godoc
 func (u *UserHandler) signin(c *gin.Context) {
 	var req request.RequestSignIn
@@ -152,7 +152,7 @@ func (u *UserHandler) signin(c *gin.Context) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/signout [delete]
+// @Router /api/user/signout [delete]
 // User godoc
 func (u *UserHandler) signout(c *gin.Context) {
 	if err := u.sessionManager.Delete(c); err != nil {

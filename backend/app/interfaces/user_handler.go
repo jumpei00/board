@@ -65,7 +65,7 @@ func (u *UserHandler) me(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param body body requestSignUp true "新規ユーザー作成情報"
+// @Param body body request.RequestSignUp true "新規ユーザー作成情報"
 // @Success 200 {object} domain.User
 // @Failure 400
 // @Failure 401
@@ -106,7 +106,7 @@ func (u *UserHandler) signup(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param body body requestSignIn true "ログイン情報"
+// @Param body body request.RequestSignIn true "ログイン情報"
 // @Success 200 {object} domain.User
 // @Failure 400
 // @Failure 401

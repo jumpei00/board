@@ -45,7 +45,7 @@ func (co *CommentHandler) SetupRouter(r *gin.RouterGroup) {
 // @Accept json
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
-// @Success 200 {object} responseThreadAndComments
+// @Success 200 {object} response.ResponseThreadAndComments
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -88,8 +88,8 @@ func (co *CommentHandler) getAll(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
-// @Param body body request.requestCommentCreate true "コメント作成情報"
-// @Success 200 {object} response.responseThreadAndComments
+// @Param body body request.RequestCommentCreate true "コメント作成情報"
+// @Success 200 {object} response.ResponseThreadAndComments
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -141,8 +141,8 @@ func (co *CommentHandler) create(c *gin.Context) {
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
 // @Param commentKey path string true "コメントキー"
-// @Param body body request.requestCommentEdit true "コメント編集情報"
-// @Success 200 {object} response.responseThreadAndComments
+// @Param body body request.RequestCommentEdit true "コメント編集情報"
+// @Success 200 {object} response.ResponseThreadAndComments
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -196,8 +196,8 @@ func (co *CommentHandler) edit(c *gin.Context) {
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
 // @Param commentKey path string true "コメントキー"
-// @Param body body requestCommentDelete true "コメント削除情報"
-// @Success 200 {object} response.responseThreadAndComments
+// @Param body body request.RequestCommentDelete true "コメント削除情報"
+// @Success 200 {object} response.ResponseThreadAndComments
 // @Failure 400
 // @Failure 401
 // @Failure 404

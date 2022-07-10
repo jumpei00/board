@@ -43,7 +43,7 @@ func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.responseThreads
+// @Success 200 {object} response.ResponseThreads
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -75,7 +75,7 @@ func (t *ThreadHandler) getAll(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
-// @Success 200 {object} response.responseThread
+// @Success 200 {object} response.ResponseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -102,8 +102,8 @@ func (t *ThreadHandler) get(c *gin.Context) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Param body body request.requestThreadCreate true "スレッド作成情報"
-// @Success 200 {object} response.responseThread
+// @Param body body request.RequestThreadCreate true "スレッド作成情報"
+// @Success 200 {object} response.ResponseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -140,8 +140,8 @@ func (t *ThreadHandler) create(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
-// @Param body body request.requestThreadEdit true "スレッド編集情報"
-// @Success 200 {object} response.responseThread
+// @Param body body request.RequestThreadEdit true "スレッド編集情報"
+// @Success 200 {object} response.ResponseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -181,7 +181,7 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
-// @Param body body request.requestThreadDelete true "スレッド削除情報"
+// @Param body body request.RequestThreadDelete true "スレッド削除情報"
 // @Success 200
 // @Failure 400
 // @Failure 401

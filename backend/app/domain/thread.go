@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/jumpei00/board/backend/app/params"
+	"github.com/jumpei00/board/backend/app/domain/params"
 )
 
 type Thread struct {
@@ -19,9 +19,14 @@ type Thread struct {
 }
 
 func NewThread(param *params.CreateThreadDomainLayerParam) *Thread {
+	initViews := 0
+	initCommentSum := 0
+
 	thread := &Thread{
 		Title:       param.Title,
 		Contributor: param.Contributor,
+		Views:       &initViews,
+		CommentSum:  &initCommentSum,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}

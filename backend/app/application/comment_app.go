@@ -1,18 +1,19 @@
 package application
 
 import (
+	appParams "github.com/jumpei00/board/backend/app/application/params"
 	"github.com/jumpei00/board/backend/app/domain"
+	domainParams "github.com/jumpei00/board/backend/app/domain/params"
 	"github.com/jumpei00/board/backend/app/domain/repository"
-	"github.com/jumpei00/board/backend/app/library/logger"
 	appError "github.com/jumpei00/board/backend/app/library/error"
-	"github.com/jumpei00/board/backend/app/params"
+	"github.com/jumpei00/board/backend/app/library/logger"
 )
 
 type CommentApplication interface {
 	GetAllByThreadKey(threadKey string) (*[]domain.Comment, error)
-	CreateComment(param *params.CreateCommentAppLayerParam) (*[]domain.Comment, error)
-	EditComment(param *params.EditCommentAppLayerParam) (*[]domain.Comment, error)
-	DeleteComment(param *params.DeleteCommentAppLayerParam) (*[]domain.Comment, error)
+	CreateComment(param *appParams.CreateCommentAppLayerParam) (*[]domain.Comment, error)
+	EditComment(param *appParams.EditCommentAppLayerParam) (*[]domain.Comment, error)
+	DeleteComment(param *appParams.DeleteCommentAppLayerParam) (*[]domain.Comment, error)
 }
 
 type commentApplication struct {
@@ -36,14 +37,14 @@ func (c *commentApplication) GetAllByThreadKey(threadKey string) (*[]domain.Comm
 	return comments, nil
 }
 
-func (c *commentApplication) CreateComment(param *params.CreateCommentAppLayerParam) (*[]domain.Comment, error) {
+func (c *commentApplication) CreateComment(param *appParams.CreateCommentAppLayerParam) (*[]domain.Comment, error) {
 	// 対象のスレッドを取得
 	thread, err := c.threadRepo.GetByKey(param.ThreadKey)
 	if err != nil {
 		return nil, err
 	}
 
-	domainParam := params.CreateCommentDomainLayerParam{
+	domainParam := domainParams.CreateCommentDomainLayerParam{
 		ThreadKey:   param.ThreadKey,
 		Contributor: param.Contributor,
 		Comment:     param.Comment,
@@ -70,7 +71,7 @@ func (c *commentApplication) CreateComment(param *params.CreateCommentAppLayerPa
 	return comments, nil
 }
 
-func (c *commentApplication) EditComment(param *params.EditCommentAppLayerParam) (*[]domain.Comment, error) {
+func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerParam) (*[]domain.Comment, error) {
 	// 対象のスレッドを取得
 	thread, err := c.threadRepo.GetByKey(param.ThreadKey)
 	if err != nil {
@@ -96,7 +97,7 @@ func (c *commentApplication) EditComment(param *params.EditCommentAppLayerParam)
 		)
 	}
 
-	domainParam := params.EditCommentDomainLayerParam{
+	domainParam := domainParams.EditCommentDomainLayerParam{
 		Comment: param.Comment,
 	}
 
@@ -119,7 +120,7 @@ func (c *commentApplication) EditComment(param *params.EditCommentAppLayerParam)
 	return comments, nil
 }
 
-func (c *commentApplication) DeleteComment(param *params.DeleteCommentAppLayerParam) (*[]domain.Comment, error) {
+func (c *commentApplication) DeleteComment(param *appParams.DeleteCommentAppLayerParam) (*[]domain.Comment, error) {
 	// スレッドはあるかどうか確認
 	thread, err := c.threadRepo.GetByKey(param.ThreadKey)
 	if err != nil {

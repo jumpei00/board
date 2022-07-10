@@ -1,19 +1,20 @@
 package application
 
 import (
+	appParams "github.com/jumpei00/board/backend/app/application/params"
 	"github.com/jumpei00/board/backend/app/domain"
+	domainParams "github.com/jumpei00/board/backend/app/domain/params"
 	"github.com/jumpei00/board/backend/app/domain/repository"
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	"github.com/jumpei00/board/backend/app/library/logger"
-	"github.com/jumpei00/board/backend/app/params"
 	"github.com/pkg/errors"
 )
 
 type UserApplication interface {
 	GetUserByID(id string) (*domain.User, error)
 	GetUserByUsername(key string) (*domain.User, error)
-	CreateUser(param *params.UserSignUpApplicationLayerParam) (*domain.User, error)
-	ValidateUser(param *params.UserSignInApplicationLayerParam) (*domain.User, error)
+	CreateUser(param *appParams.UserSignUpApplicationLayerParam) (*domain.User, error)
+	ValidateUser(param *appParams.UserSignInApplicationLayerParam) (*domain.User, error)
 }
 
 type userApplication struct {
@@ -44,7 +45,7 @@ func (u *userApplication) GetUserByUsername(username string) (*domain.User, erro
 	return user, nil
 }
 
-func (u *userApplication) CreateUser(param *params.UserSignUpApplicationLayerParam) (*domain.User, error) {
+func (u *userApplication) CreateUser(param *appParams.UserSignUpApplicationLayerParam) (*domain.User, error) {
 	// 登録しようとしているユーザー名は既に登録済みではないか調べる必要がある
 	_, err := u.userRepo.GetByUsername(param.Username)
 
@@ -59,7 +60,7 @@ func (u *userApplication) CreateUser(param *params.UserSignUpApplicationLayerPar
 		return nil, err
 	}
 
-	domainParam := params.UserSignUpDomainLayerParam{
+	domainParam := domainParams.UserSignUpDomainLayerParam{
 		Username: param.Username,
 		Password: param.Password,
 	}
@@ -77,7 +78,7 @@ func (u *userApplication) CreateUser(param *params.UserSignUpApplicationLayerPar
 	return user, nil
 }
 
-func (u *userApplication) ValidateUser(param *params.UserSignInApplicationLayerParam) (*domain.User, error) {
+func (u *userApplication) ValidateUser(param *appParams.UserSignInApplicationLayerParam) (*domain.User, error) {
 	// ユーザー名かパスワードが違う場合はエラーメッセージを返す必要がある
 	user, err := u.userRepo.GetByUsername(param.Username)
 	if err != nil {
@@ -91,7 +92,7 @@ func (u *userApplication) ValidateUser(param *params.UserSignInApplicationLayerP
 		return nil, err
 	}
 
-	domainParam := params.UserSignInDomainLayerParam{
+	domainParam := domainParams.UserSignInDomainLayerParam{
 		Username: param.Username,
 		Password: param.Password,
 	}

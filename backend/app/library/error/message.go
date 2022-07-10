@@ -2,15 +2,17 @@ package error
 
 import (
 	"os"
+	"sync"
 
 	"github.com/jumpei00/board/backend/app/library/logger"
 	"gopkg.in/yaml.v3"
 )
 
 var messageYaml *errCause
+var onceYamlAttach sync.Once
 
-func init() {
-	file, err := os.ReadFile("./app/library/error/message.yaml")
+func initialAttachYaml() {
+	file, err := os.ReadFile("app/library/error/message.yaml")
 	if err != nil {
 		logger.Fatal("no open message.yaml", "error", err)
 	}
@@ -24,6 +26,10 @@ func init() {
 }
 
 func Message() *errCause {
+	// 一度だけ実行されるようにする
+	onceYamlAttach.Do(func() {
+		initialAttachYaml()
+	})
 	return messageYaml
 }
 

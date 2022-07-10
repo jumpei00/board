@@ -5,12 +5,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
-	"github.com/jumpei00/board/backend/app/domain"
+	"github.com/jumpei00/board/backend/app/application/params"
 	"github.com/jumpei00/board/backend/app/interfaces/middleware"
+	"github.com/jumpei00/board/backend/app/interfaces/request"
+	"github.com/jumpei00/board/backend/app/interfaces/response"
 	"github.com/jumpei00/board/backend/app/interfaces/session"
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	"github.com/jumpei00/board/backend/app/library/logger"
-	"github.com/jumpei00/board/backend/app/params"
+	"github.com/pkg/errors"
 )
 
 type ThreadHandler struct {
@@ -28,11 +30,11 @@ func NewThreadHandler(sm session.Manager, ta application.ThreadApplication) *Thr
 func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
 	operatePermissionMiddleware := middleware.NewOperatePermissionMiddleware(t.sessionManager)
 
-	r.GET("/", t.getAll)
-	r.GET("/:thread_key", t.get)
-	r.POST("/", operatePermissionMiddleware, t.create)
-	r.PUT("/:thread_key", operatePermissionMiddleware, t.edit)
-	r.DELETE("/:thread_key", operatePermissionMiddleware, t.delete)
+	r.GET("", t.getAll)
+	r.GET("/:threadKey", t.get)
+	r.POST("", operatePermissionMiddleware, t.create)
+	r.PUT("/:threadKey", operatePermissionMiddleware, t.edit)
+	r.DELETE("/:threadKey", operatePermissionMiddleware, t.delete)
 }
 
 // Thread godoc
@@ -41,24 +43,26 @@ func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Success 200 {object} responseThreads
+// @Success 200 {object} response.ResponseThreads
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread [get]
+// @Router /api/threads [get]
 // Thread godoc
 func (t *ThreadHandler) getAll(c *gin.Context) {
 	threads, err := t.threadApplication.GetAllThread()
 
-	if err != nil {
+	if err != nil && errors.Cause(err) != appError.ErrNotFound {
 		handleError(c, err)
 		return
 	}
 
-	var res responseThreads
-	for _, thread := range *threads {
-		res.Threads = append(res.Threads, NewResponseThread(&thread))
+	var res response.ResponseThreads
+	if threads != nil {
+		for _, thread := range *threads {
+			res.Threads = append(res.Threads, response.NewResponseThread(&thread))
+		}
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -70,21 +74,16 @@ func (t *ThreadHandler) getAll(c *gin.Context) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Param thread_key path string true "スレッドキー"
-// @Success 200 {object} responseThread
+// @Param threadKey path string true "スレッドキー"
+// @Success 200 {object} response.ResponseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread/{thread_key} [get]
+// @Router /api/threads/{threadKey} [get]
 // Thread godoc
 func (t *ThreadHandler) get(c *gin.Context) {
-	threadKey := c.Param("thread_key")
-	if threadKey == "" {
-		logger.Warning("thread get, but not thread key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
-		return
-	}
+	threadKey := c.Param("threadKey")
 
 	thread, err := t.threadApplication.GetByThreadKey(threadKey)
 
@@ -93,7 +92,7 @@ func (t *ThreadHandler) get(c *gin.Context) {
 		return
 	}
 
-	responseThread := NewResponseThread(thread)
+	responseThread := response.NewResponseThread(thread)
 	c.JSON(http.StatusOK, responseThread)
 }
 
@@ -103,16 +102,16 @@ func (t *ThreadHandler) get(c *gin.Context) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Param body body requestThreadCreate true "スレッド作成情報"
-// @Success 200 {object} responseThread
+// @Param body body request.RequestThreadCreate true "スレッド作成情報"
+// @Success 200 {object} response.ResponseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread [post]
+// @Router /api/threads [post]
 // Thread godoc
 func (t *ThreadHandler) create(c *gin.Context) {
-	var req requestThreadCreate
+	var req request.RequestThreadCreate
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("thread create, requesting json bind error", "error", err, "binded_request", req)
 		handleError(c, err)
@@ -130,7 +129,7 @@ func (t *ThreadHandler) create(c *gin.Context) {
 		return
 	}
 
-	res := NewResponseThread(thread)
+	res := response.NewResponseThread(thread)
 	c.JSON(http.StatusOK, res)
 }
 
@@ -140,24 +139,19 @@ func (t *ThreadHandler) create(c *gin.Context) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Param thread_key path string true "スレッドキー"
-// @Param body body requestThreadEdit true "スレッド編集情報"
-// @Success 200 {object} responseThread
+// @Param threadKey path string true "スレッドキー"
+// @Param body body request.RequestThreadEdit true "スレッド編集情報"
+// @Success 200 {object} response.ResponseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread/{thread_key} [put]
+// @Router /api/threads/{threadKey} [put]
 // Thread godoc
 func (t *ThreadHandler) edit(c *gin.Context) {
-	threadKey := c.Param("thread_key")
-	if threadKey == "" {
-		logger.Warning("thread edit, but not thread key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
-		return
-	}
+	threadKey := c.Param("threadKey")
 
-	var req requestThreadEdit
+	var req request.RequestThreadEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("thread edit, requesting json bind error", "error", err, "binded_request", req)
 		handleError(c, err)
@@ -176,7 +170,7 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 		return
 	}
 
-	res := NewResponseThread(thread)
+	res := response.NewResponseThread(thread)
 	c.JSON(http.StatusOK, res)
 }
 
@@ -186,24 +180,19 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Param thread_key path string true "スレッドキー"
-// @Param body body requestThreadDelete true "スレッド削除情報"
+// @Param threadKey path string true "スレッドキー"
+// @Param body body request.RequestThreadDelete true "スレッド削除情報"
 // @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread/{thread_key} [delete]
+// @Router /api/threads/{threadKey} [delete]
 // Thread godoc
 func (t *ThreadHandler) delete(c *gin.Context) {
-	threadKey := c.Param("thread_key")
-	if threadKey == "" {
-		logger.Warning("thread delete, but not thread key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
-		return
-	}
+	threadKey := c.Param("threadKey")
 
-	var req requestThreadDelete
+	var req request.RequestThreadDelete
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("thread delete, requesting json bind error", "error", err, "binded_request", req)
 		handleError(c, err)
@@ -220,43 +209,5 @@ func (t *ThreadHandler) delete(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
-}
-
-type requestThreadCreate struct {
-	Title       string `json:"title"`
-	Contributor string `json:"contributor"`
-}
-
-type requestThreadEdit struct {
-	Title       string `json:"title"`
-	Contributor string `json:"contributor"`
-}
-
-type requestThreadDelete struct {
-	Contributor string `json:"contributor"`
-}
-
-type responseThreads struct {
-	Threads []*responseThread `json:"threads"`
-}
-
-type responseThread struct {
-	ThreadKey   string `json:"thread_key"`
-	Title       string `json:"title"`
-	Contributor string `json:"contributor"`
-	UpdateDate  string `json:"update_date"`
-	Views       int    `json:"views"`
-	CommentSum  int    `json:"comment_sum"`
-}
-
-func NewResponseThread(thread *domain.Thread) *responseThread {
-	return &responseThread{
-		ThreadKey:   thread.GetKey(),
-		Title:       thread.GetTitle(),
-		Contributor: thread.GetContributor(),
-		UpdateDate:  thread.FormatUpdatedDate(),
-		Views:       thread.GetViews(),
-		CommentSum:  thread.GetCommentSum(),
-	}
+	c.Status(http.StatusNoContent)
 }

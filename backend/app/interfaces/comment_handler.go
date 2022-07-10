@@ -5,12 +5,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
-	"github.com/jumpei00/board/backend/app/domain"
+	"github.com/jumpei00/board/backend/app/application/params"
 	"github.com/jumpei00/board/backend/app/interfaces/middleware"
+	"github.com/jumpei00/board/backend/app/interfaces/request"
+	"github.com/jumpei00/board/backend/app/interfaces/response"
 	"github.com/jumpei00/board/backend/app/interfaces/session"
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	"github.com/jumpei00/board/backend/app/library/logger"
-	"github.com/jumpei00/board/backend/app/params"
+	"github.com/pkg/errors"
 )
 
 type CommentHandler struct {
@@ -30,10 +32,10 @@ func NewCommentHandler(sm session.Manager, ta application.ThreadApplication, ca 
 func (co *CommentHandler) SetupRouter(r *gin.RouterGroup) {
 	operatePermissionMiddleware := middleware.NewOperatePermissionMiddleware(co.sessionManager)
 
-	r.GET("/:thread_key", co.getAll)
-	r.POST("/:thread_key", operatePermissionMiddleware, co.create)
-	r.PUT("/:thread_key", operatePermissionMiddleware, co.edit)
-	r.DELETE("/:thread_key", operatePermissionMiddleware, co.delete)
+	r.GET("/:threadKey/comments", co.getAll)
+	r.POST("/:threadKey/comments", operatePermissionMiddleware, co.create)
+	r.PUT("/:threadKey/comments/:commentKey", operatePermissionMiddleware, co.edit)
+	r.DELETE("/:threadKey/comments/:commentKey", operatePermissionMiddleware, co.delete)
 }
 
 // Comment godoc
@@ -42,27 +44,16 @@ func (co *CommentHandler) SetupRouter(r *gin.RouterGroup) {
 // @Tags comment
 // @Accept json
 // @Produce json
-// @Param thread_key path string true "スレッドキー"
-// @Success 200 {object} responseThreadAndComments
+// @Param threadKey path string true "スレッドキー"
+// @Success 200 {object} response.ResponseThreadAndComments
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/comment/{thread_key} [get]
+// @Router /api/threads/{threadKey}/comments [get]
 // Comment godoc
 func (co *CommentHandler) getAll(c *gin.Context) {
-	threadKey := c.Param("thread_key")
-	if threadKey == "" {
-		logger.Warning("comment get all, but not thread key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
-		return
-	}
-
-	comments, err := co.commentApplication.GetAllByThreadKey(threadKey)
-	if err != nil {
-		handleError(c, err)
-		return
-	}
+	threadKey := c.Param("threadKey")
 
 	thread, err := co.threadApplication.GetByThreadKey(threadKey)
 	if err != nil {
@@ -70,10 +61,21 @@ func (co *CommentHandler) getAll(c *gin.Context) {
 		return
 	}
 
-	var res responseThreadAndComments
-	res.Thread = NewResponseThread(thread)
-	for _, comment := range *comments {
-		res.Comments = append(res.Comments, NewResponseComment(&comment))
+	comments, err := co.commentApplication.GetAllByThreadKey(threadKey)
+
+	// もしエラーがNotFound以外のエラーだった場合はそこでエラーを返す
+	if err != nil && errors.Cause(err) != appError.ErrNotFound {
+		handleError(c, err)
+		return
+	}
+
+	var res response.ResponseThreadAndComments
+	res.Thread = response.NewResponseThread(thread)
+
+	if comments != nil {
+		for _, comment := range *comments {
+			res.Comments = append(res.Comments, response.NewResponseComment(&comment))
+		}
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -85,24 +87,19 @@ func (co *CommentHandler) getAll(c *gin.Context) {
 // @Tags comment
 // @Accept json
 // @Produce json
-// @Param thread_key path string true "スレッドキー"
-// @Param body body requestCommentCreate true "コメント作成情報"
-// @Success 200 {object} responseThreadAndComments
+// @Param threadKey path string true "スレッドキー"
+// @Param body body request.RequestCommentCreate true "コメント作成情報"
+// @Success 200 {object} response.ResponseThreadAndComments
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/comment/{thread_key} [post]
+// @Router /api/threads/{threadKey}/comments [post]
 // Comment godoc
 func (co *CommentHandler) create(c *gin.Context) {
-	threadKey := c.Param("thread_key")
-	if threadKey == "" {
-		logger.Warning("comment create, but not thread key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
-		return
-	}
+	threadKey := c.Param("threadKey")
 
-	var req requestCommentCreate
+	var req request.RequestCommentCreate
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("comment create, requesting json bind error", "error", err, "binded_request", req)
 		handleError(c, err)
@@ -127,10 +124,10 @@ func (co *CommentHandler) create(c *gin.Context) {
 		return
 	}
 
-	var res responseThreadAndComments
-	res.Thread = NewResponseThread(thread)
+	var res response.ResponseThreadAndComments
+	res.Thread = response.NewResponseThread(thread)
 	for _, comment := range *comments {
-		res.Comments = append(res.Comments, NewResponseComment(&comment))
+		res.Comments = append(res.Comments, response.NewResponseComment(&comment))
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -142,39 +139,30 @@ func (co *CommentHandler) create(c *gin.Context) {
 // @Tags comment
 // @Accept json
 // @Produce json
-// @Param thread_key path string true "スレッドキー"
-// @Param body body requestCommentEdit true "コメント編集情報"
-// @Success 200 {object} responseThreadAndComments
+// @Param threadKey path string true "スレッドキー"
+// @Param commentKey path string true "コメントキー"
+// @Param body body request.RequestCommentEdit true "コメント編集情報"
+// @Success 200 {object} response.ResponseThreadAndComments
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/comment/{thread_key} [put]
+// @Router /api/threads/{threadKey}/comments/{commentKey} [put]
 // Comment godoc
 func (co *CommentHandler) edit(c *gin.Context) {
-	threadKey := c.Param("thread_key")
-	if threadKey == "" {
-		logger.Warning("comment edit, but not thread key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
-		return
-	}
+	threadKey := c.Param("threadKey")
+	commentKey := c.Param("commentKey")
 
-	var req requestCommentEdit
+	var req request.RequestCommentEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("comment edit, requesting json bind error", "error", err, "binded_request", req)
 		handleError(c, err)
 		return
 	}
 
-	if req.CommentKey == "" {
-		logger.Warning("comment edit, but not comment key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotCommentKey, "not comment key"))
-		return
-	}
-
 	param := params.EditCommentAppLayerParam{
 		ThreadKey:   threadKey,
-		CommentKey:  req.CommentKey,
+		CommentKey:  commentKey,
 		Comment:     req.Comment,
 		Contributor: req.Contributor,
 	}
@@ -191,10 +179,10 @@ func (co *CommentHandler) edit(c *gin.Context) {
 		return
 	}
 
-	var res responseThreadAndComments
-	res.Thread = NewResponseThread(thread)
+	var res response.ResponseThreadAndComments
+	res.Thread = response.NewResponseThread(thread)
 	for _, comment := range *comments {
-		res.Comments = append(res.Comments, NewResponseComment(&comment))
+		res.Comments = append(res.Comments, response.NewResponseComment(&comment))
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -206,39 +194,30 @@ func (co *CommentHandler) edit(c *gin.Context) {
 // @Tags comment
 // @Accept json
 // @Produce json
-// @Param thread_key path string true "スレッドキー"
-// @Param body body requestCommentDelete true "コメント削除情報"
-// @Success 200 {object} responseThreadAndComments
+// @Param threadKey path string true "スレッドキー"
+// @Param commentKey path string true "コメントキー"
+// @Param body body request.RequestCommentDelete true "コメント削除情報"
+// @Success 200 {object} response.ResponseThreadAndComments
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/comment/{thread_key} [delete]
+// @Router /api/threads/{threadKey}/comments/{commentKey} [delete]
 // Comment godoc
 func (co *CommentHandler) delete(c *gin.Context) {
-	threadKey := c.Param("thread_key")
-	if threadKey == "" {
-		logger.Warning("comment delete, but not thread key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotThreadKey, "not thread key"))
-		return
-	}
+	threadKey := c.Param("threadKey")
+	commentKey := c.Param("commentKey")
 
-	var req requestCommentDelete
+	var req request.RequestCommentDelete
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logger.Error("comment delete, requesting json bind error", "error", err, "binded_request", req)
 		handleError(c, err)
 		return
 	}
 
-	if req.CommentKey == "" {
-		logger.Warning("comment delete, but not comment key")
-		handleError(c, appError.NewErrBadRequest(appError.Message().NotCommentKey, "not comment key"))
-		return
-	}
-
 	param := params.DeleteCommentAppLayerParam{
 		ThreadKey:   threadKey,
-		CommentKey:  req.CommentKey,
+		CommentKey:  commentKey,
 		Contributor: req.Contributor,
 	}
 
@@ -254,48 +233,11 @@ func (co *CommentHandler) delete(c *gin.Context) {
 		return
 	}
 
-	var res responseThreadAndComments
-	res.Thread = NewResponseThread(thread)
+	var res response.ResponseThreadAndComments
+	res.Thread = response.NewResponseThread(thread)
 	for _, comment := range *comments {
-		res.Comments = append(res.Comments, NewResponseComment(&comment))
+		res.Comments = append(res.Comments, response.NewResponseComment(&comment))
 	}
 
 	c.JSON(http.StatusOK, res)
-}
-
-type requestCommentCreate struct {
-	Comment     string `json:"comment"`
-	Contributor string `json:"contributor"`
-}
-
-type requestCommentEdit struct {
-	CommentKey  string `json:"comment_key"`
-	Comment     string `json:"comment"`
-	Contributor string `json:"contributor"`
-}
-
-type requestCommentDelete struct {
-	CommentKey  string `json:"comment_key"`
-	Contributor string `json:"contributor"`
-}
-
-type responseThreadAndComments struct {
-	Thread   *responseThread    `json:"thread"`
-	Comments []*responseComment `json:"comments"`
-}
-
-type responseComment struct {
-	CommentKey  string `joson:"comment_key"`
-	Contributor string `json:"contributor"`
-	Comment     string `json:"comment"`
-	UpdateDate  string `json:"update_date"`
-}
-
-func NewResponseComment(comment *domain.Comment) *responseComment {
-	return &responseComment{
-		CommentKey:  comment.GetKey(),
-		Contributor: comment.GetContributor(),
-		Comment:     comment.GetComment(),
-		UpdateDate:  comment.FormatUpdateDate(),
-	}
 }

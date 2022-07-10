@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jumpei00/board/backend/app/params"
+	"github.com/jumpei00/board/backend/app/domain/params"
 )
 
 type Comment struct {

@@ -7,63 +7,81 @@ definitions:
       username:
         type: string
     type: object
-  interfaces.requestCommentCreate:
+  request.RequestCommentCreate:
     properties:
       comment:
         type: string
       contributor:
         type: string
+    required:
+    - comment
+    - contributor
     type: object
-  interfaces.requestCommentDelete:
+  request.RequestCommentDelete:
     properties:
-      comment_key:
-        type: string
       contributor:
         type: string
+    required:
+    - contributor
     type: object
-  interfaces.requestCommentEdit:
+  request.RequestCommentEdit:
     properties:
       comment:
         type: string
-      comment_key:
-        type: string
       contributor:
         type: string
+    required:
+    - comment
+    - contributor
     type: object
-  interfaces.requestSignIn:
+  request.RequestSignIn:
     properties:
       password:
         type: string
       username:
         type: string
+    required:
+    - password
+    - username
     type: object
-  interfaces.requestSignUp:
+  request.RequestSignUp:
     properties:
       password:
         type: string
       username:
         type: string
+    required:
+    - password
+    - username
     type: object
-  interfaces.requestThreadCreate:
+  request.RequestThreadCreate:
     properties:
       contributor:
         type: string
       title:
         type: string
+    required:
+    - contributor
+    - title
     type: object
-  interfaces.requestThreadDelete:
+  request.RequestThreadDelete:
     properties:
       contributor:
         type: string
+    required:
+    - contributor
     type: object
-  interfaces.requestThreadEdit:
+  request.RequestThreadEdit:
     properties:
       contributor:
         type: string
       title:
         type: string
+    required:
+    - contributor
+    - title
     type: object
-  interfaces.responseComment:
+  response.ResponseComment:
     properties:
       comment:
         type: string
@@ -74,7 +92,7 @@ definitions:
       update_date:
         type: string
     type: object
-  interfaces.responseThread:
+  response.ResponseThread:
     properties:
       comment_sum:
         type: integer
@@ -89,23 +107,23 @@ definitions:
       views:
         type: integer
     type: object
-  interfaces.responseThreadAndComments:
+  response.ResponseThreadAndComments:
     properties:
       comments:
         items:
-          $ref: '#/definitions/interfaces.responseComment'
+          $ref: '#/definitions/response.ResponseComment'
         type: array
       thread:
-        $ref: '#/definitions/interfaces.responseThread'
+        $ref: '#/definitions/response.ResponseThread'
     type: object
-  interfaces.responseThreads:
+  response.ResponseThreads:
     properties:
       threads:
         items:
-          $ref: '#/definitions/interfaces.responseThread'
+          $ref: '#/definitions/response.ResponseThread'
         type: array
     type: object
-  interfaces.responseVisitor:
+  response.ResponseVisitor:
     properties:
       sum:
         type: integer
@@ -121,242 +139,7 @@ info:
   title: Board API
   version: "1.0"
 paths:
-  /api/comment/{thread_key}:
-    delete:
-      consumes:
-      - application/json
-      description: 指定されたコメントを削除する
-      parameters:
-      - description: スレッドキー
-        in: path
-        name: thread_key
-        required: true
-        type: string
-      - description: コメント削除情報
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/interfaces.requestCommentDelete'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/interfaces.responseThreadAndComments'
-        "400":
-          description: ""
-        "401":
-          description: ""
-        "404":
-          description: ""
-        "500":
-          description: ""
-      summary: 指定されたコメントを削除
-      tags:
-      - comment
-    get:
-      consumes:
-      - application/json
-      description: スレッドに紐づくコメントを全て取得
-      parameters:
-      - description: スレッドキー
-        in: path
-        name: thread_key
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/interfaces.responseThreadAndComments'
-        "400":
-          description: ""
-        "401":
-          description: ""
-        "404":
-          description: ""
-        "500":
-          description: ""
-      summary: コメントを全て取得
-      tags:
-      - comment
-    post:
-      consumes:
-      - application/json
-      description: スレッドに対するコメントを作成する
-      parameters:
-      - description: スレッドキー
-        in: path
-        name: thread_key
-        required: true
-        type: string
-      - description: コメント作成情報
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/interfaces.requestCommentCreate'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/interfaces.responseThreadAndComments'
-        "400":
-          description: ""
-        "401":
-          description: ""
-        "404":
-          description: ""
-        "500":
-          description: ""
-      summary: スレッドへの新規コメントを作成
-      tags:
-      - comment
-    put:
-      consumes:
-      - application/json
-      description: 指定されたコメントを編集し更新する
-      parameters:
-      - description: スレッドキー
-        in: path
-        name: thread_key
-        required: true
-        type: string
-      - description: コメント編集情報
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/interfaces.requestCommentEdit'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/interfaces.responseThreadAndComments'
-        "400":
-          description: ""
-        "401":
-          description: ""
-        "404":
-          description: ""
-        "500":
-          description: ""
-      summary: 指定されたコメントを更新
-      tags:
-      - comment
-  /api/me:
-    get:
-      consumes:
-      - application/json
-      description: セッション情報からユーザーを取得する
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.User'
-        "400":
-          description: ""
-        "401":
-          description: ""
-        "404":
-          description: ""
-        "500":
-          description: ""
-      summary: ユーザー情報の取得
-      tags:
-      - user
-  /api/signin:
-    post:
-      consumes:
-      - application/json
-      description: ユーザーがログインできるか検証する
-      parameters:
-      - description: ログイン情報
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/interfaces.requestSignIn'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.User'
-        "400":
-          description: ""
-        "401":
-          description: ""
-        "404":
-          description: ""
-        "500":
-          description: ""
-      summary: ログイン
-      tags:
-      - user
-  /api/signout:
-    delete:
-      consumes:
-      - application/json
-      description: ユーザーをログアウトさせる
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: ""
-        "400":
-          description: ""
-        "401":
-          description: ""
-        "404":
-          description: ""
-        "500":
-          description: ""
-      summary: ログアウト
-      tags:
-      - user
-  /api/signup:
-    post:
-      consumes:
-      - application/json
-      description: 新規ユーザーを作成する
-      parameters:
-      - description: 新規ユーザー作成情報
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/interfaces.requestSignUp'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.User'
-        "400":
-          description: ""
-        "401":
-          description: ""
-        "404":
-          description: ""
-        "500":
-          description: ""
-      summary: ユーザーの新規作成
-      tags:
-      - user
-  /api/thread:
+  /api/threads:
     get:
       consumes:
       - application/json
@@ -367,7 +150,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/interfaces.responseThreads'
+            $ref: '#/definitions/response.ResponseThreads'
         "400":
           description: ""
         "401":
@@ -389,14 +172,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/interfaces.requestThreadCreate'
+          $ref: '#/definitions/request.RequestThreadCreate'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/interfaces.responseThread'
+            $ref: '#/definitions/response.ResponseThread'
         "400":
           description: ""
         "401":
@@ -408,7 +191,7 @@ paths:
       summary: スレッドを新規作成
       tags:
       - thread
-  /api/thread/{thread_key}:
+  /api/threads/{threadKey}:
     delete:
       consumes:
       - application/json
@@ -416,7 +199,7 @@ paths:
       parameters:
       - description: スレッドキー
         in: path
-        name: thread_key
+        name: threadKey
         required: true
         type: string
       - description: スレッド削除情報
@@ -424,7 +207,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/interfaces.requestThreadDelete'
+          $ref: '#/definitions/request.RequestThreadDelete'
       produces:
       - application/json
       responses:
@@ -448,7 +231,7 @@ paths:
       parameters:
       - description: スレッドキー
         in: path
-        name: thread_key
+        name: threadKey
         required: true
         type: string
       produces:
@@ -457,7 +240,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/interfaces.responseThread'
+            $ref: '#/definitions/response.ResponseThread'
         "400":
           description: ""
         "401":
@@ -476,7 +259,7 @@ paths:
       parameters:
       - description: スレッドキー
         in: path
-        name: thread_key
+        name: threadKey
         required: true
         type: string
       - description: スレッド編集情報
@@ -484,14 +267,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/interfaces.requestThreadEdit'
+          $ref: '#/definitions/request.RequestThreadEdit'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/interfaces.responseThread'
+            $ref: '#/definitions/response.ResponseThread'
         "400":
           description: ""
         "401":
@@ -503,6 +286,252 @@ paths:
       summary: 指定のスレッドを更新
       tags:
       - thread
+  /api/threads/{threadKey}/comments:
+    get:
+      consumes:
+      - application/json
+      description: スレッドに紐づくコメントを全て取得
+      parameters:
+      - description: スレッドキー
+        in: path
+        name: threadKey
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseThreadAndComments'
+        "400":
+          description: ""
+        "401":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: コメントを全て取得
+      tags:
+      - comment
+    post:
+      consumes:
+      - application/json
+      description: スレッドに対するコメントを作成する
+      parameters:
+      - description: スレッドキー
+        in: path
+        name: threadKey
+        required: true
+        type: string
+      - description: コメント作成情報
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.RequestCommentCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseThreadAndComments'
+        "400":
+          description: ""
+        "401":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: スレッドへの新規コメントを作成
+      tags:
+      - comment
+  /api/threads/{threadKey}/comments/{commentKey}:
+    delete:
+      consumes:
+      - application/json
+      description: 指定されたコメントを削除する
+      parameters:
+      - description: スレッドキー
+        in: path
+        name: threadKey
+        required: true
+        type: string
+      - description: コメントキー
+        in: path
+        name: commentKey
+        required: true
+        type: string
+      - description: コメント削除情報
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.RequestCommentDelete'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseThreadAndComments'
+        "400":
+          description: ""
+        "401":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: 指定されたコメントを削除
+      tags:
+      - comment
+    put:
+      consumes:
+      - application/json
+      description: 指定されたコメントを編集し更新する
+      parameters:
+      - description: スレッドキー
+        in: path
+        name: threadKey
+        required: true
+        type: string
+      - description: コメントキー
+        in: path
+        name: commentKey
+        required: true
+        type: string
+      - description: コメント編集情報
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.RequestCommentEdit'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseThreadAndComments'
+        "400":
+          description: ""
+        "401":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: 指定されたコメントを更新
+      tags:
+      - comment
+  /api/user/me:
+    get:
+      consumes:
+      - application/json
+      description: セッション情報からユーザーを取得する
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: ""
+        "401":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: ユーザー情報の取得
+      tags:
+      - user
+  /api/user/signin:
+    post:
+      consumes:
+      - application/json
+      description: ユーザーがログインできるか検証する
+      parameters:
+      - description: ログイン情報
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.RequestSignIn'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: ""
+        "401":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: ログイン
+      tags:
+      - user
+  /api/user/signout:
+    delete:
+      consumes:
+      - application/json
+      description: ユーザーをログアウトさせる
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ""
+        "400":
+          description: ""
+        "401":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: ログアウト
+      tags:
+      - user
+  /api/user/signup:
+    post:
+      consumes:
+      - application/json
+      description: 新規ユーザーを作成する
+      parameters:
+      - description: 新規ユーザー作成情報
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.RequestSignUp'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: ""
+        "401":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: ユーザーの新規作成
+      tags:
+      - user
   /api/visitor:
     get:
       consumes:
@@ -514,7 +543,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/interfaces.responseVisitor'
+            $ref: '#/definitions/response.ResponseVisitor'
         "400":
           description: ""
         "401":
@@ -526,6 +555,7 @@ paths:
       summary: 訪問者統計の取得
       tags:
       - visitor
+  /api/visitor/countup:
     put:
       consumes:
       - application/json
@@ -536,7 +566,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/interfaces.responseVisitor'
+            $ref: '#/definitions/response.ResponseVisitor'
         "400":
           description: ""
         "401":

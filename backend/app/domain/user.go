@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jumpei00/board/backend/app/domain/params"
 	"github.com/jumpei00/board/backend/app/library/logger"
-	"github.com/jumpei00/board/backend/app/params"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )

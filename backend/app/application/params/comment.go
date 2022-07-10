@@ -18,13 +18,3 @@ type DeleteCommentAppLayerParam struct {
 	CommentKey  string
 	Contributor string
 }
-
-type CreateCommentDomainLayerParam struct {
-	ThreadKey string
-	Comment     string
-	Contributor string
-}
-
-type EditCommentDomainLayerParam struct {
-	Comment     string
-}

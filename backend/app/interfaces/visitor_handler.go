@@ -20,7 +20,7 @@ func NewVisitorsHandler(va application.VisitorApplication) *VisitorsHandler {
 
 func (v *VisitorsHandler) SetupRouter(r *gin.RouterGroup) {
 	r.GET("", v.get)
-	r.PUT("", v.visited)
+	r.PUT("/countup", v.visited)
 	r.PUT("/reset", v.reset)
 }
 
@@ -30,7 +30,7 @@ func (v *VisitorsHandler) SetupRouter(r *gin.RouterGroup) {
 // @Tags visitor
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.responseVisitor
+// @Success 200 {object} response.ResponseVisitor
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -54,12 +54,12 @@ func (v *VisitorsHandler) get(c *gin.Context) {
 // @Tags visitor
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.responseVisitor
+// @Success 200 {object} response.ResponseVisitor
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/visitor [put]
+// @Router /api/visitor/countup [put]
 // Visitor godoc
 func (v *VisitorsHandler) visited(c *gin.Context) {
 	visitors, err := v.visitorApplication.CountupVisitors()

@@ -5,13 +5,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
+	"github.com/jumpei00/board/backend/app/application/params"
 	"github.com/jumpei00/board/backend/app/interfaces/middleware"
 	"github.com/jumpei00/board/backend/app/interfaces/request"
 	"github.com/jumpei00/board/backend/app/interfaces/response"
 	"github.com/jumpei00/board/backend/app/interfaces/session"
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	"github.com/jumpei00/board/backend/app/library/logger"
-	"github.com/jumpei00/board/backend/app/params"
 	"github.com/pkg/errors"
 )
 
@@ -43,12 +43,12 @@ func (t *ThreadHandler) SetupRouter(r *gin.RouterGroup) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.responseThreads
+// @Success 200 {object} response.ResponseThreads
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread [get]
+// @Router /api/threads [get]
 // Thread godoc
 func (t *ThreadHandler) getAll(c *gin.Context) {
 	threads, err := t.threadApplication.GetAllThread()
@@ -75,12 +75,12 @@ func (t *ThreadHandler) getAll(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
-// @Success 200 {object} response.responseThread
+// @Success 200 {object} response.ResponseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread/{thread_key} [get]
+// @Router /api/threads/{threadKey} [get]
 // Thread godoc
 func (t *ThreadHandler) get(c *gin.Context) {
 	threadKey := c.Param("threadKey")
@@ -102,13 +102,13 @@ func (t *ThreadHandler) get(c *gin.Context) {
 // @Tags thread
 // @Accept json
 // @Produce json
-// @Param body body request.requestThreadCreate true "スレッド作成情報"
-// @Success 200 {object} response.responseThread
+// @Param body body request.RequestThreadCreate true "スレッド作成情報"
+// @Success 200 {object} response.ResponseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread [post]
+// @Router /api/threads [post]
 // Thread godoc
 func (t *ThreadHandler) create(c *gin.Context) {
 	var req request.RequestThreadCreate
@@ -140,13 +140,13 @@ func (t *ThreadHandler) create(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
-// @Param body body request.requestThreadEdit true "スレッド編集情報"
-// @Success 200 {object} response.responseThread
+// @Param body body request.RequestThreadEdit true "スレッド編集情報"
+// @Success 200 {object} response.ResponseThread
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread/{threadKey} [put]
+// @Router /api/threads/{threadKey} [put]
 // Thread godoc
 func (t *ThreadHandler) edit(c *gin.Context) {
 	threadKey := c.Param("threadKey")
@@ -181,13 +181,13 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
-// @Param body body request.requestThreadDelete true "スレッド削除情報"
+// @Param body body request.RequestThreadDelete true "スレッド削除情報"
 // @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/thread/{threadKey} [delete]
+// @Router /api/threads/{threadKey} [delete]
 // Thread godoc
 func (t *ThreadHandler) delete(c *gin.Context) {
 	threadKey := c.Param("threadKey")

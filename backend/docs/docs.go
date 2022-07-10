@@ -16,363 +16,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/comment/{thread_key}": {
-            "get": {
-                "description": "スレッドに紐づくコメントを全て取得",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "comment"
-                ],
-                "summary": "コメントを全て取得",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "スレッドキー",
-                        "name": "thread_key",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/interfaces.responseThreadAndComments"
-                        }
-                    },
-                    "400": {
-                        "description": ""
-                    },
-                    "401": {
-                        "description": ""
-                    },
-                    "404": {
-                        "description": ""
-                    },
-                    "500": {
-                        "description": ""
-                    }
-                }
-            },
-            "put": {
-                "description": "指定されたコメントを編集し更新する",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "comment"
-                ],
-                "summary": "指定されたコメントを更新",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "スレッドキー",
-                        "name": "thread_key",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "コメント編集情報",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/interfaces.requestCommentEdit"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/interfaces.responseThreadAndComments"
-                        }
-                    },
-                    "400": {
-                        "description": ""
-                    },
-                    "401": {
-                        "description": ""
-                    },
-                    "404": {
-                        "description": ""
-                    },
-                    "500": {
-                        "description": ""
-                    }
-                }
-            },
-            "post": {
-                "description": "スレッドに対するコメントを作成する",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "comment"
-                ],
-                "summary": "スレッドへの新規コメントを作成",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "スレッドキー",
-                        "name": "thread_key",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "コメント作成情報",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/interfaces.requestCommentCreate"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/interfaces.responseThreadAndComments"
-                        }
-                    },
-                    "400": {
-                        "description": ""
-                    },
-                    "401": {
-                        "description": ""
-                    },
-                    "404": {
-                        "description": ""
-                    },
-                    "500": {
-                        "description": ""
-                    }
-                }
-            },
-            "delete": {
-                "description": "指定されたコメントを削除する",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "comment"
-                ],
-                "summary": "指定されたコメントを削除",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "スレッドキー",
-                        "name": "thread_key",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "コメント削除情報",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/interfaces.requestCommentDelete"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/interfaces.responseThreadAndComments"
-                        }
-                    },
-                    "400": {
-                        "description": ""
-                    },
-                    "401": {
-                        "description": ""
-                    },
-                    "404": {
-                        "description": ""
-                    },
-                    "500": {
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/me": {
-            "get": {
-                "description": "セッション情報からユーザーを取得する",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "ユーザー情報の取得",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.User"
-                        }
-                    },
-                    "400": {
-                        "description": ""
-                    },
-                    "401": {
-                        "description": ""
-                    },
-                    "404": {
-                        "description": ""
-                    },
-                    "500": {
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/signin": {
-            "post": {
-                "description": "ユーザーがログインできるか検証する",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "ログイン",
-                "parameters": [
-                    {
-                        "description": "ログイン情報",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/interfaces.requestSignIn"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.User"
-                        }
-                    },
-                    "400": {
-                        "description": ""
-                    },
-                    "401": {
-                        "description": ""
-                    },
-                    "404": {
-                        "description": ""
-                    },
-                    "500": {
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/signout": {
-            "delete": {
-                "description": "ユーザーをログアウトさせる",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "ログアウト",
-                "responses": {
-                    "204": {
-                        "description": ""
-                    },
-                    "400": {
-                        "description": ""
-                    },
-                    "401": {
-                        "description": ""
-                    },
-                    "404": {
-                        "description": ""
-                    },
-                    "500": {
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/signup": {
-            "post": {
-                "description": "新規ユーザーを作成する",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "ユーザーの新規作成",
-                "parameters": [
-                    {
-                        "description": "新規ユーザー作成情報",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/interfaces.requestSignUp"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.User"
-                        }
-                    },
-                    "400": {
-                        "description": ""
-                    },
-                    "401": {
-                        "description": ""
-                    },
-                    "404": {
-                        "description": ""
-                    },
-                    "500": {
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/thread": {
+        "/api/threads": {
             "get": {
                 "description": "スレッドを全て取得します",
                 "consumes": [
@@ -389,7 +33,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/interfaces.responseThreads"
+                            "$ref": "#/definitions/response.ResponseThreads"
                         }
                     },
                     "400": {
@@ -425,7 +69,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/interfaces.requestThreadCreate"
+                            "$ref": "#/definitions/request.RequestThreadCreate"
                         }
                     }
                 ],
@@ -433,7 +77,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/interfaces.responseThread"
+                            "$ref": "#/definitions/response.ResponseThread"
                         }
                     },
                     "400": {
@@ -451,7 +95,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/thread/{thread_key}": {
+        "/api/threads/{threadKey}": {
             "get": {
                 "description": "スレッドキーに当てはまるスレッドを取得",
                 "consumes": [
@@ -468,7 +112,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "スレッドキー",
-                        "name": "thread_key",
+                        "name": "threadKey",
                         "in": "path",
                         "required": true
                     }
@@ -477,7 +121,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/interfaces.responseThread"
+                            "$ref": "#/definitions/response.ResponseThread"
                         }
                     },
                     "400": {
@@ -510,7 +154,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "スレッドキー",
-                        "name": "thread_key",
+                        "name": "threadKey",
                         "in": "path",
                         "required": true
                     },
@@ -520,7 +164,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/interfaces.requestThreadEdit"
+                            "$ref": "#/definitions/request.RequestThreadEdit"
                         }
                     }
                 ],
@@ -528,7 +172,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/interfaces.responseThread"
+                            "$ref": "#/definitions/response.ResponseThread"
                         }
                     },
                     "400": {
@@ -561,7 +205,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "スレッドキー",
-                        "name": "thread_key",
+                        "name": "threadKey",
                         "in": "path",
                         "required": true
                     },
@@ -571,13 +215,385 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/interfaces.requestThreadDelete"
+                            "$ref": "#/definitions/request.RequestThreadDelete"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/threads/{threadKey}/comments": {
+            "get": {
+                "description": "スレッドに紐づくコメントを全て取得",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "コメントを全て取得",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "スレッドキー",
+                        "name": "threadKey",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseThreadAndComments"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "description": "スレッドに対するコメントを作成する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "スレッドへの新規コメントを作成",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "スレッドキー",
+                        "name": "threadKey",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "コメント作成情報",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.RequestCommentCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseThreadAndComments"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/threads/{threadKey}/comments/{commentKey}": {
+            "put": {
+                "description": "指定されたコメントを編集し更新する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "指定されたコメントを更新",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "スレッドキー",
+                        "name": "threadKey",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "コメントキー",
+                        "name": "commentKey",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "コメント編集情報",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.RequestCommentEdit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseThreadAndComments"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "description": "指定されたコメントを削除する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "指定されたコメントを削除",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "スレッドキー",
+                        "name": "threadKey",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "コメントキー",
+                        "name": "commentKey",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "コメント削除情報",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.RequestCommentDelete"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseThreadAndComments"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/user/me": {
+            "get": {
+                "description": "セッション情報からユーザーを取得する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "ユーザー情報の取得",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/user/signin": {
+            "post": {
+                "description": "ユーザーがログインできるか検証する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "ログイン",
+                "parameters": [
+                    {
+                        "description": "ログイン情報",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.RequestSignIn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/user/signout": {
+            "delete": {
+                "description": "ユーザーをログアウトさせる",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "ログアウト",
+                "responses": {
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/user/signup": {
+            "post": {
+                "description": "新規ユーザーを作成する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "ユーザーの新規作成",
+                "parameters": [
+                    {
+                        "description": "新規ユーザー作成情報",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.RequestSignUp"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
                     },
                     "400": {
                         "description": ""
@@ -611,7 +627,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/interfaces.responseVisitor"
+                            "$ref": "#/definitions/response.ResponseVisitor"
                         }
                     },
                     "400": {
@@ -627,7 +643,9 @@ const docTemplate = `{
                         "description": ""
                     }
                 }
-            },
+            }
+        },
+        "/api/visitor/countup": {
             "put": {
                 "description": "サイトへの訪問回数をカウントアップさせる",
                 "consumes": [
@@ -644,7 +662,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/interfaces.responseVisitor"
+                            "$ref": "#/definitions/response.ResponseVisitor"
                         }
                     },
                     "400": {
@@ -707,8 +725,12 @@ const docTemplate = `{
                 }
             }
         },
-        "interfaces.requestCommentCreate": {
+        "request.RequestCommentCreate": {
             "type": "object",
+            "required": [
+                "comment",
+                "contributor"
+            ],
             "properties": {
                 "comment": {
                     "type": "string"
@@ -718,33 +740,38 @@ const docTemplate = `{
                 }
             }
         },
-        "interfaces.requestCommentDelete": {
+        "request.RequestCommentDelete": {
             "type": "object",
+            "required": [
+                "contributor"
+            ],
             "properties": {
-                "comment_key": {
-                    "type": "string"
-                },
                 "contributor": {
                     "type": "string"
                 }
             }
         },
-        "interfaces.requestCommentEdit": {
+        "request.RequestCommentEdit": {
             "type": "object",
+            "required": [
+                "comment",
+                "contributor"
+            ],
             "properties": {
                 "comment": {
                     "type": "string"
                 },
-                "comment_key": {
-                    "type": "string"
-                },
                 "contributor": {
                     "type": "string"
                 }
             }
         },
-        "interfaces.requestSignIn": {
+        "request.RequestSignIn": {
             "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
             "properties": {
                 "password": {
                     "type": "string"
@@ -754,8 +781,12 @@ const docTemplate = `{
                 }
             }
         },
-        "interfaces.requestSignUp": {
+        "request.RequestSignUp": {
             "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
             "properties": {
                 "password": {
                     "type": "string"
@@ -765,8 +796,12 @@ const docTemplate = `{
                 }
             }
         },
-        "interfaces.requestThreadCreate": {
+        "request.RequestThreadCreate": {
             "type": "object",
+            "required": [
+                "contributor",
+                "title"
+            ],
             "properties": {
                 "contributor": {
                     "type": "string"
@@ -776,16 +811,23 @@ const docTemplate = `{
                 }
             }
         },
-        "interfaces.requestThreadDelete": {
+        "request.RequestThreadDelete": {
             "type": "object",
+            "required": [
+                "contributor"
+            ],
             "properties": {
                 "contributor": {
                     "type": "string"
                 }
             }
         },
-        "interfaces.requestThreadEdit": {
+        "request.RequestThreadEdit": {
             "type": "object",
+            "required": [
+                "contributor",
+                "title"
+            ],
             "properties": {
                 "contributor": {
                     "type": "string"
@@ -795,7 +837,7 @@ const docTemplate = `{
                 }
             }
         },
-        "interfaces.responseComment": {
+        "response.ResponseComment": {
             "type": "object",
             "properties": {
                 "comment": {
@@ -812,7 +854,7 @@ const docTemplate = `{
                 }
             }
         },
-        "interfaces.responseThread": {
+        "response.ResponseThread": {
             "type": "object",
             "properties": {
                 "comment_sum": {
@@ -835,32 +877,32 @@ const docTemplate = `{
                 }
             }
         },
-        "interfaces.responseThreadAndComments": {
+        "response.ResponseThreadAndComments": {
             "type": "object",
             "properties": {
                 "comments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/interfaces.responseComment"
+                        "$ref": "#/definitions/response.ResponseComment"
                     }
                 },
                 "thread": {
-                    "$ref": "#/definitions/interfaces.responseThread"
+                    "$ref": "#/definitions/response.ResponseThread"
                 }
             }
         },
-        "interfaces.responseThreads": {
+        "response.ResponseThreads": {
             "type": "object",
             "properties": {
                 "threads": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/interfaces.responseThread"
+                        "$ref": "#/definitions/response.ResponseThread"
                     }
                 }
             }
         },
-        "interfaces.responseVisitor": {
+        "response.ResponseVisitor": {
             "type": "object",
             "properties": {
                 "sum": {

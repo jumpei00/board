@@ -111,15 +111,14 @@ func main() {
 	router.Use(sessionMiddleware, secureMiddleware, crossOriginMiddleware)
 
 	// routing setup
-	apigroup := router.Group("/api")
+	apigroup := router.Group("/api/user")
 	visitorGroup := router.Group("/api/visitor")
-	threadGroup := router.Group("/api/thread")
-	commentGroup := router.Group("/api/comment")
+	threadGroup := router.Group("/api/threads")
 
 	userHandler.SetupRouter(apigroup)
 	visitorHandler.SetupRouter(visitorGroup)
 	threadHandler.SetupRouter(threadGroup)
-	commentHandler.SetupRouter(commentGroup)
+	commentHandler.SetupRouter(threadGroup)
 
 	// swaggerの設定
 	if config.IsDevelopment() {

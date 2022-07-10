@@ -132,7 +132,7 @@ func TestVisitorHandler_visited(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.testCase, func(t *testing.T) {
 			c.prepare(&field)
-			response := executeHttpTest(r, http.MethodPut, "/api/visitor", nil)
+			response := executeHttpTest(r, http.MethodPut, "/api/visitor/countup", nil)
 
 			if response.Code != c.statusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.statusCode, response.Code)

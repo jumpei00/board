@@ -1,30 +1,31 @@
 package application
 
 import (
+	appParams "github.com/jumpei00/board/backend/app/application/params"
 	"github.com/jumpei00/board/backend/app/domain"
+	domainParams "github.com/jumpei00/board/backend/app/domain/params"
 	"github.com/jumpei00/board/backend/app/domain/repository"
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	"github.com/jumpei00/board/backend/app/library/logger"
-	"github.com/jumpei00/board/backend/app/params"
 	"github.com/pkg/errors"
 )
 
 type ThreadApplication interface {
 	GetAllThread() (*[]domain.Thread, error)
 	GetByThreadKey(threadKey string) (*domain.Thread, error)
-	CreateThread(param *params.CreateThreadAppLayerParam) (*domain.Thread, error)
-	EditThread(param *params.EditThreadAppLayerParam) (*domain.Thread, error)
-	DeleteThread(param *params.DeleteThreadAppLayerParam) error
+	CreateThread(param *appParams.CreateThreadAppLayerParam) (*domain.Thread, error)
+	EditThread(param *appParams.EditThreadAppLayerParam) (*domain.Thread, error)
+	DeleteThread(param *appParams.DeleteThreadAppLayerParam) error
 }
 
 type threadApplication struct {
-	threadRepo repository.ThreadRepository
+	threadRepo  repository.ThreadRepository
 	commentRepo repository.CommentRepository
 }
 
 func NewThreadApplication(tr repository.ThreadRepository, cr repository.CommentRepository) *threadApplication {
 	return &threadApplication{
-		threadRepo: tr,
+		threadRepo:  tr,
 		commentRepo: cr,
 	}
 }
@@ -47,8 +48,8 @@ func (t *threadApplication) GetByThreadKey(threadKey string) (*domain.Thread, er
 	return thread, nil
 }
 
-func (t *threadApplication) CreateThread(param *params.CreateThreadAppLayerParam) (*domain.Thread, error) {
-	domainParam := params.CreateThreadDomainLayerParam{
+func (t *threadApplication) CreateThread(param *appParams.CreateThreadAppLayerParam) (*domain.Thread, error) {
+	domainParam := domainParams.CreateThreadDomainLayerParam{
 		Title:       param.Title,
 		Contributor: param.Contributor,
 	}
@@ -63,7 +64,7 @@ func (t *threadApplication) CreateThread(param *params.CreateThreadAppLayerParam
 	return thread, nil
 }
 
-func (t *threadApplication) EditThread(param *params.EditThreadAppLayerParam) (*domain.Thread, error) {
+func (t *threadApplication) EditThread(param *appParams.EditThreadAppLayerParam) (*domain.Thread, error) {
 	thread, err := t.threadRepo.GetByKey(param.ThreadKey)
 	if err != nil {
 		return nil, err
@@ -81,8 +82,8 @@ func (t *threadApplication) EditThread(param *params.EditThreadAppLayerParam) (*
 		)
 	}
 
-	domainParam := params.EditThreadDomainLayerParam{
-		Title:       param.Title,
+	domainParam := domainParams.EditThreadDomainLayerParam{
+		Title: param.Title,
 	}
 
 	editedThread, err := t.threadRepo.Update(thread.UpdateThread(&domainParam))
@@ -93,7 +94,7 @@ func (t *threadApplication) EditThread(param *params.EditThreadAppLayerParam) (*
 	return editedThread, nil
 }
 
-func (t *threadApplication) DeleteThread(param *params.DeleteThreadAppLayerParam) error {
+func (t *threadApplication) DeleteThread(param *appParams.DeleteThreadAppLayerParam) error {
 	// スレッドが削除された場合は、それに紐づくコメントも全て削除させる必要がある
 	thread, err := t.threadRepo.GetByKey(param.ThreadKey)
 	if err != nil {
@@ -113,7 +114,7 @@ func (t *threadApplication) DeleteThread(param *params.DeleteThreadAppLayerParam
 	}
 
 	comments, err := t.commentRepo.GetAllByKey(param.ThreadKey)
-	
+
 	// スレッドに対応したコメントが無い場合は削除が必要ない
 	if errors.Cause(err) == appError.ErrNotFound {
 		if err := t.threadRepo.Delete(thread); err != nil {

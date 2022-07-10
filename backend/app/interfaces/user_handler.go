@@ -5,10 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/application"
+	"github.com/jumpei00/board/backend/app/application/params"
 	"github.com/jumpei00/board/backend/app/interfaces/request"
 	"github.com/jumpei00/board/backend/app/interfaces/session"
 	"github.com/jumpei00/board/backend/app/library/logger"
-	"github.com/jumpei00/board/backend/app/params"
 )
 
 type UserHandler struct {
@@ -41,7 +41,7 @@ func (u *UserHandler) SetupRouter(r *gin.RouterGroup) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/me [get]
+// @Router /api/user/me [get]
 // User godoc
 func (u *UserHandler) me(c *gin.Context) {
 	session, err := u.sessionManager.Get(c)
@@ -65,13 +65,13 @@ func (u *UserHandler) me(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param body body requestSignUp true "新規ユーザー作成情報"
+// @Param body body request.RequestSignUp true "新規ユーザー作成情報"
 // @Success 200 {object} domain.User
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/signup [post]
+// @Router /api/user/signup [post]
 // User godoc
 func (u *UserHandler) signup(c *gin.Context) {
 	var req request.RequestSignUp
@@ -106,13 +106,13 @@ func (u *UserHandler) signup(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param body body requestSignIn true "ログイン情報"
+// @Param body body request.RequestSignIn true "ログイン情報"
 // @Success 200 {object} domain.User
 // @Failure 400
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/signin [post]
+// @Router /api/user/signin [post]
 // User godoc
 func (u *UserHandler) signin(c *gin.Context) {
 	var req request.RequestSignIn
@@ -152,7 +152,7 @@ func (u *UserHandler) signin(c *gin.Context) {
 // @Failure 401
 // @Failure 404
 // @Failure 500
-// @Router /api/signout [delete]
+// @Router /api/user/signout [delete]
 // User godoc
 func (u *UserHandler) signout(c *gin.Context) {
 	if err := u.sessionManager.Delete(c); err != nil {

@@ -11,7 +11,7 @@ import (
 	"github.com/jumpei00/board/backend/app/domain"
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	mock_repository "github.com/jumpei00/board/backend/app/mock/repository"
-	"github.com/jumpei00/board/backend/app/params"
+	"github.com/jumpei00/board/backend/app/application/params"
 	"golang.org/x/crypto/bcrypt"
 )
 

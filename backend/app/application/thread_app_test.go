@@ -7,10 +7,10 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jumpei00/board/backend/app/application"
+	"github.com/jumpei00/board/backend/app/application/params"
 	"github.com/jumpei00/board/backend/app/domain"
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	mock_repository "github.com/jumpei00/board/backend/app/mock/repository"
-	"github.com/jumpei00/board/backend/app/params"
 	"github.com/pkg/errors"
 )
 

@@ -4,7 +4,7 @@ import { Box, Stack, Flex, Divider, Text, Spacer, useDisclosure } from "@chakra-
 import { MenuIconButton } from "../../atoms/button/MenuIconButton";
 import { GoogButton } from "../../atoms/button/GoogButton";
 import { Picture } from "../../atoms/picture/Picture";
-import { Comment } from "../../../models/Comment";
+import { Comment } from "../../../models/comment";
 import { GeneralModal } from "../modal/GeneralModal";
 import { deleteCommentPayload, editCommentPayload } from "../../../pages/threadContent/redux/comments/type";
 import { deleteComment, editComment } from "../../../state/comments";

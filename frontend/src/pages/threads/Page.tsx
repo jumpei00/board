@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { VisitorStat } from "../../components/organisms/stat/VisitorStat";
 import { ThreadPostForm } from "../../components/organisms/form/ThreadPostForm";
-import { ThreadsBoardList } from "../../components/templates/threads/ThreadBoardList";
+import { ThreadsBoardList } from "./organisms/ThreadBoardList";
 import { RootState } from "../../store/store";
 import { getAllThread } from "../../state/threads";
 import { getVisitors } from "../../state/visitor";

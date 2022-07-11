@@ -1,7 +1,7 @@
 import React from "react";
 import { Stack } from "@chakra-ui/react";
-import { CommentBoard } from "../../organisms/comment/CommentBoard";
-import { Comments } from "../../../models/Comment";
+import { CommentBoard } from "../../../../components/organisms/comment/CommentBoard";
+import { Comments } from "../../../../models/comment";
 
 export const CommentBoardList: React.FC<Comments> = (props) => {
     return (

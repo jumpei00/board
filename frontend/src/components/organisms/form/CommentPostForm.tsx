@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { Box, Text, Input, Flex, Spacer } from "@chakra-ui/react";
 import { ImageButton } from "../../atoms/button/ImageButton";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
-import { createCommentPayload } from "../../../pages/threadContent/redux/comments/type";
+import { createCommentPayload } from "../../../state/comments/type";
 import { createComment } from "../../../state/comments";
 
 type CommentPostFormProps = {

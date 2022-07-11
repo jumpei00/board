@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { Visitors } from "../../models/Visitors";
+import { Visitors } from "../../models/visitors";
 
 const initialStatevVisitors: Visitors = {
     yesterdayVisitor: 0,

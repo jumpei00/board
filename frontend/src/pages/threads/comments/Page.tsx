@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { Box } from "@chakra-ui/react";
 import { ThreadBoard } from "../../../components/organisms/thread/ThreadBoard";
 import { CommentPostform } from "../../../components/organisms/form/CommentPostForm";
-import { CommentBoardList } from "../../../components/templates/comments/CommentBoardList";
+import { CommentBoardList } from "./organisms/CommentBoardList";
 import { RootState } from "../../../store/store";
 import { getAllCommentByThreadKey } from "../../../state/comments";
 import { getThreadByThreadKeyPayload } from "../../threadContent/redux/thread/type";

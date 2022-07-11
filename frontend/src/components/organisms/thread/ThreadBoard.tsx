@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Text, Box, Flex, Spacer, Heading, useDisclosure } from "@chakra-ui/react";
-import { Thread } from "../../../models/Thread";
+import { Thread } from "../../../models/thread";
 import { MenuIconButton } from "../../atoms/button/MenuIconButton";
 import { ThreadViewButton } from "../../atoms/button/ThreadViewButton";
 import { GeneralModal } from "../modal/GeneralModal";

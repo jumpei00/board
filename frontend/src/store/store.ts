@@ -11,10 +11,10 @@ const sagaMiddleware = createSagaMiddleware()
 
 export const store = configureStore({
     reducer: {
-        users: userReducer,
-        visitors: visitorsReducer,
-        threads: threadReducer,
-        comments: commentReducer,
+        user: userReducer,
+        visitor: visitorsReducer,
+        thread: threadReducer,
+        comment: commentReducer,
     },
     middleware: new MiddlewareArray().concat(sagaMiddleware)
 });

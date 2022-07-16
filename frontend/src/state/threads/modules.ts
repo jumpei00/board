@@ -165,6 +165,6 @@ export const threadSagaSlice = createSlice({
 export const threadActions = threadSlice.actions;
 export const threadSagaActions = threadSagaSlice.actions;
 export const threadReducer = combineReducers({
-    thread: threadSlice.reducer,
+    threadState: threadSlice.reducer,
     threadSaga: threadSagaSlice.reducer,
 });

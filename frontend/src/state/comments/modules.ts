@@ -196,6 +196,6 @@ export const commentSagaSlice = createSlice({
 export const commentActions = commentSlice.actions;
 export const commentSagaActions = commentSagaSlice.actions;
 export const commentReducer = combineReducers({
-    comment: commentSlice.reducer,
+    commentState: commentSlice.reducer,
     commentSaga: commentSagaSlice.reducer,
 });

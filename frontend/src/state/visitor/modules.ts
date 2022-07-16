@@ -88,6 +88,6 @@ export const visitorSagaSlice = createSlice({
 export const visitorActions = visitorSlice.actions;
 export const visitorSagaActions = visitorSagaSlice.actions;
 export const visitorsReducer = combineReducers({
-    visitor: visitorSlice.reducer,
+    visitorState: visitorSlice.reducer,
     visitorSaga: visitorSagaSlice.reducer,
 });

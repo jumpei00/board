@@ -136,6 +136,6 @@ export const userSagaSlice = createSlice({
 export const userActions = userSlice.actions;
 export const userSagaActions = userSagaSlice.actions;
 export const userReducer = combineReducers({
-    user: userSlice.reducer,
+    userState: userSlice.reducer,
     userSaga: userSagaSlice.reducer,
 });

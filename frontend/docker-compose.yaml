@@ -16,7 +16,7 @@ services:
     environment:
       - VIRTUAL_HOST=localhost.web
       - VIRTUAL_PORT=3000
-      - API_ENV=development
+      - WEB_ENV=development
 
 networks:
   board_default:

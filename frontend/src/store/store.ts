@@ -1,19 +1,26 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { threadsReducer } from "../state/threads";
-import { visitorsReducer } from "../state/visitor";
-import { commentsReducer } from "../state/comments";
-import { threadReducer } from "../pages/threadContent/redux/thread";
-import { userReducer } from "../state/user";
+import { configureStore, MiddlewareArray } from "@reduxjs/toolkit";
+import createSagaMiddleware from "@redux-saga/core";
+import { threadReducer } from "../state/threads/modules";
+import { visitorsReducer } from "../state/visitor/modules";
+import { commentReducer } from "../state/comments/modules";
+import { userReducer } from "../state/user/modules";
+import rootSaga from "./middleware/saga";
+
+// saga configure
+const sagaMiddleware = createSagaMiddleware()
 
 export const store = configureStore({
     reducer: {
-        user: userReducer,
+        users: userReducer,
         visitors: visitorsReducer,
-        threads: threadsReducer,
-        thread: threadReducer,
-        comments: commentsReducer,
+        threads: threadReducer,
+        comments: commentReducer,
     },
+    middleware: new MiddlewareArray().concat(sagaMiddleware)
 });
+
+// saga run
+sagaMiddleware.run(rootSaga)
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

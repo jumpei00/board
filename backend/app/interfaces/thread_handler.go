@@ -118,9 +118,11 @@ func (t *ThreadHandler) create(c *gin.Context) {
 		return
 	}
 
+	user, _ := t.sessionManager.Get(c)
+
 	param := params.CreateThreadAppLayerParam{
-		Title:       req.Title,
-		Contributor: req.Contributor,
+		Title:  req.Title,
+		UserID: user.UserID,
 	}
 
 	thread, err := t.threadApplication.CreateThread(&param)
@@ -150,6 +152,7 @@ func (t *ThreadHandler) create(c *gin.Context) {
 // Thread godoc
 func (t *ThreadHandler) edit(c *gin.Context) {
 	threadKey := c.Param("threadKey")
+	user, _ := t.sessionManager.Get(c)
 
 	var req request.RequestThreadEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -159,9 +162,9 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 	}
 
 	param := params.EditThreadAppLayerParam{
-		ThreadKey:   threadKey,
-		Title:       req.Title,
-		Contributor: req.Contributor,
+		ThreadKey: threadKey,
+		Title:     req.Title,
+		UserID:    user.UserID,
 	}
 
 	thread, err := t.threadApplication.EditThread(&param)

@@ -196,6 +196,7 @@ func TestThreadApp_CreateThread(t *testing.T) {
 		initialCommentSum = 0
 		title             = "test-title"
 		contibutor        = "test-user"
+		userID            = "userID"
 		Error             = errors.New("Internal Server Error")
 	)
 	cases := []struct {
@@ -207,8 +208,9 @@ func TestThreadApp_CreateThread(t *testing.T) {
 	}{
 		{
 			testCase: "スレッドが作成された場合は成功する",
-			input:    params.CreateThreadAppLayerParam{Title: title, Contributor: contibutor},
+			input:    params.CreateThreadAppLayerParam{Title: title, UserID: userID},
 			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: contibutor}, nil)
 				mf.threadRepository.EXPECT().Insert(gomock.Any()).DoAndReturn(
 					func(thread *domain.Thread) (*domain.Thread, error) {
 						return thread, nil
@@ -220,8 +222,9 @@ func TestThreadApp_CreateThread(t *testing.T) {
 		},
 		{
 			testCase: "スレッド作成時にエラーが発生した場合は失敗する",
-			input:    params.CreateThreadAppLayerParam{Title: title, Contributor: contibutor},
+			input:    params.CreateThreadAppLayerParam{Title: title, UserID: userID},
 			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: contibutor}, nil)
 				mf.threadRepository.EXPECT().Insert(gomock.Any()).Return(nil, Error)
 			},
 			expectedThread: nil,
@@ -281,6 +284,7 @@ func TestThreadApp_EditThread(t *testing.T) {
 		wrongKey             = "wrong-key"
 		originalTitle        = "original-title"
 		editedTitle          = "edited-title"
+		userID               = "userID"
 		originalContributor  = "original-contributor"
 		differentContributor = "different-contributor"
 		originalThread       = domain.Thread{Key: correctKey, Title: originalTitle, Contributor: originalContributor, Views: &initialViews, CommentSum: &initialCommentSum}
@@ -294,7 +298,7 @@ func TestThreadApp_EditThread(t *testing.T) {
 	}{
 		{
 			testCase: "スレッドが存在しない場合は失敗する",
-			input:    params.EditThreadAppLayerParam{ThreadKey: wrongKey, Title: editedTitle, Contributor: originalContributor},
+			input:    params.EditThreadAppLayerParam{ThreadKey: wrongKey, Title: editedTitle, UserID: userID},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(wrongKey).Return(nil, appError.ErrNotFound)
 			},
@@ -303,18 +307,20 @@ func TestThreadApp_EditThread(t *testing.T) {
 		},
 		{
 			testCase: "違う投稿者が編集しようとすると失敗する",
-			input:    params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, Contributor: differentContributor},
+			input:    params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, UserID: userID},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(correctKey).Return(&originalThread, nil)
+				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: differentContributor}, nil)
 			},
 			expectedThread: nil,
 			expectedError:  &appError.BadRequest{},
 		},
 		{
 			testCase: "編集が正しく終了した場合は成功する",
-			input:    params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, Contributor: originalContributor},
+			input:    params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, UserID: userID},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(correctKey).Return(&originalThread, nil)
+				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: originalContributor}, nil)
 				mf.threadRepository.EXPECT().Update(gomock.Any()).DoAndReturn(
 					func(thread *domain.Thread) (*domain.Thread, error) {
 						return thread, nil

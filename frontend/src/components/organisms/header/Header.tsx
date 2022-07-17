@@ -6,7 +6,7 @@ import { HeaderNavigation } from "../navigation/headerNavigation";
 import { RootState } from "../../../store/store";
 
 export const Header: React.FC = () => {
-    const user = useSelector((state: RootState) => state.user);
+    const userState = useSelector((state: RootState) => state.user.userState);
 
     return (
         <>
@@ -15,10 +15,10 @@ export const Header: React.FC = () => {
                     <Heading>6ちゃんねる</Heading>
                     <Spacer></Spacer>
                     <HeaderNavigation
-                        isSignupText={user.username === ""}
-                        isSigninText={user.username === ""}
-                        isSignoutText={user.username !== ""}
-                        username={user.username}
+                        isSignupText={userState.username === ""}
+                        isSigninText={userState.username === ""}
+                        isSignoutText={userState.username !== ""}
+                        username={userState.username}
                     ></HeaderNavigation>
                 </Flex>
             </Box>

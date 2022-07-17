@@ -2,8 +2,7 @@ import React, { useState, ChangeEvent } from "react";
 import { useDispatch } from "react-redux";
 import { Text, Input, Box } from "@chakra-ui/react";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
-import { createThreadPayload } from "../../../state/threads/type";
-import { createThread } from "../../../state/threads";
+import { threadSagaActions } from "../../../state/threads/modules";
 
 type ThreadPostFormProps = {
     loginUsername: string;
@@ -14,11 +13,6 @@ export const ThreadPostForm: React.FC<ThreadPostFormProps> = (props) => {
     const [value, setValue] = useState("");
     const [buttonDisabled, setButtonDisabled] = useState(true);
 
-    const createThreadPayload: createThreadPayload = {
-        title: value,
-        contributer: props.loginUsername,
-    };
-
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         const currentValue = event.target.value;
         currentValue === "" ? setButtonDisabled(true) : setButtonDisabled(false);
@@ -26,7 +20,12 @@ export const ThreadPostForm: React.FC<ThreadPostFormProps> = (props) => {
     };
 
     const threadPostByButtonClick = () => {
-        dispatch(createThread(createThreadPayload));
+        dispatch(
+            threadSagaActions.create({
+                title: value,
+                contributor: props.loginUsername,
+            })
+        );
         setValue("");
     };
 

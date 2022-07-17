@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Box, HStack, Text } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
-import { signout } from "../../../state/user";
+import { userSagaActions } from "../../../state/user/modules";
 
 type HeaderNavigationProps = {
     isSignupText: boolean;
@@ -26,7 +26,7 @@ export const HeaderNavigation: React.FC<HeaderNavigationProps> = (props) => {
             )}
             {props.isSignoutText && (
                 <Text>
-                    <Link to="/" onClick={() => dispatch(signout())}>
+                    <Link to="/" onClick={() => dispatch(userSagaActions.signout())}>
                         ログアウト
                     </Link>
                 </Text>

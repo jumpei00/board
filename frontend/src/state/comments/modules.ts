@@ -5,7 +5,7 @@ import {
     FetchCommentResponse,
     CreateCommentResponse,
     UpdateCommentResponse,
-} from "../../models/comment";
+} from "../../models/Comment";
 
 // ---- Payload ---- //
 export type CreateCommentPayload = {

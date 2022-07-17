@@ -5,7 +5,7 @@ import {
     FetchThreadResponse,
     CreateThreadResponse,
     UpdateThreadResponse,
-} from "../../models/thread";
+} from "../../models/Thread";
 
 // ---- Payload ---- //
 export type CreateThreadPayload = {

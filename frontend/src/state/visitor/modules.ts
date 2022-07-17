@@ -1,5 +1,5 @@
 import { combineReducers, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { VisitorResponse, Visitor } from "../../models/visitors";
+import { VisitorResponse, Visitor } from "../../models/Visitors";
 
 // ---- state ---- //
 const initialState: Visitor = {

@@ -1,5 +1,5 @@
 import { combineReducers, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { User, UserResponse } from "../../models/user";
+import { User, UserResponse } from "../../models/User";
 
 // ---- Payload ---- //
 export type SignUpPayload = {

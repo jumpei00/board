@@ -196,8 +196,7 @@ func (co *CommentHandler) edit(c *gin.Context) {
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
 // @Param commentKey path string true "コメントキー"
-// @Param body body request.RequestCommentDelete true "コメント削除情報"
-// @Success 200 {object} response.ResponseThreadAndComments
+// @Success 204
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -207,37 +206,18 @@ func (co *CommentHandler) edit(c *gin.Context) {
 func (co *CommentHandler) delete(c *gin.Context) {
 	threadKey := c.Param("threadKey")
 	commentKey := c.Param("commentKey")
-
-	var req request.RequestCommentDelete
-	if err := c.ShouldBindJSON(&req); err != nil {
-		logger.Error("comment delete, requesting json bind error", "error", err, "binded_request", req)
-		handleError(c, err)
-		return
-	}
+	user, _ := co.sessionManager.Get(c)
 
 	param := params.DeleteCommentAppLayerParam{
-		ThreadKey:   threadKey,
-		CommentKey:  commentKey,
-		Contributor: req.Contributor,
+		ThreadKey:  threadKey,
+		CommentKey: commentKey,
+		UserID:     user.UserID,
 	}
 
-	comments, err := co.commentApplication.DeleteComment(&param)
-	if err != nil {
+	if err := co.commentApplication.DeleteComment(&param); err != nil {
 		handleError(c, err)
 		return
 	}
 
-	thread, err := co.threadApplication.GetByThreadKey(threadKey)
-	if err != nil {
-		handleError(c, err)
-		return
-	}
-
-	var res response.ResponseThreadAndComments
-	res.Thread = response.NewResponseThread(thread)
-	for _, comment := range *comments {
-		res.Comments = append(res.Comments, response.NewResponseComment(&comment))
-	}
-
-	c.JSON(http.StatusOK, res)
+	c.Status(http.StatusNoContent)
 }

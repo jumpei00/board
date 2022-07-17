@@ -12,6 +12,6 @@ type EditThreadAppLayerParam struct {
 }
 
 type DeleteThreadAppLayerParam struct {
-	ThreadKey   string
-	Contributor string
+	ThreadKey string
+	UserID    string
 }

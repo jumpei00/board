@@ -306,7 +306,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.ResponseThreadAndComments"
+                            "$ref": "#/definitions/response.ResponseComment"
                         }
                     },
                     "400": {
@@ -366,7 +366,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.ResponseThreadAndComments"
+                            "$ref": "#/definitions/response.ResponseComment"
                         }
                     },
                     "400": {

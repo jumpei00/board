@@ -321,7 +321,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.ResponseThreadAndComments'
+            $ref: '#/definitions/response.ResponseComment'
         "400":
           description: ""
         "401":
@@ -392,7 +392,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.ResponseThreadAndComments'
+            $ref: '#/definitions/response.ResponseComment'
         "400":
           description: ""
         "401":

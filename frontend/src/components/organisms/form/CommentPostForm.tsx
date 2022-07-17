@@ -6,7 +6,6 @@ import { PrimaryButton } from "../../atoms/button/PrimaryButton";
 import { commentSagaActions } from "../../../state/comments/modules";
 
 type CommentPostFormProps = {
-    loginUsername: string;
     threadKey: string | undefined;
 };
 
@@ -28,7 +27,6 @@ export const CommentPostform: React.FC<CommentPostFormProps> = (props) => {
                     threadKey: props.threadKey,
                     body: {
                         comment,
-                        contributor: props.loginUsername,
                     },
                 })
             );

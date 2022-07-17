@@ -4,11 +4,7 @@ import { Text, Input, Box } from "@chakra-ui/react";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
 import { threadSagaActions } from "../../../state/threads/modules";
 
-type ThreadPostFormProps = {
-    loginUsername: string;
-};
-
-export const ThreadPostForm: React.FC<ThreadPostFormProps> = (props) => {
+export const ThreadPostForm: React.FC = (props) => {
     const dispatch = useDispatch();
     const [value, setValue] = useState("");
     const [buttonDisabled, setButtonDisabled] = useState(true);
@@ -23,7 +19,6 @@ export const ThreadPostForm: React.FC<ThreadPostFormProps> = (props) => {
         dispatch(
             threadSagaActions.create({
                 title: value,
-                contributor: props.loginUsername,
             })
         );
         setValue("");

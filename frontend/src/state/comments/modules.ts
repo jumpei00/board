@@ -12,7 +12,6 @@ export type CreateCommentPayload = {
     threadKey: string;
     body: {
         comment: string;
-        contributor: string;
     };
 };
 
@@ -21,7 +20,6 @@ export type UpdateCommentPayload = {
     commentKey: string;
     body: {
         comment: string;
-        contributor: string;
     };
 };
 

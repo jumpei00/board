@@ -25,7 +25,6 @@ export const CommentBoard: React.FC<CommentBoardProps> = (props) => {
                 commentKey: props.comment.commentKey,
                 body: {
                     comment,
-                    contributor: props.comment.contributor,
                 },
             })
         );

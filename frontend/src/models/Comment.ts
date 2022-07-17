@@ -1,4 +1,4 @@
-import { Thread } from "./thread";
+import { Thread } from "./Thread";
 
 // ---- state ---- //
 export interface Comment {

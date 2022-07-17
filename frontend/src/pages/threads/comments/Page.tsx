@@ -6,58 +6,35 @@ import { ThreadBoard } from "../../../components/organisms/thread/ThreadBoard";
 import { CommentPostform } from "../../../components/organisms/form/CommentPostForm";
 import { CommentBoardList } from "./organisms/CommentBoardList";
 import { RootState } from "../../../store/store";
-import { getAllCommentByThreadKey } from "../../../state/comments";
-import { getThreadByThreadKeyPayload } from "../../threadContent/redux/thread/type";
-import { getThreadByThreadKey } from "../../threadContent/redux/thread";
-import { getAllCommentPayload } from "../../threadContent/redux/comments/type";
+import { commentSagaActions } from "../../../state/comments/modules";
 
 export const ThreadContent: React.FC = () => {
     const urlParams = useParams();
-
-    const user = useSelector((state: RootState) => state.user);
-    const thread = useSelector((state: RootState) => state.thread);
-    const threads = useSelector((state: RootState) => state.threads.threads);
-    const comments = useSelector((state: RootState) => state.comments.comments);
+    const userState = useSelector((state: RootState) => state.user.userState);
+    const commentState = useSelector((state: RootState) => state.comment.commentState);
     const dispatch = useDispatch();
 
-    const getAllCommentPayload: getAllCommentPayload = {
-        threadKey: urlParams.threadKey as string,
-    };
-
-    const getThreadByThreadKeyPayload: getThreadByThreadKeyPayload = {
-        threads,
-        threadKey: urlParams.threadKey as string,
-    };
-
     useEffect(() => {
-        dispatch(getThreadByThreadKey(getThreadByThreadKeyPayload));
-    }, [threads]);
-
-    useEffect(() => {
-        dispatch(getAllCommentByThreadKey(getAllCommentPayload));
+        if (urlParams.threadKey) {
+            dispatch(commentSagaActions.getAll(urlParams.threadKey));
+        }
     }, []);
 
     return (
         <>
             <Box w="70%" m="50px auto">
                 <ThreadBoard
-                    threadKey={thread.threadKey}
                     isStatic
-                    title={thread.title}
-                    contributer={thread.contributer}
-                    postDate={thread.postDate}
-                    updateDate={thread.updateDate}
-                    views={thread.views}
-                    sumComment={thread.sumComment}
+                    thread={commentState.thread}
                 ></ThreadBoard>
             </Box>
-            {user.username === "" || (
-                <CommentPostform
-                    loginUsername={user.username}
-                    threadKey={urlParams.threadKey as string}
-                ></CommentPostform>
+            {userState.username === "" || (
+                <CommentPostform loginUsername={userState.username} threadKey={urlParams.threadKey}></CommentPostform>
             )}
-            <CommentBoardList comments={comments}></CommentBoardList>
+            <CommentBoardList
+                threadKey={commentState.thread.threadKey}
+                comments={commentState.comments}
+            ></CommentBoardList>
         </>
     );
 };

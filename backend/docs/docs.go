@@ -208,19 +208,10 @@ const docTemplate = `{
                         "name": "threadKey",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "スレッド削除情報",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.RequestThreadDelete"
-                        }
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "204": {
                         "description": ""
                     },
                     "400": {
@@ -418,23 +409,11 @@ const docTemplate = `{
                         "name": "commentKey",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "コメント削除情報",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.RequestCommentDelete"
-                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseThreadAndComments"
-                        }
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": ""
@@ -740,17 +719,6 @@ const docTemplate = `{
                 }
             }
         },
-        "request.RequestCommentDelete": {
-            "type": "object",
-            "required": [
-                "contributor"
-            ],
-            "properties": {
-                "contributor": {
-                    "type": "string"
-                }
-            }
-        },
         "request.RequestCommentEdit": {
             "type": "object",
             "required": [
@@ -807,17 +775,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "request.RequestThreadDelete": {
-            "type": "object",
-            "required": [
-                "contributor"
-            ],
-            "properties": {
-                "contributor": {
                     "type": "string"
                 }
             }

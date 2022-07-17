@@ -95,8 +95,8 @@ func main() {
 	// application
 	userApp := application.NewUserApplication(userDB)
 	visitApp := application.NewVisitorApplication(visitorDB)
-	threadApp := application.NewThreadApplication(threadDB, commentDB)
-	commentApp := application.NewCommentApplication(threadDB, commentDB)
+	threadApp := application.NewThreadApplication(userDB, threadDB, commentDB)
+	commentApp := application.NewCommentApplication(userDB, threadDB, commentDB)
 
 	// handler
 	userHandler := interfaces.NewUserHandler(session, userApp)

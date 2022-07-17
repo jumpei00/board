@@ -17,13 +17,6 @@ definitions:
     - comment
     - contributor
     type: object
-  request.RequestCommentDelete:
-    properties:
-      contributor:
-        type: string
-    required:
-    - contributor
-    type: object
   request.RequestCommentEdit:
     properties:
       comment:
@@ -63,13 +56,6 @@ definitions:
     required:
     - contributor
     - title
-    type: object
-  request.RequestThreadDelete:
-    properties:
-      contributor:
-        type: string
-    required:
-    - contributor
     type: object
   request.RequestThreadEdit:
     properties:
@@ -206,16 +192,10 @@ paths:
         name: threadKey
         required: true
         type: string
-      - description: スレッド削除情報
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/request.RequestThreadDelete'
       produces:
       - application/json
       responses:
-        "200":
+        "204":
           description: ""
         "400":
           description: ""
@@ -369,19 +349,11 @@ paths:
         name: commentKey
         required: true
         type: string
-      - description: コメント削除情報
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/request.RequestCommentDelete'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.ResponseThreadAndComments'
+        "204":
+          description: ""
         "400":
           description: ""
         "401":

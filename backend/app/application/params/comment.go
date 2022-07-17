@@ -14,7 +14,7 @@ type EditCommentAppLayerParam struct {
 }
 
 type DeleteCommentAppLayerParam struct {
-	ThreadKey   string
-	CommentKey  string
-	Contributor string
+	ThreadKey  string
+	CommentKey string
+	UserID     string
 }

@@ -11,6 +11,7 @@ type ResponseComment struct {
 	CommentKey  string `joson:"comment_key"`
 	Contributor string `json:"contributor"`
 	Comment     string `json:"comment"`
+	CreateDate  string `json:"create_date"`
 	UpdateDate  string `json:"update_date"`
 }
 
@@ -19,6 +20,7 @@ func NewResponseComment(comment *domain.Comment) *ResponseComment {
 		CommentKey:  comment.GetKey(),
 		Contributor: comment.GetContributor(),
 		Comment:     comment.GetComment(),
+		CreateDate:  comment.FormatCreatedDate(),
 		UpdateDate:  comment.FormatUpdateDate(),
 	}
 }

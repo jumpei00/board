@@ -2,12 +2,12 @@ import React, { ChangeEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Stack, FormControl, FormLabel, Input, Heading } from "@chakra-ui/react";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
-import { userPayload } from "../../../state/user/redux/type";
+import { SignInPayload, SignUpPayload } from "../../../state/user/modules";
 
 type AuthFormProps = {
     formName: string;
     buttonName: string;
-    OnClick: (user: userPayload) => void;
+    OnClick: (payload: SignUpPayload | SignInPayload) => void;
 };
 
 export const AuthForm: React.FC<AuthFormProps> = (props) => {
@@ -24,11 +24,10 @@ export const AuthForm: React.FC<AuthFormProps> = (props) => {
     };
 
     const buttonOnClick = () => {
-        const user: userPayload = {
+        props.OnClick({
             username,
             password,
-        };
-        props.OnClick(user);
+        });
         navigate("/");
     };
 

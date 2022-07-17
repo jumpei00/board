@@ -1,14 +1,13 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { AuthForm } from "../../components/organisms/form/AuthForm";
-import { signin } from "../../state/user/redux";
-import { userPayload } from "../../state/user/redux/type";
+import { userSagaActions, SignInPayload } from "../../state/user/modules";
 
 export const SignIn: React.FC = () => {
     const dispatch = useDispatch();
 
-    const buttonClickBySignIn = (user: userPayload) => {
-        dispatch(signin(user));
+    const buttonClickBySignIn = (payload: SignInPayload) => {
+        dispatch(userSagaActions.signin(payload));
     };
 
     return <AuthForm formName="ログイン" buttonName="ログイン" OnClick={buttonClickBySignIn}></AuthForm>;

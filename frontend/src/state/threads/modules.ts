@@ -10,14 +10,12 @@ import {
 // ---- Payload ---- //
 export type CreateThreadPayload = {
     title: string;
-    contributor: string;
 };
 
 export type UpdateThreadPayload = {
     threadKey: string;
     body: {
         title: string;
-        contributor: string;
     };
 };
 

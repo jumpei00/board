@@ -148,9 +148,6 @@ func TestCommenHandler_create(t *testing.T) {
 	var (
 		correctThreadKey = "correct-thread-key"
 		wrongThreadKey   = "wrong-thread-key"
-		initViews        = 0
-		commentSum       = 0
-		thread           = &domain.Thread{Views: &initViews, CommentSum: &commentSum}
 	)
 	cases := []struct {
 		testCase   string
@@ -199,8 +196,7 @@ func TestCommenHandler_create(t *testing.T) {
 			testCase: "コメント生成もスレッド取得も問題ない場合200となる",
 			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
-				mf.commentApplication.EXPECT().CreateComment(gomock.Any()).Return(&[]domain.Comment{}, nil)
-				mf.threadApplication.EXPECT().GetByThreadKey(correctThreadKey).Return(thread, nil)
+				mf.commentApplication.EXPECT().CreateComment(gomock.Any()).Return(&domain.Comment{}, nil)
 			},
 			threadKey:  correctThreadKey,
 			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
@@ -215,17 +211,6 @@ func TestCommenHandler_create(t *testing.T) {
 			threadKey:  wrongThreadKey,
 			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
 			statusCode: http.StatusInternalServerError,
-		},
-		{
-			testCase: "コメント作成後のスレッド取得に失敗した場合は404となる",
-			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
-				mf.commentApplication.EXPECT().CreateComment(gomock.Any()).Return(&[]domain.Comment{}, nil)
-				mf.threadApplication.EXPECT().GetByThreadKey(wrongThreadKey).Return(nil, appError.ErrNotFound)
-			},
-			threadKey:  wrongThreadKey,
-			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
-			statusCode: http.StatusNotFound,
 		},
 	}
 
@@ -277,9 +262,6 @@ func TestCommentService_edit(t *testing.T) {
 	//
 	var (
 		threadKey  = "thread-key"
-		initViews  = 0
-		commentSum = 0
-		thread     = &domain.Thread{Views: &initViews, CommentSum: &commentSum}
 	)
 	cases := []struct {
 		testCase   string
@@ -328,8 +310,7 @@ func TestCommentService_edit(t *testing.T) {
 			testCase: "コメントの編集に成功した場合は200となる",
 			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
-				mf.commentApplication.EXPECT().EditComment(gomock.Any()).Return(&[]domain.Comment{}, nil)
-				mf.threadApplication.EXPECT().GetByThreadKey(threadKey).Return(thread, nil)
+				mf.commentApplication.EXPECT().EditComment(gomock.Any()).Return(&domain.Comment{}, nil)
 			},
 			threadKey:  threadKey,
 			body:       request.RequestCommentEdit{Comment: "comment", Contributor: "user"},
@@ -344,17 +325,6 @@ func TestCommentService_edit(t *testing.T) {
 			threadKey:  threadKey,
 			body:       request.RequestCommentEdit{Comment: "comment", Contributor: "user"},
 			StatusCode: http.StatusInternalServerError,
-		},
-		{
-			testCase: "コメント編集後のスレッド取得に失敗した場合は404となる",
-			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
-				mf.commentApplication.EXPECT().EditComment(gomock.Any()).Return(&[]domain.Comment{}, nil)
-				mf.threadApplication.EXPECT().GetByThreadKey(threadKey).Return(nil, appError.ErrNotFound)
-			},
-			threadKey:  threadKey,
-			body:       request.RequestCommentEdit{Comment: "comment", Contributor: "user"},
-			StatusCode: http.StatusNotFound,
 		},
 	}
 

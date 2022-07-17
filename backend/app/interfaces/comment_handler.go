@@ -89,7 +89,7 @@ func (co *CommentHandler) getAll(c *gin.Context) {
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
 // @Param body body request.RequestCommentCreate true "コメント作成情報"
-// @Success 200 {object} response.ResponseThreadAndComments
+// @Success 200 {object} response.ResponseComment
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -112,23 +112,13 @@ func (co *CommentHandler) create(c *gin.Context) {
 		Contributor: req.Contributor,
 	}
 
-	comments, err := co.commentApplication.CreateComment(&param)
+	comment, err := co.commentApplication.CreateComment(&param)
 	if err != nil {
 		handleError(c, err)
 		return
 	}
 
-	thread, err := co.threadApplication.GetByThreadKey(threadKey)
-	if err != nil {
-		handleError(c, err)
-		return
-	}
-
-	var res response.ResponseThreadAndComments
-	res.Thread = response.NewResponseThread(thread)
-	for _, comment := range *comments {
-		res.Comments = append(res.Comments, response.NewResponseComment(&comment))
-	}
+	res := response.NewResponseComment(comment)
 
 	c.JSON(http.StatusOK, res)
 }
@@ -142,7 +132,7 @@ func (co *CommentHandler) create(c *gin.Context) {
 // @Param threadKey path string true "スレッドキー"
 // @Param commentKey path string true "コメントキー"
 // @Param body body request.RequestCommentEdit true "コメント編集情報"
-// @Success 200 {object} response.ResponseThreadAndComments
+// @Success 200 {object} response.ResponseComment
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -167,23 +157,13 @@ func (co *CommentHandler) edit(c *gin.Context) {
 		Contributor: req.Contributor,
 	}
 
-	comments, err := co.commentApplication.EditComment(&param)
+	comment, err := co.commentApplication.EditComment(&param)
 	if err != nil {
 		handleError(c, err)
 		return
 	}
 
-	thread, err := co.threadApplication.GetByThreadKey(threadKey)
-	if err != nil {
-		handleError(c, err)
-		return
-	}
-
-	var res response.ResponseThreadAndComments
-	res.Thread = response.NewResponseThread(thread)
-	for _, comment := range *comments {
-		res.Comments = append(res.Comments, response.NewResponseComment(&comment))
-	}
+	res := response.NewResponseComment(comment)
 
 	c.JSON(http.StatusOK, res)
 }

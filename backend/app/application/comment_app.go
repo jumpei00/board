@@ -11,8 +11,8 @@ import (
 
 type CommentApplication interface {
 	GetAllByThreadKey(threadKey string) (*[]domain.Comment, error)
-	CreateComment(param *appParams.CreateCommentAppLayerParam) (*[]domain.Comment, error)
-	EditComment(param *appParams.EditCommentAppLayerParam) (*[]domain.Comment, error)
+	CreateComment(param *appParams.CreateCommentAppLayerParam) (*domain.Comment, error)
+	EditComment(param *appParams.EditCommentAppLayerParam) (*domain.Comment, error)
 	DeleteComment(param *appParams.DeleteCommentAppLayerParam) error
 }
 
@@ -39,7 +39,7 @@ func (c *commentApplication) GetAllByThreadKey(threadKey string) (*[]domain.Comm
 	return comments, nil
 }
 
-func (c *commentApplication) CreateComment(param *appParams.CreateCommentAppLayerParam) (*[]domain.Comment, error) {
+func (c *commentApplication) CreateComment(param *appParams.CreateCommentAppLayerParam) (*domain.Comment, error) {
 	// 対象のスレッドを取得
 	thread, err := c.threadRepo.GetByKey(param.ThreadKey)
 	if err != nil {
@@ -52,9 +52,10 @@ func (c *commentApplication) CreateComment(param *appParams.CreateCommentAppLaye
 		Comment:     param.Comment,
 	}
 
-	newComment := domain.NewComment(&domainParam)
+	comment := domain.NewComment(&domainParam)
 
-	if _, err := c.commentRepo.Insert(newComment); err != nil {
+	newComment, err := c.commentRepo.Insert(comment)
+	if err != nil {
 		return nil, err
 	}
 
@@ -65,15 +66,10 @@ func (c *commentApplication) CreateComment(param *appParams.CreateCommentAppLaye
 		return nil, err
 	}
 
-	comments, err := c.commentRepo.GetAllByKey(param.ThreadKey)
-	if err != nil {
-		return nil, err
-	}
-
-	return comments, nil
+	return newComment, nil
 }
 
-func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerParam) (*[]domain.Comment, error) {
+func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerParam) (*domain.Comment, error) {
 	// 対象のスレッドを取得
 	thread, err := c.threadRepo.GetByKey(param.ThreadKey)
 	if err != nil {
@@ -104,7 +100,9 @@ func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerPar
 	}
 
 	updatedComment := comment.UpdateComment(&domainParam)
-	if _, err := c.commentRepo.Insert(updatedComment); err != nil {
+
+	insertedComment, err := c.commentRepo.Insert(updatedComment)
+	if err != nil {
 		return nil, err
 	}
 
@@ -114,12 +112,7 @@ func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerPar
 		return nil, err
 	}
 
-	comments, err := c.commentRepo.GetAllByKey(param.ThreadKey)
-	if err != nil {
-		return nil, err
-	}
-
-	return comments, nil
+	return insertedComment, nil
 }
 
 func (c *commentApplication) DeleteComment(param *appParams.DeleteCommentAppLayerParam) error {

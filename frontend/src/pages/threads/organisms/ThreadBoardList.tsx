@@ -1,7 +1,7 @@
 import React from "react";
 import { Stack } from "@chakra-ui/react";
 import { ThreadBoard } from "../../../components/organisms/thread/ThreadBoard";
-import { Threads } from "../../../models/thread";
+import { Threads } from "../../../models/Thread";
 
 export const ThreadsBoardList: React.FC<Threads> = (props) => {
     return (
@@ -9,13 +9,7 @@ export const ThreadsBoardList: React.FC<Threads> = (props) => {
             {props.threads.map((thread) => (
                 <ThreadBoard
                     key={thread.threadKey}
-                    threadKey={thread.threadKey}
-                    title={thread.title}
-                    contributer={thread.contributer}
-                    postDate={thread.postDate}
-                    updateDate={thread.updateDate}
-                    views={thread.views}
-                    sumComment={thread.sumComment}
+                    thread={thread}
                 ></ThreadBoard>
             ))}
         </Stack>

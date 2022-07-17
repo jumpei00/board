@@ -46,9 +46,14 @@ func (c *commentApplication) CreateComment(param *appParams.CreateCommentAppLaye
 		return nil, err
 	}
 
+	user, err := c.userRepo.GetByID(param.UserID)
+	if err != nil {
+		return nil, err
+	}
+
 	domainParam := domainParams.CreateCommentDomainLayerParam{
 		ThreadKey:   param.ThreadKey,
-		Contributor: param.Contributor,
+		Contributor: user.Username,
 		Comment:     param.Comment,
 	}
 
@@ -82,16 +87,21 @@ func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerPar
 		return nil, err
 	}
 
+	user, err := c.userRepo.GetByID(param.UserID)
+	if err != nil {
+		return nil, err
+	}
+
 	// 同じ投稿者でなければ編集することはできない
-	if comment.IsNotSameContritubor(param.Contributor) {
+	if comment.IsNotSameContritubor(user.Username) {
 		logger.Warning(
 			"comment conributor and edit contributor is not same",
 			"comment_contributor", comment.GetContributor(),
-			"requesting_contiributor", param.Contributor,
+			"requesting_contiributor", user.Username,
 		)
 		return nil, appError.NewErrBadRequest(
 			appError.Message().NotSameContributor,
-			"contibutor is %s, but edit requesting user is %s", comment.GetContributor(), param.Contributor,
+			"contibutor is %s, but edit requesting user is %s", comment.GetContributor(), user.Username,
 		)
 	}
 

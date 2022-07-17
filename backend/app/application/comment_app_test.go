@@ -104,6 +104,7 @@ func TestCommentApp_CreateComment(t *testing.T) {
 	}
 
 	field := mockField{
+		userRepository:    userRepository,
 		threadRepository:  threadRepository,
 		commentRepository: commentRepository,
 	}
@@ -119,6 +120,7 @@ func TestCommentApp_CreateComment(t *testing.T) {
 		commentText       = "comment-contents"
 		contibutor        = "comment-user"
 		initialCommentSum = 0
+		userID            = "userID"
 		thread            = domain.Thread{Key: correctThreadKey, CommentSum: &initialCommentSum}
 	)
 	cases := []struct {
@@ -130,7 +132,7 @@ func TestCommentApp_CreateComment(t *testing.T) {
 	}{
 		{
 			testCase: "間違ったスレッドキーの場合は失敗する",
-			input:    params.CreateCommentAppLayerParam{ThreadKey: wrongThreadKey, Comment: commentText, Contributor: contibutor},
+			input:    params.CreateCommentAppLayerParam{ThreadKey: wrongThreadKey, Comment: commentText, UserID: userID},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(wrongThreadKey).Return(nil, appError.ErrNotFound)
 			},
@@ -139,9 +141,10 @@ func TestCommentApp_CreateComment(t *testing.T) {
 		},
 		{
 			testCase: "正しいスレッドキーの場合は成功する",
-			input:    params.CreateCommentAppLayerParam{ThreadKey: correctThreadKey, Comment: commentText, Contributor: contibutor},
+			input:    params.CreateCommentAppLayerParam{ThreadKey: correctThreadKey, Comment: commentText, UserID: userID},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(correctThreadKey).Return(&thread, nil)
+				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: contibutor}, nil)
 				mf.threadRepository.EXPECT().Update(gomock.Any()).Return(nil, nil)
 				mf.commentRepository.EXPECT().Insert(gomock.Any()).DoAndReturn(
 					func(comment *domain.Comment) (*domain.Comment, error) {
@@ -159,10 +162,10 @@ func TestCommentApp_CreateComment(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.testCase, func(t *testing.T) {
 			c.prepare(&field)
-			comments, err := commentApplication.CreateComment(&c.input)
+			comment, err := commentApplication.CreateComment(&c.input)
 
-			if diff := cmp.Diff(comments, c.expectedComments, opt); diff != "" {
-				t.Errorf("different comments.\ndiff: %s\nwant: %v\ngot: %v", diff, c.expectedComments, comments)
+			if diff := cmp.Diff(comment, c.expectedComments, opt); diff != "" {
+				t.Errorf("different comments.\ndiff: %s\nwant: %v\ngot: %v", diff, c.expectedComments, comment)
 			}
 			if !isSameError(err, c.expectedError) {
 				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)
@@ -189,6 +192,7 @@ func TestCommentApp_EditComment(t *testing.T) {
 	}
 
 	field := mockField{
+		userRepository: userRepository,
 		threadRepository:  threadRepository,
 		commentRepository: commentRepository,
 	}
@@ -206,6 +210,7 @@ func TestCommentApp_EditComment(t *testing.T) {
 		wrongCommentKey    = "wrong-comment-key"
 		wrongContributor   = "wrong-contributor"
 		editedComment      = "edited-comment"
+		userID             = "userID"
 		thread             = domain.Thread{Key: correctThreadKey}
 		comment            = domain.Comment{Key: correctCommentKey, ThreadKey: correctThreadKey, Contributor: correctContributor}
 	)
@@ -237,20 +242,22 @@ func TestCommentApp_EditComment(t *testing.T) {
 		},
 		{
 			testCase: "違うユーザーは編集できない",
-			input:    params.EditCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, Contributor: wrongContributor},
+			input:    params.EditCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, UserID: userID},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(correctThreadKey).Return(&thread, nil)
 				mf.commentRepository.EXPECT().GetByKey(correctCommentKey).Return(&comment, nil)
+				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: wrongContributor}, nil)
 			},
 			expectedComments: nil,
 			expectedError:    &appError.BadRequest{},
 		},
 		{
 			testCase: "同じユーザーの場合は成功する",
-			input:    params.EditCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, Contributor: correctContributor, Comment: editedComment},
+			input:    params.EditCommentAppLayerParam{ThreadKey: correctThreadKey, CommentKey: correctCommentKey, UserID: userID, Comment: editedComment},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(correctThreadKey).Return(&thread, nil)
 				mf.commentRepository.EXPECT().GetByKey(correctCommentKey).Return(&comment, nil)
+				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: correctContributor}, nil)
 				mf.commentRepository.EXPECT().Insert(gomock.Any()).DoAndReturn(
 					func(comment *domain.Comment) (*domain.Comment, error) {
 						return comment, nil
@@ -271,10 +278,10 @@ func TestCommentApp_EditComment(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.testCase, func(t *testing.T) {
 			c.prepare(&field)
-			comments, err := commentApplication.EditComment(&c.input)
+			comment, err := commentApplication.EditComment(&c.input)
 
-			if diff := cmp.Diff(comments, c.expectedComments, opt); diff != "" {
-				t.Errorf("different comments.\ndiff: %s\nwant: %v, got: %v", diff, c.expectedComments, comments)
+			if diff := cmp.Diff(comment, c.expectedComments, opt); diff != "" {
+				t.Errorf("different comments.\ndiff: %s\nwant: %v, got: %v", diff, c.expectedComments, comment)
 			}
 			if !isSameError(err, c.expectedError) {
 				t.Errorf("different error.\nwant: %s\ngot: %s", c.expectedError, err)

@@ -98,6 +98,7 @@ func (co *CommentHandler) getAll(c *gin.Context) {
 // Comment godoc
 func (co *CommentHandler) create(c *gin.Context) {
 	threadKey := c.Param("threadKey")
+	user, _ := co.sessionManager.Get(c)
 
 	var req request.RequestCommentCreate
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -107,9 +108,9 @@ func (co *CommentHandler) create(c *gin.Context) {
 	}
 
 	param := params.CreateCommentAppLayerParam{
-		ThreadKey:   threadKey,
-		Comment:     req.Comment,
-		Contributor: req.Contributor,
+		ThreadKey: threadKey,
+		Comment:   req.Comment,
+		UserID:    user.UserID,
 	}
 
 	comment, err := co.commentApplication.CreateComment(&param)
@@ -142,6 +143,7 @@ func (co *CommentHandler) create(c *gin.Context) {
 func (co *CommentHandler) edit(c *gin.Context) {
 	threadKey := c.Param("threadKey")
 	commentKey := c.Param("commentKey")
+	user, _ := co.sessionManager.Get(c)
 
 	var req request.RequestCommentEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -151,10 +153,10 @@ func (co *CommentHandler) edit(c *gin.Context) {
 	}
 
 	param := params.EditCommentAppLayerParam{
-		ThreadKey:   threadKey,
-		CommentKey:  commentKey,
-		Comment:     req.Comment,
-		Contributor: req.Contributor,
+		ThreadKey:  threadKey,
+		CommentKey: commentKey,
+		Comment:    req.Comment,
+		UserID:     user.UserID,
 	}
 
 	comment, err := co.commentApplication.EditComment(&param)

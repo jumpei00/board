@@ -148,6 +148,7 @@ func TestCommenHandler_create(t *testing.T) {
 	var (
 		correctThreadKey = "correct-thread-key"
 		wrongThreadKey   = "wrong-thread-key"
+		userID           = "userID"
 	)
 	cases := []struct {
 		testCase   string
@@ -159,19 +160,10 @@ func TestCommenHandler_create(t *testing.T) {
 		{
 			testCase: "コメントが欠けている場合は500となる",
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session.Session{UserID: userID}, nil)
 			},
 			threadKey:  correctThreadKey,
-			body:       request.RequestCommentCreate{Contributor: "user"},
-			statusCode: http.StatusInternalServerError,
-		},
-		{
-			testCase: "投稿者が欠けている場合は500となる",
-			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
-			},
-			threadKey:  correctThreadKey,
-			body:       request.RequestCommentCreate{Comment: "comment"},
+			body:       request.RequestCommentCreate{},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
@@ -180,7 +172,7 @@ func TestCommenHandler_create(t *testing.T) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, appError.ErrNotFound)
 			},
 			threadKey:  correctThreadKey,
-			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentCreate{Comment: "comment"},
 			statusCode: http.StatusUnauthorized,
 		},
 		{
@@ -189,27 +181,27 @@ func TestCommenHandler_create(t *testing.T) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
 			},
 			threadKey:  correctThreadKey,
-			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentCreate{Comment: "comment"},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
 			testCase: "コメント生成もスレッド取得も問題ない場合200となる",
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session.Session{UserID: userID}, nil)
 				mf.commentApplication.EXPECT().CreateComment(gomock.Any()).Return(&domain.Comment{}, nil)
 			},
 			threadKey:  correctThreadKey,
-			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentCreate{Comment: "comment"},
 			statusCode: http.StatusOK,
 		},
 		{
 			testCase: "コメント作成に失敗した場合は500となる",
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session.Session{UserID: userID}, nil)
 				mf.commentApplication.EXPECT().CreateComment(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
 			},
 			threadKey:  wrongThreadKey,
-			body:       request.RequestCommentCreate{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentCreate{Comment: "comment"},
 			statusCode: http.StatusInternalServerError,
 		},
 	}
@@ -261,31 +253,21 @@ func TestCommentService_edit(t *testing.T) {
 	// execute
 	//
 	var (
-		threadKey  = "thread-key"
+		threadKey = "thread-key"
+		userID    = "userID"
 	)
 	cases := []struct {
 		testCase   string
 		prepare    func(*mockField)
-		threadKey  string
 		body       request.RequestCommentEdit
 		StatusCode int
 	}{
 		{
 			testCase: "コメントが欠けている場合は500となる",
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session.Session{UserID: userID}, nil)
 			},
-			threadKey:  threadKey,
-			body:       request.RequestCommentEdit{Contributor: "user"},
-			StatusCode: http.StatusInternalServerError,
-		},
-		{
-			testCase: "投稿者が欠けている場合は500となる",
-			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
-			},
-			threadKey:  threadKey,
-			body:       request.RequestCommentEdit{Comment: "comment"},
+			body:       request.RequestCommentEdit{},
 			StatusCode: http.StatusInternalServerError,
 		},
 		{
@@ -293,8 +275,7 @@ func TestCommentService_edit(t *testing.T) {
 			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, appError.ErrNotFound)
 			},
-			threadKey:  threadKey,
-			body:       request.RequestCommentEdit{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentEdit{Comment: "comment"},
 			StatusCode: http.StatusUnauthorized,
 		},
 		{
@@ -302,28 +283,25 @@ func TestCommentService_edit(t *testing.T) {
 			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
 			},
-			threadKey:  threadKey,
-			body:       request.RequestCommentEdit{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentEdit{Comment: "comment"},
 			StatusCode: http.StatusInternalServerError,
 		},
 		{
 			testCase: "コメントの編集に成功した場合は200となる",
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session.Session{UserID: userID}, nil)
 				mf.commentApplication.EXPECT().EditComment(gomock.Any()).Return(&domain.Comment{}, nil)
 			},
-			threadKey:  threadKey,
-			body:       request.RequestCommentEdit{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentEdit{Comment: "comment"},
 			StatusCode: http.StatusOK,
 		},
 		{
 			testCase: "コメントの編集に失敗した場合は500となる",
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session.Session{UserID: userID}, nil)
 				mf.commentApplication.EXPECT().EditComment(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
 			},
-			threadKey:  threadKey,
-			body:       request.RequestCommentEdit{Comment: "comment", Contributor: "user"},
+			body:       request.RequestCommentEdit{Comment: "comment"},
 			StatusCode: http.StatusInternalServerError,
 		},
 	}
@@ -331,7 +309,7 @@ func TestCommentService_edit(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.testCase, func(t *testing.T) {
 			c.prepare(&field)
-			path := "/api/threads/" + c.threadKey + "/comments/comment-key"
+			path := "/api/threads/" + threadKey + "/comments/comment-key"
 			j, _ := json.Marshal(&c.body)
 
 			response := executeHttpTest(r, http.MethodPut, path, bytes.NewBuffer(j))
@@ -374,8 +352,8 @@ func TestCommentService_delete(t *testing.T) {
 	// execute
 	//
 	var (
-		threadKey  = "thread-key"
-		session = session.Session{UserID: "userID"}
+		threadKey = "thread-key"
+		session   = session.Session{UserID: "userID"}
 	)
 	cases := []struct {
 		testCase   string

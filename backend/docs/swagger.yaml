@@ -11,21 +11,15 @@ definitions:
     properties:
       comment:
         type: string
-      contributor:
-        type: string
     required:
     - comment
-    - contributor
     type: object
   request.RequestCommentEdit:
     properties:
       comment:
         type: string
-      contributor:
-        type: string
     required:
     - comment
-    - contributor
     type: object
   request.RequestSignIn:
     properties:
@@ -49,22 +43,16 @@ definitions:
     type: object
   request.RequestThreadCreate:
     properties:
-      contributor:
-        type: string
       title:
         type: string
     required:
-    - contributor
     - title
     type: object
   request.RequestThreadEdit:
     properties:
-      contributor:
-        type: string
       title:
         type: string
     required:
-    - contributor
     - title
     type: object
   response.ResponseComment:

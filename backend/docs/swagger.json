@@ -700,14 +700,10 @@
         "request.RequestCommentCreate": {
             "type": "object",
             "required": [
-                "comment",
-                "contributor"
+                "comment"
             ],
             "properties": {
                 "comment": {
-                    "type": "string"
-                },
-                "contributor": {
                     "type": "string"
                 }
             }
@@ -715,14 +711,10 @@
         "request.RequestCommentEdit": {
             "type": "object",
             "required": [
-                "comment",
-                "contributor"
+                "comment"
             ],
             "properties": {
                 "comment": {
-                    "type": "string"
-                },
-                "contributor": {
                     "type": "string"
                 }
             }
@@ -760,13 +752,9 @@
         "request.RequestThreadCreate": {
             "type": "object",
             "required": [
-                "contributor",
                 "title"
             ],
             "properties": {
-                "contributor": {
-                    "type": "string"
-                },
                 "title": {
                     "type": "string"
                 }
@@ -775,13 +763,9 @@
         "request.RequestThreadEdit": {
             "type": "object",
             "required": [
-                "contributor",
                 "title"
             ],
             "properties": {
-                "contributor": {
-                    "type": "string"
-                },
                 "title": {
                     "type": "string"
                 }

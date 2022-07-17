@@ -707,14 +707,10 @@ const docTemplate = `{
         "request.RequestCommentCreate": {
             "type": "object",
             "required": [
-                "comment",
-                "contributor"
+                "comment"
             ],
             "properties": {
                 "comment": {
-                    "type": "string"
-                },
-                "contributor": {
                     "type": "string"
                 }
             }
@@ -722,14 +718,10 @@ const docTemplate = `{
         "request.RequestCommentEdit": {
             "type": "object",
             "required": [
-                "comment",
-                "contributor"
+                "comment"
             ],
             "properties": {
                 "comment": {
-                    "type": "string"
-                },
-                "contributor": {
                     "type": "string"
                 }
             }
@@ -767,13 +759,9 @@ const docTemplate = `{
         "request.RequestThreadCreate": {
             "type": "object",
             "required": [
-                "contributor",
                 "title"
             ],
             "properties": {
-                "contributor": {
-                    "type": "string"
-                },
                 "title": {
                     "type": "string"
                 }
@@ -782,13 +770,9 @@ const docTemplate = `{
         "request.RequestThreadEdit": {
             "type": "object",
             "required": [
-                "contributor",
                 "title"
             ],
             "properties": {
-                "contributor": {
-                    "type": "string"
-                },
                 "title": {
                     "type": "string"
                 }

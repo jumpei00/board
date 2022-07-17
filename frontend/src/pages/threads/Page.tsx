@@ -27,7 +27,7 @@ export const Home: React.FC = () => {
                 today={visitorState.today}
                 sum={visitorState.sum}
             ></VisitorStat>
-            {userState.username === "" || <ThreadPostForm loginUsername={userState.username}></ThreadPostForm>}
+            {userState.username === "" || <ThreadPostForm></ThreadPostForm>}
             <ThreadsBoardList threads={threadState.threads}></ThreadsBoardList>
         </>
     );

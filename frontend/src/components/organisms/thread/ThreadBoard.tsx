@@ -24,7 +24,6 @@ export const ThreadBoard: React.FC<ThreadBoadProps> = (props) => {
             threadKey: props.thread.threadKey,
             body: {
                 title,
-                contributor: props.thread.contributor,
             }
         };
         dispatch(threadSagaActions.update(updateThreadPayload));

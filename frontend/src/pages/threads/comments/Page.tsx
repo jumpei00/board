@@ -29,7 +29,7 @@ export const ThreadContent: React.FC = () => {
                 ></ThreadBoard>
             </Box>
             {userState.username === "" || (
-                <CommentPostform loginUsername={userState.username} threadKey={urlParams.threadKey}></CommentPostform>
+                <CommentPostform threadKey={urlParams.threadKey}></CommentPostform>
             )}
             <CommentBoardList
                 threadKey={commentState.thread.threadKey}

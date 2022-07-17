@@ -849,6 +849,9 @@ const docTemplate = `{
                 "contributor": {
                     "type": "string"
                 },
+                "create_date": {
+                    "type": "string"
+                },
                 "update_date": {
                     "type": "string"
                 }
@@ -861,6 +864,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "contributor": {
+                    "type": "string"
+                },
+                "create_date": {
                     "type": "string"
                 },
                 "thread_key": {

@@ -36,10 +36,10 @@ func (m *MockCommentApplication) EXPECT() *MockCommentApplicationMockRecorder {
 }
 
 // CreateComment mocks base method.
-func (m *MockCommentApplication) CreateComment(param *params.CreateCommentAppLayerParam) (*[]domain.Comment, error) {
+func (m *MockCommentApplication) CreateComment(param *params.CreateCommentAppLayerParam) (*domain.Comment, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateComment", param)
-	ret0, _ := ret[0].(*[]domain.Comment)
+	ret0, _ := ret[0].(*domain.Comment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -65,10 +65,10 @@ func (mr *MockCommentApplicationMockRecorder) DeleteComment(param interface{}) *
 }
 
 // EditComment mocks base method.
-func (m *MockCommentApplication) EditComment(param *params.EditCommentAppLayerParam) (*[]domain.Comment, error) {
+func (m *MockCommentApplication) EditComment(param *params.EditCommentAppLayerParam) (*domain.Comment, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EditComment", param)
-	ret0, _ := ret[0].(*[]domain.Comment)
+	ret0, _ := ret[0].(*domain.Comment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

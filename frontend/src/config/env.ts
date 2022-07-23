@@ -4,10 +4,10 @@ type envMap = {
     production: string;
 };
 
-const ENV: envType = process.env.WEB_ENV as envType;
+export const ENV: envType = process.env.REACT_APP_WEB_ENV as envType;
 
 const urlMap: envMap = {
-    development: "http://localhost.api",
+    development: "http://api.localhost.test",
     production: "",
 };
 

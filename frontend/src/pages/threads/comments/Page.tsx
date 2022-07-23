@@ -7,6 +7,7 @@ import { CommentPostform } from "../../../components/organisms/form/CommentPostF
 import { CommentBoardList } from "./organisms/CommentBoardList";
 import { RootState } from "../../../store/store";
 import { commentSagaActions } from "../../../state/comments/modules";
+import { userSagaActions } from "../../../state/user/modules";
 
 export const ThreadContent: React.FC = () => {
     const urlParams = useParams();
@@ -15,6 +16,7 @@ export const ThreadContent: React.FC = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
+        dispatch(userSagaActions.getme());
         if (urlParams.threadKey) {
             dispatch(commentSagaActions.getAll(urlParams.threadKey));
         }
@@ -23,14 +25,9 @@ export const ThreadContent: React.FC = () => {
     return (
         <>
             <Box w="70%" m="50px auto">
-                <ThreadBoard
-                    isStatic
-                    thread={commentState.thread}
-                ></ThreadBoard>
+                <ThreadBoard isStatic thread={commentState.thread}></ThreadBoard>
             </Box>
-            {userState.username === "" || (
-                <CommentPostform threadKey={urlParams.threadKey}></CommentPostform>
-            )}
+            {userState.username === "" || <CommentPostform threadKey={urlParams.threadKey}></CommentPostform>}
             <CommentBoardList
                 threadKey={commentState.thread.threadKey}
                 comments={commentState.comments}

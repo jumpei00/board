@@ -110,7 +110,7 @@ definitions:
       yesterday:
         type: integer
     type: object
-host: localhost.api
+host: api.localhost.test
 info:
   contact: {}
   description: This is api server of board application

@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Box, Stack, Flex, Divider, Text, Spacer, useDisclosure } from "@chakra-ui/react";
 import { MenuIconButton } from "../../atoms/button/MenuIconButton";
-import { GoogButton } from "../../atoms/button/GoogButton";
-import { Picture } from "../../atoms/picture/Picture";
 import { Comment } from "../../../models/Comment";
 import { GeneralModal } from "../modal/GeneralModal";
 import { commentSagaActions } from "../../../state/comments/modules";
+import { RootState } from "../../../store/store";
 
 type CommentBoardProps = {
     threadKey: string;
@@ -14,6 +13,7 @@ type CommentBoardProps = {
 };
 
 export const CommentBoard: React.FC<CommentBoardProps> = (props) => {
+    const userState = useSelector((state: RootState) => state.user.userState)
     const dispatch = useDispatch();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [isEdit, setIsEdit] = useState(true);
@@ -48,13 +48,15 @@ export const CommentBoard: React.FC<CommentBoardProps> = (props) => {
                     <Flex>
                         <Text m="auto">投稿者: {props.comment.contributor}</Text>
                         <Spacer></Spacer>
-                        <MenuIconButton onOpen={onOpen} setIsEdit={setIsEdit}></MenuIconButton>
+                        {userState.username === props.comment.contributor && (
+                            <MenuIconButton onOpen={onOpen} setIsEdit={setIsEdit}></MenuIconButton>
+                        )}
                     </Flex>
                     <Divider></Divider>
                     <Text>{props.comment.comment}</Text>
-                    <Picture url={"https://bit.ly/dan-abramov"}></Picture>
+                    {/* <Picture url={"https://bit.ly/dan-abramov"}></Picture> */}
                     <Flex>
-                        <GoogButton></GoogButton>
+                        {/* <GoogButton></GoogButton> */}
                         <Spacer></Spacer>
                         <Text m="auto">更新日時: {props.comment.updateDate}</Text>
                     </Flex>

@@ -12,11 +12,13 @@ services:
       - ./:/app
     networks:
       - board_default
-    command: yarn start
+    command: >
+      sh -c
+      "echo 'REACT_APP_WEB_ENV=development' > .env &&
+      yarn start"
     environment:
-      - VIRTUAL_HOST=localhost.web
+      - VIRTUAL_HOST=web.localhost.test
       - VIRTUAL_PORT=3000
-      - WEB_ENV=development
 
 networks:
   board_default:

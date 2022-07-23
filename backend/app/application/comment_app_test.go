@@ -258,7 +258,7 @@ func TestCommentApp_EditComment(t *testing.T) {
 				mf.threadRepository.EXPECT().GetByKey(correctThreadKey).Return(&thread, nil)
 				mf.commentRepository.EXPECT().GetByKey(correctCommentKey).Return(&comment, nil)
 				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: correctContributor}, nil)
-				mf.commentRepository.EXPECT().Insert(gomock.Any()).DoAndReturn(
+				mf.commentRepository.EXPECT().Update(gomock.Any()).DoAndReturn(
 					func(comment *domain.Comment) (*domain.Comment, error) {
 						return comment, nil
 					},

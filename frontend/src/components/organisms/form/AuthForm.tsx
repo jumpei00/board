@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Stack, FormControl, FormLabel, Input, Heading } from "@chakra-ui/react";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
@@ -8,10 +8,12 @@ type AuthFormProps = {
     formName: string;
     buttonName: string;
     OnClick: (payload: SignUpPayload | SignInPayload) => void;
+    pending: boolean
+    success: boolean
 };
 
 export const AuthForm: React.FC<AuthFormProps> = (props) => {
-    const navigate = useNavigate();
+    const navigate = useNavigate() 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
@@ -28,8 +30,13 @@ export const AuthForm: React.FC<AuthFormProps> = (props) => {
             username,
             password,
         });
-        navigate("/");
     };
+
+    useEffect(() => {
+        if (props.success) {
+            navigate("/")
+        }
+    }, [props.pending])
 
     return (
         <Box w="50%" m="200px auto" bg="gray.300" boxShadow="dark-lg" p="50px">
@@ -39,6 +46,7 @@ export const AuthForm: React.FC<AuthFormProps> = (props) => {
                     <Box>
                         <FormLabel>ユーザー名</FormLabel>
                         <Input
+                            id="username"
                             type="text"
                             variant="flushed"
                             placeholder="username"
@@ -49,6 +57,7 @@ export const AuthForm: React.FC<AuthFormProps> = (props) => {
                     <Box>
                         <FormLabel>パスワード</FormLabel>
                         <Input
+                            id="password"
                             type="password"
                             variant="flushed"
                             placeholder="password"

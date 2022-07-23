@@ -7,8 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jumpei00/board/backend/app/config"
 	"github.com/jumpei00/board/backend/app/domain"
-	"github.com/pkg/errors"
 	appError "github.com/jumpei00/board/backend/app/library/error"
+	"github.com/jumpei00/board/backend/app/library/logger"
+	"github.com/pkg/errors"
 )
 
 const sessionkey = "session-key"
@@ -82,22 +83,27 @@ func (m *manager) get(c *gin.Context) (*Session, error) {
 	sessionJSON, ok := sessionStore.Get(sessionkey).([]byte)
 	// 存在しなかった場合
 	if sessionJSON == nil {
+		if err := m.delete(c); err != nil {
+			logger.Error("cannot delete session", "Error", err)
+		}
 		return nil, appError.NewErrNotFound("session not found")
 	}
 	// キャストできなかった場合
 	// 一応削除を試みる
 	if !ok {
 		if err := m.delete(c); err != nil {
-			return nil, appError.NewErrSessionCastFailed("session cast and delete error -> error: %s", err)
+			logger.Error("cannot delete session", "Error", err)
 		}
+		return nil, appError.NewErrSessionCastFailed("session cast error -> session: %s", sessionStore.Get(sessionkey))
 	}
 
-	var session *Session
-	if err := json.Unmarshal(sessionJSON, session); err != nil {
+	var session Session
+	if err := json.Unmarshal(sessionJSON, &session); err != nil {
+		logger.Info("error", "error", err)
 		return nil, errors.WithStack(err)
 	}
 
-	return session, nil
+	return &session, nil
 }
 
 func (m *manager) setAndSave(c *gin.Context, session *Session) error {

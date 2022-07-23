@@ -23,7 +23,7 @@ import (
 // @title Board API
 // @version 1.0
 // @description This is api server of board application
-// @host localhost.api
+// @host api.localhost.test
 // license.name jumpei00
 // @BasePath /
 func main() {
@@ -41,6 +41,7 @@ func main() {
 			c, err := redis.Dial("tcp", config.GetRedisHost())
 			if err != nil {
 				logger.Fatal("redis session open error", "error", err)
+				return nil, err
 			}
 			return c, nil
 		},
@@ -78,7 +79,7 @@ func main() {
 	// cross origin
 	crossOriginConfig := cors.Config{
 		AllowOrigins:     []string{config.GetFrontURL()},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,

@@ -7,34 +7,35 @@ import {
     CreateCommentPayload,
     UpdateCommentPayload,
     DeleteCommentPayload,
+    commentActions,
 } from "./modules";
 
 function* fetchComments(action: PayloadAction<string>) {
     try {
-        const { res } = yield call(getAllCommentsAPI, action.payload);
-        yield put(commentSagaActions.getAllDone(res));
+        const { data } = yield call(getAllCommentsAPI, action.payload);
+        yield put(commentSagaActions.getAllDone());
+        yield put(commentActions.storeComments(data));
     } catch (e) {
-        console.log(e);
         yield put(commentSagaActions.getAllFail());
     }
 }
 
 function* createComment(action: PayloadAction<CreateCommentPayload>) {
     try {
-        const { res } = yield call(createCommentAPI, action.payload);
-        yield put(commentSagaActions.createDone(res));
+        const { data } = yield call(createCommentAPI, action.payload);
+        yield put(commentSagaActions.createDone());
+        yield put(commentActions.addComment(data));
     } catch (e) {
-        console.log(e);
         yield put(commentSagaActions.createFail());
     }
 }
 
 function* updateComment(action: PayloadAction<UpdateCommentPayload>) {
     try {
-        const { res } = yield call(updateCommentAPI, action.payload);
-        yield put(commentSagaActions.updateDone(res));
+        const { data } = yield call(updateCommentAPI, action.payload);
+        yield put(commentSagaActions.updateDone());
+        yield put(commentActions.editComment(data));
     } catch (e) {
-        console.log(e);
         yield put(commentSagaActions.updateFail());
     }
 }
@@ -42,9 +43,9 @@ function* updateComment(action: PayloadAction<UpdateCommentPayload>) {
 function* deleteComment(action: PayloadAction<DeleteCommentPayload>) {
     try {
         yield call(deleteCommentAPI, action.payload);
-        yield put(commentSagaActions.deleteDone(action.payload.commentKey));
+        yield put(commentSagaActions.deleteDone());
+        yield put(commentActions.deleteComment(action.payload.commentKey));
     } catch (e) {
-        console.log(e);
         yield put(commentSagaActions.deleteFail());
     }
 }

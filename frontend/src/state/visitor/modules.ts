@@ -61,10 +61,9 @@ export const visitorSagaSlice = createSlice({
         getStat: (state) => {
             state.fetchResponse.pending = true;
         },
-        getStatDone: (state, action: PayloadAction<Visitor>) => {
+        getStatDone: (state) => {
             state.fetchResponse.pending = false;
             state.fetchResponse.success = true;
-            visitorSlice.actions.storeVisitor(action.payload);
         },
         getStatFail: (state) => {
             state.fetchResponse.pending = false;
@@ -73,10 +72,9 @@ export const visitorSagaSlice = createSlice({
         coutup: (state) => {
             state.countupResponse.pending = true;
         },
-        coutupDone: (state, action: PayloadAction<Visitor>) => {
+        coutupDone: (state) => {
             state.countupResponse.pending = false;
             state.countupResponse.success = true;
-            visitorSlice.actions.storeVisitor(action.payload);
         },
         coutupFail: (state) => {
             state.countupResponse.pending = false;

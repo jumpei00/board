@@ -1,21 +1,22 @@
 import { call, put, takeEvery } from "redux-saga/effects";
 import { visitorCountup, visitorStat } from "../../api/visitor";
-import { visitorSagaActionsType, visitorSagaActions } from "./modules";
+import { visitorSagaActionsType, visitorSagaActions, visitorActions } from "./modules";
 
 function* getVisitorStat() {
     try {
-        const { res } = yield call(visitorStat);
-        yield put(visitorSagaActions.getStatDone(res));
+        const { data } = yield call(visitorStat);
+        yield put(visitorSagaActions.getStatDone());
+        yield put(visitorActions.storeVisitor(data));
     } catch (e) {
-        console.log(e);
         yield put(visitorSagaActions.getStatFail());
     }
 }
 
 function* countupTodayVisitor() {
     try {
-        const { res } = yield call(visitorCountup);
-        yield put(visitorSagaActions.coutupDone(res));
+        const { data } = yield call(visitorCountup);
+        yield put(visitorSagaActions.coutupDone());
+        yield put(visitorActions.storeVisitor(data));
     } catch (e) {
         console.log(e);
         yield put(visitorSagaActions.coutupFail());

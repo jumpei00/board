@@ -15,7 +15,7 @@ services:
       - database
     command: air
     environment:
-      - VIRTUAL_HOST=localhost.api
+      - VIRTUAL_HOST=api.localhost.test
       - VIRTUAL_PORT=8080
       - API_ENV=development
       - MYSQL_HOST=mysql

@@ -1,5 +1,5 @@
 import { SignInPayload, SignUpPayload } from "../state/user/modules";
-import { boardApi } from "./init";
+import boardApi from "./init";
 
 export const getMe = () => {
     return boardApi.get(`/api/user/me`)

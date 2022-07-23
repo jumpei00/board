@@ -84,11 +84,12 @@ export const userSagaSlice = createSlice({
     reducers: {
         getme: (state) => {
             state.fetchResponse.pending = true;
+            state.fetchResponse.success = false;
+            state.fetchResponse.error = false;
         },
-        getmeDone: (state, action: PayloadAction<User>) => {
+        getmeDone: (state) => {
             state.fetchResponse.pending = false;
             state.fetchResponse.success = true;
-            userSlice.actions.storeUser(action.payload);
         },
         getmeFail: (state) => {
             state.fetchResponse.pending = false;
@@ -96,11 +97,12 @@ export const userSagaSlice = createSlice({
         },
         signup: (state, action: PayloadAction<SignUpPayload>) => {
             state.signupResponse.pending = true;
+            state.signupResponse.success = false;
+            state.signupResponse.error = false;
         },
-        signupDone: (state, action: PayloadAction<User>) => {
+        signupDone: (state) => {
             state.signupResponse.pending = false;
             state.signupResponse.success = true;
-            userSlice.actions.storeUser(action.payload);
         },
         signupFail: (state) => {
             state.signupResponse.pending = false;
@@ -108,11 +110,12 @@ export const userSagaSlice = createSlice({
         },
         signin: (state, action: PayloadAction<SignInPayload>) => {
             state.signinResponse.pending = true;
+            state.signinResponse.success = false;
+            state.signinResponse.error = false;
         },
-        signinDone: (state, action: PayloadAction<User>) => {
+        signinDone: (state) => {
             state.signinResponse.pending = false;
             state.signinResponse.success = true;
-            userSlice.actions.storeUser(action.payload);
         },
         signinFail: (state) => {
             state.signinResponse.pending = false;
@@ -120,11 +123,16 @@ export const userSagaSlice = createSlice({
         },
         signout: (state) => {
             state.signoutResponse.pending = true;
+            state.signoutResponse.success = false;
+            state.signoutResponse.error = false;
         },
         signoutDone: (state) => {
             state.signoutResponse.pending = false;
             state.signoutResponse.success = true;
-            userSlice.actions.clearUser();
+            state.signinResponse.success = false;
+            state.signinResponse.error = false;
+            state.signupResponse.success = false;
+            state.signupResponse.error = false;
         },
         signoutFail: (state) => {
             state.signoutResponse.pending = false;

@@ -1,4 +1,4 @@
-import { boardApi } from "./init"
+import boardApi from "./init"
 
 export const visitorStat = () => {
     return boardApi.get(`/api/visitor`)

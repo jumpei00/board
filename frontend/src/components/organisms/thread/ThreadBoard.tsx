@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Text, Box, Flex, Spacer, Heading, useDisclosure } from "@chakra-ui/react";
 import { Thread } from "../../../models/Thread";
@@ -7,13 +7,15 @@ import { MenuIconButton } from "../../atoms/button/MenuIconButton";
 import { ThreadViewButton } from "../../atoms/button/ThreadViewButton";
 import { GeneralModal } from "../modal/GeneralModal";
 import { UpdateThreadPayload, threadSagaActions } from "../../../state/threads/modules";
+import { RootState } from "../../../store/store";
 
 interface ThreadBoadProps {
     isStatic?: boolean;
-    thread: Thread
+    thread: Thread;
 }
 
 export const ThreadBoard: React.FC<ThreadBoadProps> = (props) => {
+    const userState = useSelector((state: RootState) => state.user.userState);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -24,7 +26,7 @@ export const ThreadBoard: React.FC<ThreadBoadProps> = (props) => {
             threadKey: props.thread.threadKey,
             body: {
                 title,
-            }
+            },
         };
         dispatch(threadSagaActions.update(updateThreadPayload));
         onClose();
@@ -42,9 +44,13 @@ export const ThreadBoard: React.FC<ThreadBoadProps> = (props) => {
                     <Heading>{props.thread.title}</Heading>
                     <Spacer></Spacer>
                     {props.isStatic || (
-                        <ThreadViewButton onClick={() => navigate(`thread/${props.thread.threadKey}`)}>Look!</ThreadViewButton>
+                        <ThreadViewButton onClick={() => navigate(`thread/${props.thread.threadKey}`)}>
+                            Look!
+                        </ThreadViewButton>
                     )}
-                    <MenuIconButton onOpen={onOpen} setIsEdit={setIsEdit}></MenuIconButton>
+                    {props.isStatic || userState.username === props.thread.contributor && (
+                        <MenuIconButton onOpen={onOpen} setIsEdit={setIsEdit}></MenuIconButton>
+                    )}
                 </Flex>
                 <Text textAlign="right">投稿者: {props.thread.contributor}</Text>
                 <Text textAlign="right">投稿日: {props.thread.createDate}</Text>

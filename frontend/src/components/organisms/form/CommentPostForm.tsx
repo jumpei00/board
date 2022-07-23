@@ -1,7 +1,6 @@
 import React, { ChangeEvent, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Box, Text, Input, Flex, Spacer } from "@chakra-ui/react";
-import { ImageButton } from "../../atoms/button/ImageButton";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
 import { commentSagaActions } from "../../../state/comments/modules";
 
@@ -45,7 +44,7 @@ export const CommentPostform: React.FC<CommentPostFormProps> = (props) => {
                 onChange={handleChange}
             ></Input>
             <Flex>
-                <ImageButton>画像</ImageButton>
+                {/* <ImageButton>画像</ImageButton> */}
                 <Spacer></Spacer>
                 <PrimaryButton colorScheme="teal" isDisabled={buttonDisable} onClick={postCommentOnClick}>
                     投稿

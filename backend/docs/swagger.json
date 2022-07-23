@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost.api",
+    "host": "api.localhost.test",
     "basePath": "/",
     "paths": {
         "/api/threads": {

@@ -7,6 +7,7 @@ import { RootState } from "../../store/store";
 import { userSagaActions } from "../../state/user/modules";
 import { threadSagaActions } from "../../state/threads/modules";
 import { visitorSagaActions } from "../../state/visitor/modules";
+import { commentActions } from "../../state/comments/modules";
 
 export const Home: React.FC = () => {
     const userState = useSelector((state: RootState) => state.user.userState);
@@ -18,6 +19,7 @@ export const Home: React.FC = () => {
         dispatch(userSagaActions.getme());
         dispatch(threadSagaActions.getAll());
         dispatch(visitorSagaActions.getStat());
+        dispatch(commentActions.clearComment());
     }, []);
 
     return (

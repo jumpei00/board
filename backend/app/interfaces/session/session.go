@@ -10,8 +10,8 @@ type Session struct {
 
 func newSession(useID string) *Session {
 	return &Session{
-		UserID: useID,
-		CreatedAt: time.Now(),
+		UserID:     useID,
+		CreatedAt:  time.Now(),
 		LastAccess: time.Now(),
 	}
 }

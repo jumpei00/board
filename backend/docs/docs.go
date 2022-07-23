@@ -208,19 +208,10 @@ const docTemplate = `{
                         "name": "threadKey",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "スレッド削除情報",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.RequestThreadDelete"
-                        }
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "204": {
                         "description": ""
                     },
                     "400": {
@@ -315,7 +306,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.ResponseThreadAndComments"
+                            "$ref": "#/definitions/response.ResponseComment"
                         }
                     },
                     "400": {
@@ -375,7 +366,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.ResponseThreadAndComments"
+                            "$ref": "#/definitions/response.ResponseComment"
                         }
                     },
                     "400": {
@@ -418,23 +409,11 @@ const docTemplate = `{
                         "name": "commentKey",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "コメント削除情報",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.RequestCommentDelete"
-                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseThreadAndComments"
-                        }
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": ""
@@ -728,25 +707,10 @@ const docTemplate = `{
         "request.RequestCommentCreate": {
             "type": "object",
             "required": [
-                "comment",
-                "contributor"
+                "comment"
             ],
             "properties": {
                 "comment": {
-                    "type": "string"
-                },
-                "contributor": {
-                    "type": "string"
-                }
-            }
-        },
-        "request.RequestCommentDelete": {
-            "type": "object",
-            "required": [
-                "contributor"
-            ],
-            "properties": {
-                "contributor": {
                     "type": "string"
                 }
             }
@@ -754,14 +718,10 @@ const docTemplate = `{
         "request.RequestCommentEdit": {
             "type": "object",
             "required": [
-                "comment",
-                "contributor"
+                "comment"
             ],
             "properties": {
                 "comment": {
-                    "type": "string"
-                },
-                "contributor": {
                     "type": "string"
                 }
             }
@@ -799,25 +759,10 @@ const docTemplate = `{
         "request.RequestThreadCreate": {
             "type": "object",
             "required": [
-                "contributor",
                 "title"
             ],
             "properties": {
-                "contributor": {
-                    "type": "string"
-                },
                 "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "request.RequestThreadDelete": {
-            "type": "object",
-            "required": [
-                "contributor"
-            ],
-            "properties": {
-                "contributor": {
                     "type": "string"
                 }
             }
@@ -825,13 +770,9 @@ const docTemplate = `{
         "request.RequestThreadEdit": {
             "type": "object",
             "required": [
-                "contributor",
                 "title"
             ],
             "properties": {
-                "contributor": {
-                    "type": "string"
-                },
                 "title": {
                     "type": "string"
                 }
@@ -849,6 +790,9 @@ const docTemplate = `{
                 "contributor": {
                     "type": "string"
                 },
+                "create_date": {
+                    "type": "string"
+                },
                 "update_date": {
                     "type": "string"
                 }
@@ -861,6 +805,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "contributor": {
+                    "type": "string"
+                },
+                "create_date": {
                     "type": "string"
                 },
                 "thread_key": {
@@ -922,7 +869,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost.api",
+	Host:             "api.localhost.test",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Board API",

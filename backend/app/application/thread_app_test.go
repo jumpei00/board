@@ -21,20 +21,23 @@ func TestThreadApp_GetAllThread(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	userRepository := mock_repository.NewMockUserRepository(mockCtrl)
 	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
 	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
 
 	type mockField struct {
+		userRepository    *mock_repository.MockUserRepository
 		threadRepository  *mock_repository.MockThreadRepository
 		commentRepository *mock_repository.MockCommentRepository
 	}
 
 	field := mockField{
+		userRepository:    userRepository,
 		threadRepository:  threadRepository,
 		commentRepository: commentRepository,
 	}
 
-	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
+	threadApplication := application.NewThreadApplication(userRepository, threadRepository, commentRepository)
 
 	//
 	// execute
@@ -92,20 +95,23 @@ func TestThreadApp_GetByThreadKey(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	userRepository := mock_repository.NewMockUserRepository(mockCtrl)
 	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
 	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
 
 	type mockField struct {
+		userRepository    *mock_repository.MockUserRepository
 		threadRepository  *mock_repository.MockThreadRepository
 		commentRepository *mock_repository.MockCommentRepository
 	}
 
 	field := mockField{
+		userRepository:    userRepository,
 		threadRepository:  threadRepository,
 		commentRepository: commentRepository,
 	}
 
-	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
+	threadApplication := application.NewThreadApplication(userRepository, threadRepository, commentRepository)
 
 	//
 	// execute
@@ -164,20 +170,23 @@ func TestThreadApp_CreateThread(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	userRepository := mock_repository.NewMockUserRepository(mockCtrl)
 	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
 	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
 
 	type mockField struct {
+		userRepository    *mock_repository.MockUserRepository
 		threadRepository  *mock_repository.MockThreadRepository
 		commentRepository *mock_repository.MockCommentRepository
 	}
 
 	field := mockField{
+		userRepository:    userRepository,
 		threadRepository:  threadRepository,
 		commentRepository: commentRepository,
 	}
 
-	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
+	threadApplication := application.NewThreadApplication(userRepository, threadRepository, commentRepository)
 
 	//
 	// execute
@@ -187,6 +196,7 @@ func TestThreadApp_CreateThread(t *testing.T) {
 		initialCommentSum = 0
 		title             = "test-title"
 		contibutor        = "test-user"
+		userID            = "userID"
 		Error             = errors.New("Internal Server Error")
 	)
 	cases := []struct {
@@ -198,8 +208,9 @@ func TestThreadApp_CreateThread(t *testing.T) {
 	}{
 		{
 			testCase: "スレッドが作成された場合は成功する",
-			input:    params.CreateThreadAppLayerParam{Title: title, Contributor: contibutor},
+			input:    params.CreateThreadAppLayerParam{Title: title, UserID: userID},
 			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: contibutor}, nil)
 				mf.threadRepository.EXPECT().Insert(gomock.Any()).DoAndReturn(
 					func(thread *domain.Thread) (*domain.Thread, error) {
 						return thread, nil
@@ -211,8 +222,9 @@ func TestThreadApp_CreateThread(t *testing.T) {
 		},
 		{
 			testCase: "スレッド作成時にエラーが発生した場合は失敗する",
-			input:    params.CreateThreadAppLayerParam{Title: title, Contributor: contibutor},
+			input:    params.CreateThreadAppLayerParam{Title: title, UserID: userID},
 			prepare: func(mf *mockField) {
+				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: contibutor}, nil)
 				mf.threadRepository.EXPECT().Insert(gomock.Any()).Return(nil, Error)
 			},
 			expectedThread: nil,
@@ -244,20 +256,23 @@ func TestThreadApp_EditThread(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	userRepository := mock_repository.NewMockUserRepository(mockCtrl)
 	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
 	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
 
 	type mockField struct {
+		userRepository    *mock_repository.MockUserRepository
 		threadRepository  *mock_repository.MockThreadRepository
 		commentRepository *mock_repository.MockCommentRepository
 	}
 
 	field := mockField{
+		userRepository:    userRepository,
 		threadRepository:  threadRepository,
 		commentRepository: commentRepository,
 	}
 
-	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
+	threadApplication := application.NewThreadApplication(userRepository, threadRepository, commentRepository)
 
 	//
 	// exucute
@@ -269,6 +284,7 @@ func TestThreadApp_EditThread(t *testing.T) {
 		wrongKey             = "wrong-key"
 		originalTitle        = "original-title"
 		editedTitle          = "edited-title"
+		userID               = "userID"
 		originalContributor  = "original-contributor"
 		differentContributor = "different-contributor"
 		originalThread       = domain.Thread{Key: correctKey, Title: originalTitle, Contributor: originalContributor, Views: &initialViews, CommentSum: &initialCommentSum}
@@ -282,7 +298,7 @@ func TestThreadApp_EditThread(t *testing.T) {
 	}{
 		{
 			testCase: "スレッドが存在しない場合は失敗する",
-			input:    params.EditThreadAppLayerParam{ThreadKey: wrongKey, Title: editedTitle, Contributor: originalContributor},
+			input:    params.EditThreadAppLayerParam{ThreadKey: wrongKey, Title: editedTitle, UserID: userID},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(wrongKey).Return(nil, appError.ErrNotFound)
 			},
@@ -291,18 +307,20 @@ func TestThreadApp_EditThread(t *testing.T) {
 		},
 		{
 			testCase: "違う投稿者が編集しようとすると失敗する",
-			input:    params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, Contributor: differentContributor},
+			input:    params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, UserID: userID},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(correctKey).Return(&originalThread, nil)
+				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: differentContributor}, nil)
 			},
 			expectedThread: nil,
 			expectedError:  &appError.BadRequest{},
 		},
 		{
 			testCase: "編集が正しく終了した場合は成功する",
-			input:    params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, Contributor: originalContributor},
+			input:    params.EditThreadAppLayerParam{ThreadKey: correctKey, Title: editedTitle, UserID: userID},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(correctKey).Return(&originalThread, nil)
+				mf.userRepository.EXPECT().GetByID(userID).Return(&domain.User{Username: originalContributor}, nil)
 				mf.threadRepository.EXPECT().Update(gomock.Any()).DoAndReturn(
 					func(thread *domain.Thread) (*domain.Thread, error) {
 						return thread, nil
@@ -338,32 +356,38 @@ func TestThreadApp_DeleteThread(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	userRepository := mock_repository.NewMockUserRepository(mockCtrl)
 	threadRepository := mock_repository.NewMockThreadRepository(mockCtrl)
 	commentRepository := mock_repository.NewMockCommentRepository(mockCtrl)
 
 	type mockField struct {
+		userRepository    *mock_repository.MockUserRepository
 		threadRepository  *mock_repository.MockThreadRepository
 		commentRepository *mock_repository.MockCommentRepository
 	}
 
 	field := mockField{
+		userRepository:    userRepository,
 		threadRepository:  threadRepository,
 		commentRepository: commentRepository,
 	}
 
-	threadApplication := application.NewThreadApplication(threadRepository, commentRepository)
+	threadApplication := application.NewThreadApplication(userRepository, threadRepository, commentRepository)
 
 	//
 	// execute
 	//
 	var (
-		correntThreadKey          = "correct-key"
-		correctNoCommentThreadKey = "correct-no-comment-key"
-		wrongThreadKey            = "wrong-key"
-		originalContributor       = "original-contributor"
-		differentContributor      = "different-contributor"
-		thread                    = domain.Thread{Key: correntThreadKey, Contributor: originalContributor}
-		comments                  = []domain.Comment{}
+		correntThreadKey  = "correct-key"
+		wrongThreadKey    = "wrong-key"
+		correctUserID     = "correct-userID"
+		wrongUserID       = "wrong-userID"
+		originalUserName  = "original-username"
+		differentUserName = "different-username"
+		correctUser       = domain.User{Username: originalUserName}
+		wrongUser         = domain.User{Username: differentUserName}
+		thread            = domain.Thread{Key: correntThreadKey, Contributor: originalUserName}
+		comments          = []domain.Comment{}
 	)
 	cases := []struct {
 		testCase      string
@@ -373,7 +397,7 @@ func TestThreadApp_DeleteThread(t *testing.T) {
 	}{
 		{
 			testCase: "スレッドが存在しない場合は失敗する",
-			input:    params.DeleteThreadAppLayerParam{ThreadKey: wrongThreadKey, Contributor: originalContributor},
+			input:    params.DeleteThreadAppLayerParam{ThreadKey: wrongThreadKey, UserID: correctUserID},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(wrongThreadKey).Return(nil, appError.ErrNotFound)
 			},
@@ -381,27 +405,30 @@ func TestThreadApp_DeleteThread(t *testing.T) {
 		},
 		{
 			testCase: "異なる投稿者の場合は失敗する",
-			input:    params.DeleteThreadAppLayerParam{ThreadKey: correntThreadKey, Contributor: differentContributor},
+			input:    params.DeleteThreadAppLayerParam{ThreadKey: correntThreadKey, UserID: wrongUserID},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(correntThreadKey).Return(&thread, nil)
+				mf.userRepository.EXPECT().GetByID(wrongUserID).Return(&wrongUser, nil)
 			},
 			expectedError: &appError.BadRequest{},
 		},
 		{
-			testCase: "スレッドに対応するコメントが無い場合は成功する",
-			input:    params.DeleteThreadAppLayerParam{ThreadKey: correctNoCommentThreadKey, Contributor: originalContributor},
+			testCase: "スレッドに対応するコメントが無く、スレッドに対する削除が完了した場合成功する",
+			input:    params.DeleteThreadAppLayerParam{ThreadKey: correntThreadKey, UserID: originalUserName},
 			prepare: func(mf *mockField) {
-				mf.threadRepository.EXPECT().GetByKey(correctNoCommentThreadKey).Return(&thread, nil)
-				mf.commentRepository.EXPECT().GetAllByKey(correctNoCommentThreadKey).Return(nil, appError.ErrNotFound)
+				mf.threadRepository.EXPECT().GetByKey(correntThreadKey).Return(&thread, nil)
+				mf.userRepository.EXPECT().GetByID(originalUserName).Return(&correctUser, nil)
+				mf.commentRepository.EXPECT().GetAllByKey(correntThreadKey).Return(nil, appError.ErrNotFound)
 				mf.threadRepository.EXPECT().Delete(&thread).Return(nil)
 			},
 			expectedError: nil,
 		},
 		{
 			testCase: "スレッドに対応するコメントがあって、削除できた場合は成功する",
-			input:    params.DeleteThreadAppLayerParam{ThreadKey: correntThreadKey, Contributor: originalContributor},
+			input:    params.DeleteThreadAppLayerParam{ThreadKey: correntThreadKey, UserID: originalUserName},
 			prepare: func(mf *mockField) {
 				mf.threadRepository.EXPECT().GetByKey(correntThreadKey).Return(&thread, nil)
+				mf.userRepository.EXPECT().GetByID(originalUserName).Return(&correctUser, nil)
 				mf.commentRepository.EXPECT().GetAllByKey(correntThreadKey).Return(&comments, nil)
 				mf.threadRepository.EXPECT().DeleteThreadAndComments(&thread, &comments).Return(nil)
 			},

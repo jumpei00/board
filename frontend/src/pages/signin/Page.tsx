@@ -1,15 +1,24 @@
 import React from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AuthForm } from "../../components/organisms/form/AuthForm";
-import { signin } from "../../state/user/redux";
-import { userPayload } from "../../state/user/redux/type";
+import { userSagaActions, SignInPayload } from "../../state/user/modules";
+import { RootState } from "../../store/store";
 
 export const SignIn: React.FC = () => {
+    const userSagaState = useSelector((state: RootState) => state.user.userSaga);
     const dispatch = useDispatch();
 
-    const buttonClickBySignIn = (user: userPayload) => {
-        dispatch(signin(user));
+    const buttonClickBySignIn = (payload: SignInPayload) => {
+        dispatch(userSagaActions.signin(payload));
     };
 
-    return <AuthForm formName="ログイン" buttonName="ログイン" OnClick={buttonClickBySignIn}></AuthForm>;
+    return (
+        <AuthForm
+            formName="ログイン"
+            buttonName="ログイン"
+            OnClick={buttonClickBySignIn}
+            pending={userSagaState.signinResponse.pending}
+            success={userSagaState.signinResponse.success}
+        ></AuthForm>
+    );
 };

@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost.api",
+    "host": "api.localhost.test",
     "basePath": "/",
     "paths": {
         "/api/threads": {
@@ -201,19 +201,10 @@
                         "name": "threadKey",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "スレッド削除情報",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.RequestThreadDelete"
-                        }
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "204": {
                         "description": ""
                     },
                     "400": {
@@ -308,7 +299,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.ResponseThreadAndComments"
+                            "$ref": "#/definitions/response.ResponseComment"
                         }
                     },
                     "400": {
@@ -368,7 +359,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.ResponseThreadAndComments"
+                            "$ref": "#/definitions/response.ResponseComment"
                         }
                     },
                     "400": {
@@ -411,23 +402,11 @@
                         "name": "commentKey",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "コメント削除情報",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.RequestCommentDelete"
-                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseThreadAndComments"
-                        }
+                    "204": {
+                        "description": ""
                     },
                     "400": {
                         "description": ""
@@ -721,25 +700,10 @@
         "request.RequestCommentCreate": {
             "type": "object",
             "required": [
-                "comment",
-                "contributor"
+                "comment"
             ],
             "properties": {
                 "comment": {
-                    "type": "string"
-                },
-                "contributor": {
-                    "type": "string"
-                }
-            }
-        },
-        "request.RequestCommentDelete": {
-            "type": "object",
-            "required": [
-                "contributor"
-            ],
-            "properties": {
-                "contributor": {
                     "type": "string"
                 }
             }
@@ -747,14 +711,10 @@
         "request.RequestCommentEdit": {
             "type": "object",
             "required": [
-                "comment",
-                "contributor"
+                "comment"
             ],
             "properties": {
                 "comment": {
-                    "type": "string"
-                },
-                "contributor": {
                     "type": "string"
                 }
             }
@@ -792,25 +752,10 @@
         "request.RequestThreadCreate": {
             "type": "object",
             "required": [
-                "contributor",
                 "title"
             ],
             "properties": {
-                "contributor": {
-                    "type": "string"
-                },
                 "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "request.RequestThreadDelete": {
-            "type": "object",
-            "required": [
-                "contributor"
-            ],
-            "properties": {
-                "contributor": {
                     "type": "string"
                 }
             }
@@ -818,13 +763,9 @@
         "request.RequestThreadEdit": {
             "type": "object",
             "required": [
-                "contributor",
                 "title"
             ],
             "properties": {
-                "contributor": {
-                    "type": "string"
-                },
                 "title": {
                     "type": "string"
                 }
@@ -842,6 +783,9 @@
                 "contributor": {
                     "type": "string"
                 },
+                "create_date": {
+                    "type": "string"
+                },
                 "update_date": {
                     "type": "string"
                 }
@@ -854,6 +798,9 @@
                     "type": "integer"
                 },
                 "contributor": {
+                    "type": "string"
+                },
+                "create_date": {
                     "type": "string"
                 },
                 "thread_key": {

@@ -1,26 +1,17 @@
 import React, { ChangeEvent, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Box, Text, Input, Flex, Spacer } from "@chakra-ui/react";
-import { ImageButton } from "../../atoms/button/ImageButton";
 import { PrimaryButton } from "../../atoms/button/PrimaryButton";
-import { createCommentPayload } from "../../../pages/threadContent/redux/comments/type";
-import { createComment } from "../../../pages/threadContent/redux/comments";
+import { commentSagaActions } from "../../../state/comments/modules";
 
 type CommentPostFormProps = {
-    loginUsername: string;
-    threadKey: string;
+    threadKey: string | undefined;
 };
 
 export const CommentPostform: React.FC<CommentPostFormProps> = (props) => {
     const dispatch = useDispatch();
     const [comment, setComment] = useState("");
     const [buttonDisable, setButtonDisable] = useState(true);
-
-    const createCommentPayload: createCommentPayload = {
-        threadKey: props.threadKey,
-        comment,
-        contributer: props.loginUsername,
-    };
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         const currentValue = event.target.value;
@@ -29,8 +20,17 @@ export const CommentPostform: React.FC<CommentPostFormProps> = (props) => {
     };
 
     const postCommentOnClick = () => {
-        dispatch(createComment(createCommentPayload));
-        setComment("");
+        if (props.threadKey) {
+            dispatch(
+                commentSagaActions.create({
+                    threadKey: props.threadKey,
+                    body: {
+                        comment,
+                    },
+                })
+            );
+            setComment("");
+        }
     };
 
     return (
@@ -44,7 +44,7 @@ export const CommentPostform: React.FC<CommentPostFormProps> = (props) => {
                 onChange={handleChange}
             ></Input>
             <Flex>
-                <ImageButton>画像</ImageButton>
+                {/* <ImageButton>画像</ImageButton> */}
                 <Spacer></Spacer>
                 <PrimaryButton colorScheme="teal" isDisabled={buttonDisable} onClick={postCommentOnClick}>
                     投稿

@@ -11,18 +11,20 @@ import (
 
 type CommentApplication interface {
 	GetAllByThreadKey(threadKey string) (*[]domain.Comment, error)
-	CreateComment(param *appParams.CreateCommentAppLayerParam) (*[]domain.Comment, error)
-	EditComment(param *appParams.EditCommentAppLayerParam) (*[]domain.Comment, error)
-	DeleteComment(param *appParams.DeleteCommentAppLayerParam) (*[]domain.Comment, error)
+	CreateComment(param *appParams.CreateCommentAppLayerParam) (*domain.Comment, error)
+	EditComment(param *appParams.EditCommentAppLayerParam) (*domain.Comment, error)
+	DeleteComment(param *appParams.DeleteCommentAppLayerParam) error
 }
 
 type commentApplication struct {
+	userRepo    repository.UserRepository
 	threadRepo  repository.ThreadRepository
 	commentRepo repository.CommentRepository
 }
 
-func NewCommentApplication(tr repository.ThreadRepository, cr repository.CommentRepository) *commentApplication {
+func NewCommentApplication(ur repository.UserRepository, tr repository.ThreadRepository, cr repository.CommentRepository) *commentApplication {
 	return &commentApplication{
+		userRepo:    ur,
 		threadRepo:  tr,
 		commentRepo: cr,
 	}
@@ -37,22 +39,28 @@ func (c *commentApplication) GetAllByThreadKey(threadKey string) (*[]domain.Comm
 	return comments, nil
 }
 
-func (c *commentApplication) CreateComment(param *appParams.CreateCommentAppLayerParam) (*[]domain.Comment, error) {
+func (c *commentApplication) CreateComment(param *appParams.CreateCommentAppLayerParam) (*domain.Comment, error) {
 	// 対象のスレッドを取得
 	thread, err := c.threadRepo.GetByKey(param.ThreadKey)
 	if err != nil {
 		return nil, err
 	}
 
+	user, err := c.userRepo.GetByID(param.UserID)
+	if err != nil {
+		return nil, err
+	}
+
 	domainParam := domainParams.CreateCommentDomainLayerParam{
 		ThreadKey:   param.ThreadKey,
-		Contributor: param.Contributor,
+		Contributor: user.Username,
 		Comment:     param.Comment,
 	}
 
-	newComment := domain.NewComment(&domainParam)
+	comment := domain.NewComment(&domainParam)
 
-	if _, err := c.commentRepo.Insert(newComment); err != nil {
+	newComment, err := c.commentRepo.Insert(comment)
+	if err != nil {
 		return nil, err
 	}
 
@@ -63,15 +71,10 @@ func (c *commentApplication) CreateComment(param *appParams.CreateCommentAppLaye
 		return nil, err
 	}
 
-	comments, err := c.commentRepo.GetAllByKey(param.ThreadKey)
-	if err != nil {
-		return nil, err
-	}
-
-	return comments, nil
+	return newComment, nil
 }
 
-func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerParam) (*[]domain.Comment, error) {
+func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerParam) (*domain.Comment, error) {
 	// 対象のスレッドを取得
 	thread, err := c.threadRepo.GetByKey(param.ThreadKey)
 	if err != nil {
@@ -84,16 +87,21 @@ func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerPar
 		return nil, err
 	}
 
+	user, err := c.userRepo.GetByID(param.UserID)
+	if err != nil {
+		return nil, err
+	}
+
 	// 同じ投稿者でなければ編集することはできない
-	if comment.IsNotSameContritubor(param.Contributor) {
+	if comment.IsNotSameContritubor(user.Username) {
 		logger.Warning(
 			"comment conributor and edit contributor is not same",
 			"comment_contributor", comment.GetContributor(),
-			"requesting_contiributor", param.Contributor,
+			"requesting_contiributor", user.Username,
 		)
 		return nil, appError.NewErrBadRequest(
 			appError.Message().NotSameContributor,
-			"contibutor is %s, but edit requesting user is %s", comment.GetContributor(), param.Contributor,
+			"contibutor is %s, but edit requesting user is %s", comment.GetContributor(), user.Username,
 		)
 	}
 
@@ -102,7 +110,9 @@ func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerPar
 	}
 
 	updatedComment := comment.UpdateComment(&domainParam)
-	if _, err := c.commentRepo.Insert(updatedComment); err != nil {
+
+	returnedComment, err := c.commentRepo.Update(updatedComment)
+	if err != nil {
 		return nil, err
 	}
 
@@ -112,54 +122,49 @@ func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerPar
 		return nil, err
 	}
 
-	comments, err := c.commentRepo.GetAllByKey(param.ThreadKey)
-	if err != nil {
-		return nil, err
-	}
-
-	return comments, nil
+	return returnedComment, nil
 }
 
-func (c *commentApplication) DeleteComment(param *appParams.DeleteCommentAppLayerParam) (*[]domain.Comment, error) {
+func (c *commentApplication) DeleteComment(param *appParams.DeleteCommentAppLayerParam) error {
 	// スレッドはあるかどうか確認
 	thread, err := c.threadRepo.GetByKey(param.ThreadKey)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	comment, err := c.commentRepo.GetByKey(param.CommentKey)
 	if err != nil {
-		return nil, err
+		return err
+	}
+
+	user, err := c.userRepo.GetByID(param.UserID)
+	if err != nil {
+		return err
 	}
 
 	// 同じ投稿者でなければ削除することはできない
-	if comment.IsNotSameContritubor(param.Contributor) {
+	if comment.IsNotSameContritubor(user.Username) {
 		logger.Warning(
 			"comment conributor and delete contributor is not same",
 			"comment_contributor", comment.GetContributor(),
-			"requesting_contiributor", param.Contributor,
+			"requesting_contiributor", user.Username,
 		)
-		return nil, appError.NewErrBadRequest(
+		return appError.NewErrBadRequest(
 			appError.Message().NotSameContributor,
-			"contibutor is %s, but delete requesting user is %s", comment.GetContributor(), param.Contributor,
+			"contibutor is %s, but delete requesting user is %s", comment.GetContributor(), user.Username,
 		)
 	}
 
 	if err := c.commentRepo.Delete(comment); err != nil {
-		return nil, err
+		return err
 	}
 
 	// スレッドの更新時刻とコメント数を更新
 	thread.UpdateLatestUpdatedDate()
 	thread.CountdownCommentSum()
 	if _, err := c.threadRepo.Update(thread); err != nil {
-		return nil, err
+		return err
 	}
 
-	comments, err := c.commentRepo.GetAllByKey(param.ThreadKey)
-	if err != nil {
-		return nil, err
-	}
-
-	return comments, nil
+	return nil
 }

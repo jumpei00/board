@@ -118,9 +118,11 @@ func (t *ThreadHandler) create(c *gin.Context) {
 		return
 	}
 
+	user, _ := t.sessionManager.Get(c)
+
 	param := params.CreateThreadAppLayerParam{
-		Title:       req.Title,
-		Contributor: req.Contributor,
+		Title:  req.Title,
+		UserID: user.UserID,
 	}
 
 	thread, err := t.threadApplication.CreateThread(&param)
@@ -150,6 +152,7 @@ func (t *ThreadHandler) create(c *gin.Context) {
 // Thread godoc
 func (t *ThreadHandler) edit(c *gin.Context) {
 	threadKey := c.Param("threadKey")
+	user, _ := t.sessionManager.Get(c)
 
 	var req request.RequestThreadEdit
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -159,9 +162,9 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 	}
 
 	param := params.EditThreadAppLayerParam{
-		ThreadKey:   threadKey,
-		Title:       req.Title,
-		Contributor: req.Contributor,
+		ThreadKey: threadKey,
+		Title:     req.Title,
+		UserID:    user.UserID,
 	}
 
 	thread, err := t.threadApplication.EditThread(&param)
@@ -181,8 +184,7 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param threadKey path string true "スレッドキー"
-// @Param body body request.RequestThreadDelete true "スレッド削除情報"
-// @Success 200
+// @Success 204
 // @Failure 400
 // @Failure 401
 // @Failure 404
@@ -191,17 +193,11 @@ func (t *ThreadHandler) edit(c *gin.Context) {
 // Thread godoc
 func (t *ThreadHandler) delete(c *gin.Context) {
 	threadKey := c.Param("threadKey")
-
-	var req request.RequestThreadDelete
-	if err := c.ShouldBindJSON(&req); err != nil {
-		logger.Error("thread delete, requesting json bind error", "error", err, "binded_request", req)
-		handleError(c, err)
-		return
-	}
+	user, _ := t.sessionManager.Get(c)
 
 	param := params.DeleteThreadAppLayerParam{
-		ThreadKey:   threadKey,
-		Contributor: req.Contributor,
+		ThreadKey: threadKey,
+		UserID:    user.UserID,
 	}
 
 	if err := t.threadApplication.DeleteThread(&param); err != nil {

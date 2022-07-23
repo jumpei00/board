@@ -11,6 +11,7 @@ import (
 	"github.com/jumpei00/board/backend/app/domain"
 	"github.com/jumpei00/board/backend/app/interfaces"
 	"github.com/jumpei00/board/backend/app/interfaces/request"
+	"github.com/jumpei00/board/backend/app/interfaces/session"
 	appError "github.com/jumpei00/board/backend/app/library/error"
 	mock_application "github.com/jumpei00/board/backend/app/mock/application"
 	mock_session "github.com/jumpei00/board/backend/app/mock/session"
@@ -179,7 +180,8 @@ func TestThreaHandler_create(t *testing.T) {
 	var (
 		initView   = 0
 		commentSum = 0
-		thread     = &domain.Thread{Views: &initView, CommentSum: &commentSum}
+		thread     = domain.Thread{Views: &initView, CommentSum: &commentSum}
+		session    = session.Session{UserID: "userID"}
 	)
 	cases := []struct {
 		testCase   string
@@ -190,26 +192,18 @@ func TestThreaHandler_create(t *testing.T) {
 		{
 			testCase: "タイトルが欠如してリクエストされた場合は500になる",
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(&session, nil)
 			},
-			body:       request.RequestThreadCreate{Contributor: "test-user"},
-			statusCode: http.StatusInternalServerError,
-		},
-		{
-			testCase: "投稿者が欠如してリクエストされた場合は500になる",
-			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
-			},
-			body:       request.RequestThreadCreate{Title: "test-title"},
+			body:       request.RequestThreadCreate{},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
 			testCase: "スレッドの作成に失敗した場合は500となる",
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session, nil)
 				mf.threadApplication.EXPECT().CreateThread(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
 			},
-			body:       request.RequestThreadCreate{Title: "test-title", Contributor: "test-user"},
+			body:       request.RequestThreadCreate{Title: "test-title"},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
@@ -217,7 +211,7 @@ func TestThreaHandler_create(t *testing.T) {
 			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, appError.ErrNotFound)
 			},
-			body:       request.RequestThreadCreate{Title: "test-title", Contributor: "test-user"},
+			body:       request.RequestThreadCreate{Title: "test-title"},
 			statusCode: http.StatusUnauthorized,
 		},
 		{
@@ -225,16 +219,16 @@ func TestThreaHandler_create(t *testing.T) {
 			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
 			},
-			body:       request.RequestThreadCreate{Title: "test-title", Contributor: "test-user"},
+			body:       request.RequestThreadCreate{Title: "test-title"},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
 			testCase: "スレッドの作成に成功した場合は200となる",
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
-				mf.threadApplication.EXPECT().CreateThread(gomock.Any()).Return(thread, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session, nil)
+				mf.threadApplication.EXPECT().CreateThread(gomock.Any()).Return(&thread, nil)
 			},
-			body:       request.RequestThreadCreate{Title: "test-title", Contributor: "test-user"},
+			body:       request.RequestThreadCreate{Title: "test-title"},
 			statusCode: http.StatusOK,
 		},
 	}
@@ -287,7 +281,8 @@ func TestThreadHandler_edit(t *testing.T) {
 		wrongThreadKey   = "wrong-thread-key"
 		initView         = 0
 		commentSum       = 0
-		thread           = &domain.Thread{Views: &initView, CommentSum: &commentSum}
+		thread           = domain.Thread{Views: &initView, CommentSum: &commentSum}
+		session          = session.Session{UserID: "userID"}
 	)
 	cases := []struct {
 		testCase   string
@@ -300,28 +295,19 @@ func TestThreadHandler_edit(t *testing.T) {
 			testCase:  "タイトルが欠如してリクエストされた場合は500になる",
 			threadKey: correctThreadKey,
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session, nil)
 			},
-			body:       request.RequestThreadEdit{Contributor: "test-user"},
-			statusCode: http.StatusInternalServerError,
-		},
-		{
-			testCase:  "投稿者が欠如してリクエストされた場合は500になる",
-			threadKey: correctThreadKey,
-			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
-			},
-			body:       request.RequestThreadEdit{Title: "test-title"},
+			body:       request.RequestThreadEdit{},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
 			testCase:  "スレッドキーに対するスレッドが存在しない場合は404となる",
 			threadKey: wrongThreadKey,
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session, nil)
 				mf.threadApplication.EXPECT().EditThread(gomock.Any()).Return(nil, appError.ErrNotFound)
 			},
-			body:       request.RequestThreadEdit{Title: "test-title", Contributor: "test-user"},
+			body:       request.RequestThreadEdit{Title: "test-title"},
 			statusCode: http.StatusNotFound,
 		},
 		{
@@ -330,7 +316,7 @@ func TestThreadHandler_edit(t *testing.T) {
 			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, appError.ErrNotFound)
 			},
-			body:       request.RequestThreadEdit{Title: "test-title", Contributor: "test-user"},
+			body:       request.RequestThreadEdit{Title: "test-title"},
 			statusCode: http.StatusUnauthorized,
 		},
 		{
@@ -339,17 +325,17 @@ func TestThreadHandler_edit(t *testing.T) {
 			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
 			},
-			body:       request.RequestThreadEdit{Title: "test-title", Contributor: "test-user"},
+			body:       request.RequestThreadEdit{Title: "test-title"},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
 			testCase:  "スレッドの編集に成功したら200となる",
 			threadKey: correctThreadKey,
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
-				mf.threadApplication.EXPECT().EditThread(gomock.Any()).Return(thread, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session, nil)
+				mf.threadApplication.EXPECT().EditThread(gomock.Any()).Return(&thread, nil)
 			},
-			body:       request.RequestThreadEdit{Title: "test-title", Contributor: "test-user"},
+			body:       request.RequestThreadEdit{Title: "test-title"},
 			statusCode: http.StatusOK,
 		},
 	}
@@ -400,31 +386,21 @@ func TestThreadHandler_delete(t *testing.T) {
 	var (
 		correctThreadKey = "correct-thread-key"
 		wrongThreadKey   = "wrong-thread-key"
+		session          = session.Session{UserID: "userID"}
 	)
 	cases := []struct {
 		testCase   string
 		threadKey  string
 		prepare    func(*mockField)
-		body       request.RequestThreadDelete
 		statusCode int
 	}{
-		{
-			testCase:  "投稿者が欠如してリクエストされた場合は500になる",
-			threadKey: correctThreadKey,
-			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
-			},
-			body:       request.RequestThreadDelete{},
-			statusCode: http.StatusInternalServerError,
-		},
 		{
 			testCase:  "スレッドキーに対するスレッドが存在しない場合は404となる",
 			threadKey: wrongThreadKey,
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session, nil)
 				mf.threadApplication.EXPECT().DeleteThread(gomock.Any()).Return(appError.ErrNotFound)
 			},
-			body:       request.RequestThreadDelete{Contributor: "test-user"},
 			statusCode: http.StatusNotFound,
 		},
 		{
@@ -433,7 +409,6 @@ func TestThreadHandler_delete(t *testing.T) {
 			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, appError.ErrNotFound)
 			},
-			body:       request.RequestThreadDelete{Contributor: "test-user"},
 			statusCode: http.StatusUnauthorized,
 		},
 		{
@@ -442,17 +417,15 @@ func TestThreadHandler_delete(t *testing.T) {
 			prepare: func(mf *mockField) {
 				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, errors.New("Internal Server Error"))
 			},
-			body:       request.RequestThreadDelete{Contributor: "test-user"},
 			statusCode: http.StatusInternalServerError,
 		},
 		{
 			testCase:  "スレッドの削除に成功した場合は204となる",
 			threadKey: correctThreadKey,
 			prepare: func(mf *mockField) {
-				mf.sessionManager.EXPECT().Get(gomock.Any()).Return(nil, nil)
+				mf.sessionManager.EXPECT().Get(gomock.Any()).MaxTimes(2).Return(&session, nil)
 				mf.threadApplication.EXPECT().DeleteThread(gomock.Any()).Return(nil)
 			},
-			body:       request.RequestThreadDelete{Contributor: "test-user"},
 			statusCode: http.StatusNoContent,
 		},
 	}
@@ -461,9 +434,8 @@ func TestThreadHandler_delete(t *testing.T) {
 		t.Run(c.testCase, func(t *testing.T) {
 			c.prepare(&field)
 			path := "/api/threads/" + c.threadKey
-			j, _ := json.Marshal(&c.body)
 
-			response := executeHttpTest(r, http.MethodDelete, path, bytes.NewBuffer(j))
+			response := executeHttpTest(r, http.MethodDelete, path, nil)
 
 			if response.Code != c.statusCode {
 				t.Errorf("different status code.\nwant: %d\ngot: %d", c.statusCode, response.Code)

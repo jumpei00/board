@@ -11,28 +11,15 @@ definitions:
     properties:
       comment:
         type: string
-      contributor:
-        type: string
     required:
     - comment
-    - contributor
-    type: object
-  request.RequestCommentDelete:
-    properties:
-      contributor:
-        type: string
-    required:
-    - contributor
     type: object
   request.RequestCommentEdit:
     properties:
       comment:
         type: string
-      contributor:
-        type: string
     required:
     - comment
-    - contributor
     type: object
   request.RequestSignIn:
     properties:
@@ -56,29 +43,16 @@ definitions:
     type: object
   request.RequestThreadCreate:
     properties:
-      contributor:
-        type: string
       title:
         type: string
     required:
-    - contributor
     - title
-    type: object
-  request.RequestThreadDelete:
-    properties:
-      contributor:
-        type: string
-    required:
-    - contributor
     type: object
   request.RequestThreadEdit:
     properties:
-      contributor:
-        type: string
       title:
         type: string
     required:
-    - contributor
     - title
     type: object
   response.ResponseComment:
@@ -89,6 +63,8 @@ definitions:
         type: string
       contributor:
         type: string
+      create_date:
+        type: string
       update_date:
         type: string
     type: object
@@ -97,6 +73,8 @@ definitions:
       comment_sum:
         type: integer
       contributor:
+        type: string
+      create_date:
         type: string
       thread_key:
         type: string
@@ -132,7 +110,7 @@ definitions:
       yesterday:
         type: integer
     type: object
-host: localhost.api
+host: api.localhost.test
 info:
   contact: {}
   description: This is api server of board application
@@ -202,16 +180,10 @@ paths:
         name: threadKey
         required: true
         type: string
-      - description: スレッド削除情報
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/request.RequestThreadDelete'
       produces:
       - application/json
       responses:
-        "200":
+        "204":
           description: ""
         "400":
           description: ""
@@ -337,7 +309,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.ResponseThreadAndComments'
+            $ref: '#/definitions/response.ResponseComment'
         "400":
           description: ""
         "401":
@@ -365,19 +337,11 @@ paths:
         name: commentKey
         required: true
         type: string
-      - description: コメント削除情報
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/request.RequestCommentDelete'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.ResponseThreadAndComments'
+        "204":
+          description: ""
         "400":
           description: ""
         "401":
@@ -416,7 +380,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.ResponseThreadAndComments'
+            $ref: '#/definitions/response.ResponseComment'
         "400":
           description: ""
         "401":

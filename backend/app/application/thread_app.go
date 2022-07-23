@@ -19,12 +19,14 @@ type ThreadApplication interface {
 }
 
 type threadApplication struct {
+	userRepo    repository.UserRepository
 	threadRepo  repository.ThreadRepository
 	commentRepo repository.CommentRepository
 }
 
-func NewThreadApplication(tr repository.ThreadRepository, cr repository.CommentRepository) *threadApplication {
+func NewThreadApplication(ur repository.UserRepository, tr repository.ThreadRepository, cr repository.CommentRepository) *threadApplication {
 	return &threadApplication{
+		userRepo:    ur,
 		threadRepo:  tr,
 		commentRepo: cr,
 	}
@@ -49,9 +51,14 @@ func (t *threadApplication) GetByThreadKey(threadKey string) (*domain.Thread, er
 }
 
 func (t *threadApplication) CreateThread(param *appParams.CreateThreadAppLayerParam) (*domain.Thread, error) {
+	user, err := t.userRepo.GetByID(param.UserID)
+	if err != nil {
+		return nil, err
+	}
+
 	domainParam := domainParams.CreateThreadDomainLayerParam{
 		Title:       param.Title,
-		Contributor: param.Contributor,
+		Contributor: user.Username,
 	}
 
 	newThread := domain.NewThread(&domainParam)
@@ -70,15 +77,20 @@ func (t *threadApplication) EditThread(param *appParams.EditThreadAppLayerParam)
 		return nil, err
 	}
 
-	if thread.IsNotSameContributor(param.Contributor) {
+	user, err := t.userRepo.GetByID(param.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if thread.IsNotSameContributor(user.Username) {
 		logger.Warning(
 			"thread contibutor and edit requesting contributor is not same",
 			"thread_contributor", thread.GetContributor(),
-			"requesting_contributor", param.Contributor,
+			"requesting_contributor", user.Username,
 		)
 		return nil, appError.NewErrBadRequest(
 			appError.Message().NotSameContributor,
-			"contibutor is %s, but edit requesting user is %s", thread.GetContributor(), param.Contributor,
+			"contibutor is %s, but edit requesting user is %s", thread.GetContributor(), user.Username,
 		)
 	}
 
@@ -101,15 +113,20 @@ func (t *threadApplication) DeleteThread(param *appParams.DeleteThreadAppLayerPa
 		return err
 	}
 
-	if thread.IsNotSameContributor(param.Contributor) {
+	user, err := t.userRepo.GetByID(param.UserID)
+	if err != nil {
+		return err
+	}
+
+	if thread.IsNotSameContributor(user.Username) {
 		logger.Warning(
 			"thread contibutor and delete requesting contributor is not same",
 			"thread_contributor", thread.GetContributor(),
-			"requesting_contributor", param.Contributor,
+			"requesting_contributor", user.Username,
 		)
 		return appError.NewErrBadRequest(
 			appError.Message().NotSameContributor,
-			"contibutor is %s, but delete requesting user is %s", thread.GetContributor(), param.Contributor,
+			"contibutor is %s, but delete requesting user is %s", thread.GetContributor(), user.Username,
 		)
 	}
 

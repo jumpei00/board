@@ -23,7 +23,7 @@ func IsProduction() bool {
 
 func GetFrontURL() string {
 	if IsDevelopment() {
-		return "http://localhost.web"
+		return "http://web.localhost.test"
 	}
 	return ""
 }

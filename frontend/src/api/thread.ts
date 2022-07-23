@@ -1,5 +1,5 @@
 import { CreateThreadPayload, UpdateThreadPayload } from "../state/threads/modules";
-import { boardApi } from "./init";
+import boardApi from "./init";
 
 export const getAllThreadsAPI = () => {
     return boardApi.get(`/api/threads`);

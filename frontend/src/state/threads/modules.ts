@@ -74,18 +74,19 @@ export const threadSlice = createSlice({
     initialState,
     reducers: {
         storeThreads: (state, action: PayloadAction<FetchThreadResponse>) => {
+            if (action.payload.threads === null) {
+                return state
+            }
             return action.payload;
         },
         addThread: (state, action: PayloadAction<CreateThreadResponse>) => {
             state.threads.unshift(action.payload);
         },
         editThread: (state, action: PayloadAction<UpdateThreadResponse>) => {
-            let targetThread = state.threads.find((thread) => thread.threadKey === action.payload.threadKey);
+            const targetThread = state.threads.find((thread) => thread.threadKey === action.payload.threadKey);
             if (targetThread) {
-                targetThread = {
-                    ...targetThread,
-                    ...action.payload,
-                };
+                targetThread.title = action.payload.title
+                targetThread.updateDate = action.payload.updateDate
             }
         },
         deleteThread: (state, action: PayloadAction<string>) => {
@@ -112,10 +113,9 @@ export const threadSagaSlice = createSlice({
         getAll: (state) => {
             state.updateResponse.pending = true;
         },
-        getAllDone: (state, action: PayloadAction<FetchThreadResponse>) => {
+        getAllDone: (state) => {
             state.fetchResponse.pending = false;
             state.fetchResponse.success = true;
-            threadSlice.actions.storeThreads(action.payload);
         },
         getAllFail: (state) => {
             state.fetchResponse.pending = false;
@@ -124,10 +124,9 @@ export const threadSagaSlice = createSlice({
         create: (state, action: PayloadAction<CreateThreadPayload>) => {
             state.createResponse.pending = true;
         },
-        createDone: (state, action: PayloadAction<CreateThreadResponse>) => {
+        createDone: (state) => {
             state.createResponse.pending = false;
             state.createResponse.success = true;
-            threadSlice.actions.addThread(action.payload);
         },
         createFail: (state) => {
             state.createResponse.pending = false;
@@ -136,10 +135,9 @@ export const threadSagaSlice = createSlice({
         update: (state, action: PayloadAction<UpdateThreadPayload>) => {
             state.updateResponse.pending = true;
         },
-        updateDone: (state, action: PayloadAction<UpdateThreadResponse>) => {
+        updateDone: (state) => {
             state.updateResponse.pending = false;
             state.updateResponse.success = true;
-            threadSlice.actions.editThread(action.payload);
         },
         updateFail: (state) => {
             state.updateResponse.pending = false;
@@ -148,10 +146,9 @@ export const threadSagaSlice = createSlice({
         delete: (state, action: PayloadAction<string>) => {
             state.deleteResponse.pending = true;
         },
-        deleteDone: (state, action: PayloadAction<string>) => {
+        deleteDone: (state) => {
             state.deleteResponse.pending = false;
             state.deleteResponse.success = true;
-            threadSlice.actions.deleteThread(action.payload);
         },
         deleteFail: (state) => {
             state.deleteResponse.pending = false;

@@ -97,30 +97,33 @@ export const commentSlice = createSlice({
     initialState,
     reducers: {
         storeComments: (state, action: PayloadAction<FetchCommentResponse>) => {
+            if (action.payload.thread === null) {
+                // エラーハンドリングするべき
+                return state
+            }
+            if (action.payload.comments === null) {
+                return {
+                    ...state,
+                    thread: action.payload.thread,
+                }
+            }
             return action.payload;
         },
         addComment: (state, action: PayloadAction<CreateCommentResponse>) => {
             state.comments.unshift(action.payload);
-            return {
-                ...state,
-                thread: {
-                    ...state.thread,
-                    commentSum: state.thread.commentSum + 1,
-                    updateDate: action.payload.updateDate,
-                },
-            };
+            state.thread.commentSum = state.thread.commentSum + 1
+            state.thread.updateDate = action.payload.updateDate
         },
         editComment: (state, action: PayloadAction<UpdateCommentResponse>) => {
-            let taegetComment = state.comments.find((comment) => comment.commentKey === action.payload.commentKey);
-            if (taegetComment) {
-                taegetComment = {
-                    ...taegetComment,
-                    ...action.payload,
-                };
+            const targetComment = state.comments.find((comment) => comment.commentKey === action.payload.commentKey);
+            if (targetComment) {
+                targetComment.comment = action.payload.comment
+                targetComment.updateDate = action.payload.updateDate
             }
         },
         deleteComment: (state, action: PayloadAction<string>) => {
             state.comments = state.comments.filter((comment) => comment.commentKey !== action.payload);
+            state.thread.commentSum = state.thread.commentSum - 1
         },
         clearComment: () => initialState,
     },
@@ -143,10 +146,9 @@ export const commentSagaSlice = createSlice({
         getAll: (state, action: PayloadAction<string>) => {
             state.fetchResponse.pending = true;
         },
-        getAllDone: (state, action: PayloadAction<FetchCommentResponse>) => {
+        getAllDone: (state) => {
             state.fetchResponse.pending = false;
             state.fetchResponse.success = true;
-            commentSlice.actions.storeComments(action.payload);
         },
         getAllFail: (state) => {
             state.fetchResponse.pending = false;
@@ -155,10 +157,9 @@ export const commentSagaSlice = createSlice({
         create: (state, action: PayloadAction<CreateCommentPayload>) => {
             state.createResponse.pending = true;
         },
-        createDone: (state, action: PayloadAction<CreateCommentResponse>) => {
+        createDone: (state) => {
             state.createResponse.pending = false;
             state.createResponse.success = true;
-            commentSlice.actions.addComment(action.payload);
         },
         createFail: (state) => {
             state.createResponse.pending = false;
@@ -167,10 +168,9 @@ export const commentSagaSlice = createSlice({
         update: (state, action: PayloadAction<UpdateCommentPayload>) => {
             state.updateResponse.pending = true;
         },
-        updateDone: (state, action: PayloadAction<UpdateCommentResponse>) => {
+        updateDone: (state) => {
             state.updateResponse.pending = false;
             state.updateResponse.success = true;
-            commentSlice.actions.editComment(action.payload);
         },
         updateFail: (state) => {
             state.updateResponse.pending = false;
@@ -179,10 +179,9 @@ export const commentSagaSlice = createSlice({
         delete: (state, action: PayloadAction<DeleteCommentPayload>) => {
             state.deleteResponse.pending = true;
         },
-        deleteDone: (state, action: PayloadAction<string>) => {
+        deleteDone: (state) => {
             state.deleteResponse.pending = false;
             state.deleteResponse.success = true;
-            commentSlice.actions.deleteComment(action.payload);
         },
         deleteFail: (state) => {
             state.deleteResponse.pending = false;

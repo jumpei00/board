@@ -1,5 +1,5 @@
 import { CreateCommentPayload, DeleteCommentPayload, UpdateCommentPayload } from "../state/comments/modules"
-import { boardApi } from "./init"
+import boardApi from "./init"
 
 export const getAllCommentsAPI = (payload: string) => {
     return boardApi.get(`/api/threads/${payload}/comments`)

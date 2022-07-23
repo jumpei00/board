@@ -102,13 +102,13 @@ func (t *threadRepository) Delete(thread *domain.Thread) error {
 
 func (t *threadRepository) DeleteThreadAndComments(thread *domain.Thread, comments *[]domain.Comment) error {
 	err := t.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Delete(thread).Error; err != nil {
-			logger.Error("thread delete failed", "error", err, "thread", thread)
+		if err := tx.Delete(comments).Error; err != nil {
+			logger.Error("targeted all comments delete failed", "error", err, "thread_key", thread.GetKey())
 			return err
 		}
 
-		if err := tx.Delete(comments).Error; err != nil {
-			logger.Error("targeted all comments delete failed", "error", err, "thread_key", thread.GetKey())
+		if err := tx.Delete(thread).Error; err != nil {
+			logger.Error("thread delete failed", "error", err, "thread", thread)
 			return err
 		}
 

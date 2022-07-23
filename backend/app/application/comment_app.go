@@ -111,7 +111,7 @@ func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerPar
 
 	updatedComment := comment.UpdateComment(&domainParam)
 
-	insertedComment, err := c.commentRepo.Insert(updatedComment)
+	returnedComment, err := c.commentRepo.Update(updatedComment)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func (c *commentApplication) EditComment(param *appParams.EditCommentAppLayerPar
 		return nil, err
 	}
 
-	return insertedComment, nil
+	return returnedComment, nil
 }
 
 func (c *commentApplication) DeleteComment(param *appParams.DeleteCommentAppLayerParam) error {

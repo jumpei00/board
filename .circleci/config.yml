@@ -14,15 +14,15 @@ executors:
 jobs:
   go-test:
     executor: go
-    working_directory: ./backend
     steps:
       - checkout
       - restore_cache:
           keys:
             - go-mod-v4-{{ checksum "go.sum" }}
       - run:
-          name: go test
-          command: go test ./...
+          working_directory: ./backend
+          command: |
+            go test ./...
       - save_cache:
           paths:
             - "/go/pkg/mod"

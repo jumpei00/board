@@ -21,7 +21,8 @@ jobs:
           keys:
             - go-mod-v4-{{ checksum "go.sum" }}
       - run:
-          name: go test ./...
+          name: go test
+          command: go test ./...
       - save_cache:
           paths:
             - "/go/pkg/mod"

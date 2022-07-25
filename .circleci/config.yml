@@ -25,8 +25,7 @@ jobs:
       - save_cache:
           paths:
             - "/go/pkg/mod"
-          key:
-            - go-mod-v4-{{ checksum "go.sum" }}
+          key: go-mod-v4-{{ checksum "go.sum" }}
 
 workflows:
   production-deploy:

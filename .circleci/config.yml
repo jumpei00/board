@@ -2,14 +2,12 @@ version: 2.1
 
 orbs:
   gcp-cli: circleci/gcp-cli@2.4.1
+  node: circleci/node@5.0.2
   
 executors:
   go:
     docker:
       - image: cimg/go:1.18
-  node:
-    docker:
-      - image: cimg/node:16.14
 
 jobs:
   go-test:
@@ -28,7 +26,29 @@ jobs:
             - "/go/pkg/mod"
           key: go-mod-v4-{{ checksum "go.sum" }}
 
+  react-test:
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+      - run:
+          working_directory: ./frontend
+          command: |
+            yarn test
+
+  # go-build:
+  #   executor: gcp-cli/google
+  #   steps:
+  #     - checkout
+  #     - gcp-cli/initialize
+  #     - run:
+  #         working_derectory: ./backend
+  #         command: |
+
 workflows:
   production-deploy:
    jobs:
      - go-test
+     - react-test
+        

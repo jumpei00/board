@@ -38,18 +38,22 @@ jobs:
           command: |
             yarn test
 
-  # go-build:
-  #   executor: gcp-cli/google
-  #   steps:
-  #     - checkout
-  #     - gcp-cli/initialize
-  #     - run:
-  #         working_derectory: ./backend
-  #         command: |
+  go-build:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - run:
+          working_derectory: ./backend
+          command: |
+            gcloud builds submit --region=asia-northeast1 --tag asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-api-image:latest
 
 workflows:
   production-deploy:
    jobs:
      - go-test
      - react-test
-        
+     - go-build:
+         requires:
+           - go-test
+           - react-test        

@@ -46,7 +46,7 @@ jobs:
       - run:
           working_derectory: ./backend
           command: |
-            gcloud builds submit --region=asia-northeast1 --tag asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-image:latest
+            gcloud builds submit --region=asia-northeast1 --tag=asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-image:latest
   
   react-build:
     executor: gcp-cli/google
@@ -56,7 +56,7 @@ jobs:
       - run:
           working_derectory: ./frontend
           command: |
-            gcloud builds submit --region=asia-northeast1 --tag asia-northeast1-docker.pkg.dev/board-357514/board-frontend/react-image:latest
+            gcloud builds submit --region=asia-northeast1 --tag=asia-northeast1-docker.pkg.dev/board-357514/board-frontend/react-image:latest
 
 workflows:
   production-deploy:

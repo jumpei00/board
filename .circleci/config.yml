@@ -44,8 +44,9 @@ jobs:
       - checkout
       - gcp-cli/initialize
       - run:
-          working_derectory: ./backend
           command: |
+            ls
+            cd ./backend 
             gcloud builds submit --region=asia-northeast1 --tag asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-image:latest
   
   react-build:
@@ -54,8 +55,9 @@ jobs:
       - checkout
       - gcp-cli/initialize
       - run:
-          working_derectory: ./frontend
           command: |
+            ls
+            cd ./frontend
             gcloud builds submit --region=asia-northeast1 --tag asia-northeast1-docker.pkg.dev/board-357514/board-frontend/react-image:latest
 
 workflows:

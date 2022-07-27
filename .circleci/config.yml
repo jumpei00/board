@@ -46,7 +46,8 @@ jobs:
       - run:
           command: |
             ls
-            cd ./backend 
+            cd backend/
+            ls
             gcloud builds submit --region=asia-northeast1 --tag asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-image:latest
   
   react-build:
@@ -57,7 +58,8 @@ jobs:
       - run:
           command: |
             ls
-            cd ./frontend
+            cd frontend/
+            ls
             gcloud builds submit --region=asia-northeast1 --tag asia-northeast1-docker.pkg.dev/board-357514/board-frontend/react-image:latest
 
 workflows:

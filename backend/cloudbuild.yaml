@@ -3,3 +3,4 @@ steps:
     args: ["build", "-t", "asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-api", "-f", "./docker/api/production/Dockerfile", "."]
 images:
   - "asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-api"
+logsBucket: 'gs://board-357514_cloudbuild-backend-log'

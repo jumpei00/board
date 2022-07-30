@@ -45,7 +45,7 @@ jobs:
       - gcp-cli/initialize
       - run:
           command: |
-            gcloud builds submit --region=asia-northeast1 --config=./backend/cloudbuild.yaml
+            gcloud builds submit --config=backend/cloudbuild.yaml backend
   
   react-build:
     executor: gcp-cli/google
@@ -54,7 +54,7 @@ jobs:
       - gcp-cli/initialize
       - run:
           command: |
-            gcloud builds submit --region=asia-northeast1 --config=./frontend/cloudbuild.yaml
+            gcloud builds submit --config=frontend/cloudbuild.yaml frontend
 
 workflows:
   production-deploy:

@@ -1,5 +1,5 @@
 steps:
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "asia-northeast1-docker.pkg.dev/$PROJECT_ID/board-backend/go-api:latest", "./docker/api/production/"]
-  images:
-    - "asia-northeast1-docker.pkg.dev/$PROJECT_ID/board-backend/go-api:latest"
+    args: ["build", "-t", "asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-api", "-f", "./docker/api/production/Dockerfile", "."]
+images:
+  - "asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-api"

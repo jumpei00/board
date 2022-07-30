@@ -4,3 +4,4 @@ tmp
 .dockerignore
 .gitignore
 .air.toml
+docs

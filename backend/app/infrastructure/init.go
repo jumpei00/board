@@ -12,12 +12,11 @@ import (
 func GenerateDBPool() (*gorm.DB, error) {
 	// dsn -> username:password@protocol(host:port)/dbname?param=value
 	dsn := fmt.Sprintf(
-		"%s:%s@%s(%s:%s)/%s?charset=utf8mb4&parseTime=True",
+		"%s:%s@%s(%s)/%s?charset=utf8mb4&parseTime=True",
 		config.GetMySQLUserName(),
 		config.GetMySQLPassword(),
-		"tcp",
+		config.GetMysqlProtocol(),
 		config.GetMySQLHost(),
-		config.GetMySQLPort(),
 		config.GetMySQLDatabaseName(),
 	)
 

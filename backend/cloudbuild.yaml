@@ -1,8 +1,6 @@
 steps:
   - name: "gcr.io/cloud-builders/docker"
     args: ["build", "-t", "asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-api", "-f", "./docker/api/production/Dockerfile", "."]
-  - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "asia-northeast1-docker.pkg.dev/board-357514/board-backend/db-migration", "-f", "./docker/migration/Dockerfile", "./docker/migration/"]
 images:
   - "asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-api"
 logsBucket: 'gs://board-357514_cloudbuild-backend-log'

@@ -47,6 +47,15 @@ jobs:
           command: |
             gcloud builds submit --config=backend/cloudbuild.yaml backend
   
+  db-migration-build:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - run:
+          command: |
+            gcloud builds submit --config=backend/docker/migration/cloudbuild.yaml backend/docker/migration
+  
   react-build:
     executor: gcp-cli/google
     steps:
@@ -63,6 +72,10 @@ workflows:
      - go-test
      - react-test
      - go-build:
+         requires:
+           - go-test
+           - react-test
+     - db-migration-build:
          requires:
            - go-test
            - react-test

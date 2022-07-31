@@ -114,14 +114,14 @@ workflows:
          requires:
            - go-test
            - react-test
-    #  - db-migration:
-    #      requires:
-    #        - go-build
-    #        - db-migration-build
-    #        - react-build
-    #  - backend-deploy:
-    #      requires:
-    #        - db-migration
-    #  - frontend-deploy:
-    #      requires:
-    #        - db-migration
+     - db-migration:
+         requires:
+           - go-build
+           - db-migration-build
+           - react-build
+     - backend-deploy:
+         requires:
+           - db-migration
+     - frontend-deploy:
+         requires:
+           - db-migration

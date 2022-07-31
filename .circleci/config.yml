@@ -54,6 +54,7 @@ jobs:
       - gcp-cli/initialize
       - run:
           command: |
+            echo 'REACT_APP_WEB_ENV=production' > frontend/.env
             gcloud builds submit --config=frontend/cloudbuild.yaml frontend
 
 workflows:

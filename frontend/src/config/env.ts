@@ -8,7 +8,7 @@ export const ENV: envType = process.env.REACT_APP_WEB_ENV as envType;
 
 const urlMap: envMap = {
     development: "http://api.localhost.test",
-    production: "",
+    production: "http://api.localhost.test",
 };
 
 export const ApiURL = urlMap[ENV]

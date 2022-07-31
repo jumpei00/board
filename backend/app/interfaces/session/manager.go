@@ -33,9 +33,9 @@ func NewSessionManager() *manager {
 		setOptions: sessions.Options{
 			Path:   "/",
 			MaxAge: defaultMaxAge,
-			// 本番環境の時は有効化
 			Secure:   config.IsProduction(),
 			HttpOnly: true,
+			SameSite: config.SameSiteMode(),
 		},
 		deleteOptions: sessions.Options{
 			MaxAge: -1,

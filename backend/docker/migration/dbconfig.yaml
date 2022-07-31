@@ -5,5 +5,5 @@ development:
 
 production:
   dialect: mysql
-  datasource: ${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_PROTOCOL}(${MYSQL_HOST=mysql:3306})/${MYSQL_DATABASE_NAME}?charset=utf8mb4&parseTime=True
+  datasource: ${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_PROTOCOL}(${MYSQL_HOST})/${MYSQL_DATABASE_NAME}?charset=utf8mb4&parseTime=True
   dir: ./mysql

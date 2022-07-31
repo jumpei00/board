@@ -25,7 +25,7 @@ func GetFrontURL() string {
 	if IsDevelopment() {
 		return "http://web.localhost.test"
 	}
-	return "*"
+	return "https://board-web-service-2x4i4vgx5q-an.a.run.app"
 }
 
 func GetMySQLHost() string {

@@ -1,6 +1,6 @@
 steps:
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "asia-northeast1-docker.pkg.dev/board-357514/board-frontend/react-web", "-f", "./docker/production/Dockerfile", "."]
+    args: ["build", "-t", "asia-northeast1-docker.pkg.dev/$PROJECT_ID/${_FRONTEND_SERVICE}/${_REACT_WEB_IMAGE}", "-f", "./docker/production/Dockerfile", "."]
 images:
-  - "asia-northeast1-docker.pkg.dev/board-357514/board-frontend/react-web"
+  - "asia-northeast1-docker.pkg.dev/$PROJECT_ID/${_FRONTEND_SERVICE}/${_REACT_WEB_IMAGE}"
 logsBucket: 'gs://board-357514_cloudbuild-frontend-log'

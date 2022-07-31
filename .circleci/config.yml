@@ -45,7 +45,8 @@ jobs:
       - gcp-cli/initialize
       - run:
           command: |
-            gcloud builds submit --config=backend/cloudbuild.yaml backend
+            gcloud builds submit --config=backend/cloudbuild.yaml backend \
+            --substitutions=_MYSQL_PASSWORD=${MYSQL_PASSWORD},_SESSION_SECRET=${SESSION_SECRET},_BACKEND_SERVICE=${BACKEND_SERVICE},_GO_API_IMAGE=${GO_API_IMAGE}
   
   db-migration-build:
     executor: gcp-cli/google
@@ -54,7 +55,8 @@ jobs:
       - gcp-cli/initialize
       - run:
           command: |
-            gcloud builds submit --config=backend/docker/migration/cloudbuild.yaml backend/docker/migration
+            gcloud builds submit --config=backend/docker/migration/cloudbuild.yaml backend/docker/migration \
+            --substitutions=_MYSQL_PASSWORD=${MYSQL_PASSWORD},_BACKEND_SERVICE=${BACKEND_SERVICE},_DB_MIGRATION_IMAGE=${DB_MIGRATION_IMAGE}
   
   react-build:
     executor: gcp-cli/google
@@ -64,7 +66,36 @@ jobs:
       - run:
           command: |
             echo 'REACT_APP_WEB_ENV=production' > frontend/.env
-            gcloud builds submit --config=frontend/cloudbuild.yaml frontend
+            gcloud builds submit --config=frontend/cloudbuild.yaml frontend \
+            --substitutions=_FRONTEND_SERVICE=${FRONTEND_SERVICE},_REACT_WEB_IMAGE=${REACT_WEB_IMAGE}
+  
+  backend-deploy:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - run:
+          command: |
+            gcloud run deploy board-api-service --image asia-northeast1-docker.pkg.dev/${PROJECT_ID}/${BACKEND_SERVICE}/${GO_API_IMAGE}:latest
+  
+  frontend-deploy:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - run:
+          command: |
+            gcloud run deploy board-api-service --image asia-northeast1-docker.pkg.dev/${PROJECT_ID}/${FRONTEND_SERVICE}/${REACT_WEB_IMAGE}:latest
+  
+  db-migration:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - run:
+          command: |
+            gcloud beta run jobs update db-migration-job --image asia-northeast1-docker.pkg.dev/${PROJECT_ID}/${BACKEND_SERVICE}/${DB_MIGRATION_IMAGE}:latest
+            gcloud beta run jobs execute db-migration-job --wait
 
 workflows:
   production-deploy:
@@ -83,3 +114,14 @@ workflows:
          requires:
            - go-test
            - react-test
+    #  - db-migration:
+    #      requires:
+    #        - go-build
+    #        - db-migration-build
+    #        - react-build
+    #  - backend-deploy:
+    #      requires:
+    #        - db-migration
+    #  - frontend-deploy:
+    #      requires:
+    #        - db-migration

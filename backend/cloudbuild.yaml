@@ -1,6 +1,7 @@
 steps:
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-api", "-f", "./docker/api/production/Dockerfile", "."]
+    args: ["build", "-t", "asia-northeast1-docker.pkg.dev/$PROJECT_ID/${_BACKEND_SERVICE}/${_GO_API_IMAGE}", "-f", "./docker/api/production/Dockerfile",
+           "--build-arg", "MYSQL_PASSWORD=${_MYSQL_PASSWORD}", "--build-arg", "SESSION_SECRET=${_SESSION_SECRET}", "."]
 images:
-  - "asia-northeast1-docker.pkg.dev/board-357514/board-backend/go-api"
+  - "asia-northeast1-docker.pkg.dev/$PROJECT_ID/${_BACKEND_SERVICE}/${_GO_API_IMAGE}"
 logsBucket: 'gs://board-357514_cloudbuild-backend-log'

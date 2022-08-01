@@ -1,0 +1,16 @@
+FROM golang:1.18
+
+WORKDIR /go/api
+
+COPY go.* ./
+RUN go mod download
+
+COPY . ./
+
+ARG MYSQL_PASSWORD
+ARG SESSION_SECRET
+
+ENV MYSQL_PASSWORD ${MYSQL_PASSWORD}
+ENV SESSION_SECRET ${SESSION_SECRET}
+
+RUN go build -o /api

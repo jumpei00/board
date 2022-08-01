@@ -1,0 +1,6 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "asia-northeast1-docker.pkg.dev/$PROJECT_ID/${_BACKEND_REPO}/${_DB_MIGRATION_IMAGE}", "--build-arg", "MYSQL_PASSWORD=${_MYSQL_PASSWORD}", "."]
+images:
+  - "asia-northeast1-docker.pkg.dev/$PROJECT_ID/${_BACKEND_REPO}/${_DB_MIGRATION_IMAGE}"
+logsBucket: 'gs://board-357514_cloudbuild-migration-log'

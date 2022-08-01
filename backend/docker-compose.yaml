@@ -5,7 +5,7 @@ services:
     container_name: api
     build:
       context: .
-      dockerfile: ./docker/api/dockerfile
+      dockerfile: ./docker/api/development/Dockerfile
     ports:
       - "8080:8080"
     volumes:
@@ -18,8 +18,8 @@ services:
       - VIRTUAL_HOST=api.localhost.test
       - VIRTUAL_PORT=8080
       - API_ENV=development
-      - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
+      - MYSQL_HOST=mysql:3306
+      - MYSQL_PROTOCOL=tcp
       - MYSQL_USER=development
       - MYSQL_PASSWORD=password
       - MYSQL_DATABASE_NAME=board

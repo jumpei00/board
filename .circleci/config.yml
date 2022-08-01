@@ -1,0 +1,129 @@
+version: 2.1
+
+orbs:
+  gcp-cli: circleci/gcp-cli@2.4.1
+  node: circleci/node@5.0.2
+  
+executors:
+  go:
+    docker:
+      - image: cimg/go:1.18
+
+jobs:
+  go-test:
+    executor: go
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v4-{{ checksum "go.sum" }}
+      - run:
+          working_directory: ./backend
+          command: |
+            go test ./...
+      - save_cache:
+          paths:
+            - "/go/pkg/mod"
+          key: go-mod-v4-{{ checksum "go.sum" }}
+
+  react-test:
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          app-dir: ./frontend
+          pkg-manager: yarn
+      - run:
+          working_directory: ./frontend
+          command: |
+            yarn test
+
+  go-build:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - run:
+          command: |
+            gcloud builds submit --config=backend/cloudbuild.yaml backend \
+            --substitutions=_MYSQL_PASSWORD=${MYSQL_PASSWORD},_SESSION_SECRET=${SESSION_SECRET},_BACKEND_REPO=${BACKEND_REPO},_GO_API_IMAGE=${GO_API_IMAGE}
+  
+  db-migration-build:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - run:
+          command: |
+            gcloud builds submit --config=backend/docker/migration/cloudbuild.yaml backend/docker/migration \
+            --substitutions=_MYSQL_PASSWORD=${MYSQL_PASSWORD},_BACKEND_REPO=${BACKEND_REPO},_DB_MIGRATION_IMAGE=${DB_MIGRATION_IMAGE}
+  
+  react-build:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - run:
+          command: |
+            echo 'REACT_APP_WEB_ENV=production' > frontend/.env
+            gcloud builds submit --config=frontend/cloudbuild.yaml frontend \
+            --substitutions=_FRONTEND_REPO=${FRONTEND_REPO},_REACT_WEB_IMAGE=${REACT_WEB_IMAGE}
+  
+  backend-deploy:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - run:
+          command: |
+            gcloud run deploy ${BACKEND_SERVICE} --region ${REGION} --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/${BACKEND_REPO}/${GO_API_IMAGE}:latest
+  
+  frontend-deploy:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - run:
+          command: |
+            gcloud run deploy ${FRONTEND_SERVICE} --region ${REGION} --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/${FRONTEND_REPO}/${REACT_WEB_IMAGE}:latest
+  
+  db-migration:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - run:
+          command: |
+            gcloud beta run jobs update db-migration-job --region ${REGION} --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/${BACKEND_REPO}/${DB_MIGRATION_IMAGE}:latest
+            gcloud beta run jobs execute db-migration-job --region ${REGION} --wait
+
+workflows:
+  test:
+    jobs:
+      - go-test
+      - react-test
+  deploy:
+    jobs:
+      - go-build:
+          filters:
+            branches:
+              only: main
+      - db-migration-build:
+          filters:
+            branches:
+              only: main
+      - react-build:
+          filters:
+            branches:
+              only: main
+      - db-migration:
+          requires:
+            - go-build
+            - db-migration-build
+            - react-build
+      - backend-deploy:
+          requires:
+            - db-migration
+      - frontend-deploy:
+          requires:
+            - db-migration

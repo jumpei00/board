@@ -76,7 +76,7 @@ jobs:
       - gcp-cli/initialize
       - run:
           command: |
-            gcloud run deploy board-api-service --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/${BACKEND_SERVICE}/${GO_API_IMAGE}:latest
+            gcloud run deploy board-api-service --region ${REGION} --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/${BACKEND_SERVICE}/${GO_API_IMAGE}:latest
   
   frontend-deploy:
     executor: gcp-cli/google
@@ -85,7 +85,7 @@ jobs:
       - gcp-cli/initialize
       - run:
           command: |
-            gcloud run deploy board-api-service --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/${FRONTEND_SERVICE}/${REACT_WEB_IMAGE}:latest
+            gcloud run deploy board-api-service --region ${REGION} --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/${FRONTEND_SERVICE}/${REACT_WEB_IMAGE}:latest
   
   db-migration:
     executor: gcp-cli/google

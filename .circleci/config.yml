@@ -98,30 +98,32 @@ jobs:
             gcloud beta run jobs execute db-migration-job --region ${REGION} --wait
 
 workflows:
-  production-deploy:
-   jobs:
-     - go-test
-     - react-test
-     - go-build:
-         requires:
-           - go-test
-           - react-test
-     - db-migration-build:
-         requires:
-           - go-test
-           - react-test
-     - react-build:
-         requires:
-           - go-test
-           - react-test
-     - db-migration:
-         requires:
-           - go-build
-           - db-migration-build
-           - react-build
-     - backend-deploy:
-         requires:
-           - db-migration
-     - frontend-deploy:
-         requires:
-           - db-migration
+  test:
+    jobs:
+      - go-test
+      - react-test
+  deploy:
+    jobs:
+      - go-build:
+          filters:
+            branches:
+              only: main
+      - db-migration-build:
+          filters:
+            branches:
+              only: main
+      - react-build:
+          filters:
+            branches:
+              only: main
+      - db-migration:
+          requires:
+            - go-build
+            - db-migration-build
+            - react-build
+      - backend-deploy:
+          requires:
+            - db-migration
+      - frontend-deploy:
+          requires:
+            - db-migration

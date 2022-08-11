@@ -1,6 +1,13 @@
 steps:
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "asia-northeast1-docker.pkg.dev/$PROJECT_ID/${_FRONTEND_REPO}/${_REACT_WEB_IMAGE}", "-f", "./docker/production/Dockerfile", "."]
+    entrypoint: bash
+    args: ["-c", "docker pull asia-northeast1-docker.pkg.dev/$PROJECT_ID/${_FRONTEND_REPO}/${_REACT_WEB_IMAGE}:latest || exit 0"]
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build",
+           "-t", "asia-northeast1-docker.pkg.dev/$PROJECT_ID/${_FRONTEND_REPO}/${_REACT_WEB_IMAGE}",
+           "-f", "./docker/production/Dockerfile", 
+           "--cache-from", "asia-northeast1-docker.pkg.dev/$PROJECT_ID/${_FRONTEND_REPO}/${_REACT_WEB_IMAGE}:latest",
+           "."]
 images:
   - "asia-northeast1-docker.pkg.dev/$PROJECT_ID/${_FRONTEND_REPO}/${_REACT_WEB_IMAGE}"
-logsBucket: 'gs://board-357514_cloudbuild-frontend-log'
+logsBucket: 'gs://${_FRONTEND_BUCKET}'

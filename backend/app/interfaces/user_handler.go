@@ -24,10 +24,15 @@ func NewUserHandler(sm session.Manager, ua application.UserApplication) *UserHan
 }
 
 func (u *UserHandler) SetupRouter(r *gin.RouterGroup) {
+	r.GET("/helthcheck", u.helthcheck)
 	r.GET("/me", u.me)
 	r.POST("/signup", u.signup)
 	r.POST("/signin", u.signin)
 	r.DELETE("/signout", u.signout)
+}
+
+func (u *UserHandler) helthcheck(c *gin.Context) {
+	c.Status(http.StatusOK)
 }
 
 // User godoc

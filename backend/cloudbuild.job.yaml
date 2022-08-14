@@ -1,0 +1,25 @@
+steps:
+  - name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: bash
+    args:
+      - "-c"
+      -  |
+        gcloud scheduler jobs create http helthcheck \
+        --location asia-northeast1 \
+        --schedule "0 9 * * 1" \
+        --uri "https://backend-service-y7ractbmra-an.a.run.app/api/user/helthcheck" \
+        --http-method GET \
+        --time-zone Asia/Tokyo \
+        || echo "Scheduler email-sensor already exist";
+  - name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: bash
+    args:
+      - "-c"
+      -  |
+        gcloud scheduler jobs create http helthcheck2 \
+        --location asia-northeast1 \
+        --schedule "0 9 * * 1" \
+        --uri "https://backend-service-y7ractbmra-an.a.run.app/api/user/helthcheck" \
+        --http-method GET \
+        --time-zone Asia/Tokyo \
+        || echo "Scheduler email-sensor already exist";
